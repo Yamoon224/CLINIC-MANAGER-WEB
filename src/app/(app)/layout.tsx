@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: "/rendez-vous", label: "Rendez-vous" },
   { href: "/queue", label: "File d'attente" },
   { href: "/urgences", label: "Urgences" },
+  { href: "/vaccinations", label: "Vaccinations" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

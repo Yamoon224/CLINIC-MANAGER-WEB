@@ -2,6 +2,7 @@ import { PatientHistory } from "@/features/consultations/PatientHistory";
 import { StartConsultationAction } from "@/features/consultations/StartConsultationAction";
 import { MaterniteSection } from "@/features/maternite/MaterniteSection";
 import { OrientPatientAction } from "@/features/queue/OrientPatientAction";
+import { CarnetVaccination } from "@/features/vaccinations/CarnetVaccination";
 import type { Patient } from "./types";
 
 export function PatientDetail({ patient }: { patient: Patient }) {
@@ -57,6 +58,8 @@ export function PatientDetail({ patient }: { patient: Patient }) {
         <h2 className="font-semibold mb-2">Historique des consultations</h2>
         <PatientHistory patientId={patient.id} />
       </div>
+
+      <CarnetVaccination patientId={patient.id} />
 
       {patient.sexe !== "M" && <MaterniteSection patientId={patient.id} />}
     </div>
