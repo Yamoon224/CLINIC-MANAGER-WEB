@@ -1,3 +1,5 @@
+import { PatientHistory } from "@/features/consultations/PatientHistory";
+import { StartConsultationAction } from "@/features/consultations/StartConsultationAction";
 import { OrientPatientAction } from "@/features/queue/OrientPatientAction";
 import type { Patient } from "./types";
 
@@ -45,7 +47,15 @@ export function PatientDetail({ patient }: { patient: Patient }) {
         </div>
       )}
 
-      <OrientPatientAction patientId={patient.id} />
+      <div className="flex gap-4 flex-wrap">
+        <OrientPatientAction patientId={patient.id} />
+        <StartConsultationAction patientId={patient.id} />
+      </div>
+
+      <div>
+        <h2 className="font-semibold mb-2">Historique des consultations</h2>
+        <PatientHistory patientId={patient.id} />
+      </div>
     </div>
   );
 }

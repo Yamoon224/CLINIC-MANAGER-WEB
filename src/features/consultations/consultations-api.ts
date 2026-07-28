@@ -1,0 +1,56 @@
+import { apiFetch } from "@/lib/api-client";
+import type {
+  Consultation,
+  Prescription,
+  StartConsultationPayload,
+  UpdateConsultationPayload,
+} from "./types";
+
+export function startConsultation(
+  payload: StartConsultationPayload,
+): Promise<{ data: Consultation }> {
+  return apiFetch<{ data: Consultation }>("/consultations", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getConsultation(id: number): Promise<{ data: Consultation }> {
+  return apiFetch<{ data: Consultation }>(`/consultations/${id}`);
+}
+
+export function updateConsultation(
+  id: number,
+  payload: UpdateConsultationPayload,
+): Promise<{ data: Consultation }> {
+  return apiFetch<{ data: Consultation }>(`/consultations/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function addPrescription(
+  consultationId: number,
+  payload: { type: string; designation: string; instructions?: string },
+): Promise<{ data: Prescription }> {
+  return apiFetch<{ data: Prescription }>(
+    `/consultations/${consultationId}/prescriptions`,
+    { method: "POST", body: JSON.stringify(payload) },
+  );
+}
+
+export function completeConsultation(
+  id: number,
+): Promise<{ data: Consultation }> {
+  return apiFetch<{ data: Consultation }>(`/consultations/${id}/terminer`, {
+    method: "POST",
+  });
+}
+
+export function fetchPatientHistory(
+  patientId: number,
+): Promise<{ data: Consultation[] }> {
+  return apiFetch<{ data: Consultation[] }>(
+    `/patients/${patientId}/consultations`,
+  );
+}
