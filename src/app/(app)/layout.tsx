@@ -8,6 +8,7 @@ import { useAuth } from "@/features/auth/auth-context";
 const NAV_LINKS = [
   { href: "/dashboard", label: "Tableau de bord" },
   { href: "/patients", label: "Patients" },
+  { href: "/rendez-vous", label: "Rendez-vous" },
   { href: "/queue", label: "File d'attente" },
 ];
 
