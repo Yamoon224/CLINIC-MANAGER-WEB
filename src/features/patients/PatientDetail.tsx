@@ -1,3 +1,4 @@
+import { OrientPatientAction } from "@/features/queue/OrientPatientAction";
 import type { Patient } from "./types";
 
 export function PatientDetail({ patient }: { patient: Patient }) {
@@ -43,6 +44,8 @@ export function PatientDetail({ patient }: { patient: Patient }) {
           {patient.allergies}
         </div>
       )}
+
+      <OrientPatientAction patientId={patient.id} />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { useAuth } from "@/features/auth/auth-context";
 const NAV_LINKS = [
   { href: "/dashboard", label: "Tableau de bord" },
   { href: "/patients", label: "Patients" },
+  { href: "/queue", label: "File d'attente" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
