@@ -1,3 +1,4 @@
+import { PatientFactures } from "@/features/caisse/PatientFactures";
 import { PatientHistory } from "@/features/consultations/PatientHistory";
 import { StartConsultationAction } from "@/features/consultations/StartConsultationAction";
 import { PatientSejours } from "@/features/hospitalisation/PatientSejours";
@@ -69,6 +70,8 @@ export function PatientDetail({ patient }: { patient: Patient }) {
       <PatientDispensations patientId={patient.id} />
 
       <PatientSejours patientId={patient.id} />
+
+      <PatientFactures patientId={patient.id} />
 
       {patient.sexe !== "M" && <MaterniteSection patientId={patient.id} />}
     </div>
