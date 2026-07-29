@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { addNouveauNe } from "./maternite-api";
 import { Button, Field, Input, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function NouveauNeForm({
   accouchementId,
@@ -11,6 +12,7 @@ export function NouveauNeForm({
   accouchementId: number;
   onAdded: () => void;
 }) {
+  const { t } = useTranslation();
   const [sexe, setSexe] = useState<"M" | "F" | "">("");
   const [poids, setPoids] = useState("");
   const [taille, setTaille] = useState("");
@@ -40,56 +42,56 @@ export function NouveauNeForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex max-w-lg flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
     >
       <div className="grid grid-cols-3 gap-3">
-        <Field label="Sexe">
+        <Field label={t("maternite.nouveauNeForm.sexe")}>
           <Select value={sexe} onChange={(e) => setSexe(e.target.value as "M" | "F" | "")}>
-            <option value="">Sexe</option>
-            <option value="F">Féminin</option>
-            <option value="M">Masculin</option>
+            <option value="">{t("maternite.nouveauNeForm.sexe")}</option>
+            <option value="F">{t("maternite.nouveauNeForm.sexeFeminin")}</option>
+            <option value="M">{t("maternite.nouveauNeForm.sexeMasculin")}</option>
           </Select>
         </Field>
-        <Field label="Poids (kg)">
+        <Field label={t("maternite.nouveauNeForm.poidsKg")}>
           <Input
-            placeholder="Poids (kg)"
+            placeholder={t("maternite.nouveauNeForm.poidsKg")}
             value={poids}
             onChange={(e) => setPoids(e.target.value)}
           />
         </Field>
-        <Field label="Taille (cm)">
+        <Field label={t("maternite.nouveauNeForm.tailleCm")}>
           <Input
-            placeholder="Taille (cm)"
+            placeholder={t("maternite.nouveauNeForm.tailleCm")}
             value={taille}
             onChange={(e) => setTaille(e.target.value)}
           />
         </Field>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Score Apgar 1 min">
+        <Field label={t("maternite.nouveauNeForm.apgar1")}>
           <Input
-            placeholder="Score Apgar 1 min"
+            placeholder={t("maternite.nouveauNeForm.apgar1")}
             value={apgar1}
             onChange={(e) => setApgar1(e.target.value)}
           />
         </Field>
-        <Field label="Score Apgar 5 min">
+        <Field label={t("maternite.nouveauNeForm.apgar5")}>
           <Input
-            placeholder="Score Apgar 5 min"
+            placeholder={t("maternite.nouveauNeForm.apgar5")}
             value={apgar5}
             onChange={(e) => setApgar5(e.target.value)}
           />
         </Field>
       </div>
-      <Field label="Vaccinations de naissance">
+      <Field label={t("maternite.nouveauNeForm.vaccinations")}>
         <Input
-          placeholder="Vaccinations de naissance"
+          placeholder={t("maternite.nouveauNeForm.vaccinations")}
           value={vaccinations}
           onChange={(e) => setVaccinations(e.target.value)}
         />
       </Field>
       <Button type="submit" disabled={isSubmitting} className="self-start">
-        Ajouter le nouveau-né
+        {t("maternite.nouveauNeForm.submit")}
       </Button>
     </form>
   );

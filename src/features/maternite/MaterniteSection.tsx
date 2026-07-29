@@ -6,8 +6,10 @@ import { useEffect, useState } from "react";
 import { createGrossesse, fetchGrossesses } from "./maternite-api";
 import type { Grossesse } from "./types";
 import { Badge, Button, Card, Input } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function MaterniteSection({ patientId }: { patientId: number }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [grossesses, setGrossesses] = useState<Grossesse[] | null>(null);
   const [ddr, setDdr] = useState("");
@@ -33,33 +35,37 @@ export function MaterniteSection({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="mb-2 font-semibold text-foreground">Maternité</h2>
+      <h2 className="mb-2 font-semibold text-foreground">{t("maternite.section.title")}</h2>
       <div className="mb-3 flex flex-col gap-1 text-sm">
         {grossesses.map((g) => (
           <div key={g.id} className="flex items-center gap-2">
             <Link href={`/grossesses/${g.id}`} className="font-medium text-primary hover:underline">
-              Grossesse {g.statut === "suivie" ? "en cours" : g.statut}
+              {g.statut === "suivie" ? t("maternite.section.enCours") : g.statut}
             </Link>
-            {g.a_risque && <Badge tone="danger">À risque</Badge>}
-            {g.terme && <span className="text-muted">terme prévu {g.terme}</span>}
+            {g.a_risque && <Badge tone="danger">{t("maternite.section.aRisqueBadge")}</Badge>}
+            {g.terme && (
+              <span className="text-muted">
+                {t("maternite.section.termePrevu", { terme: g.terme })}
+              </span>
+            )}
           </div>
         ))}
         {grossesses.length === 0 && (
-          <p className="text-muted">Aucun dossier obstétrical.</p>
+          <p className="text-muted">{t("maternite.section.noGrossesse")}</p>
         )}
       </div>
 
       {!enCours && (
-        <Card className="flex max-w-md items-center gap-2">
+        <Card className="flex items-center gap-2">
           <Input
             type="date"
             value={ddr}
             onChange={(e) => setDdr(e.target.value)}
             className="flex-1"
-            aria-label="Date des dernières règles"
+            aria-label={t("maternite.section.ddrAriaLabel")}
           />
           <Button onClick={handleCreate} disabled={isCreating} className="whitespace-nowrap">
-            Ouvrir un dossier grossesse
+            {t("maternite.section.openGrossesse")}
           </Button>
         </Card>
       )}

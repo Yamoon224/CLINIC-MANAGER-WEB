@@ -3,24 +3,31 @@
 import { useCallback, useEffect, useState } from "react";
 import { annuler, fetchWorkList, preleve, saisirResultat, validerBiologiste } from "./laboratoire-api";
 import type { DemandeAnalyse } from "./types";
-import { Badge, Button, Card, Input } from "@/components/ui";
-
-const STATUT_LABELS: Record<DemandeAnalyse["statut"], string> = {
-  demandee: "Demandée",
-  preleve: "Prélevée",
-  valide_technicien: "Résultat saisi",
-  valide: "Validée",
-  annulee: "Annulée",
-};
+import { Badge, Button, Card, Input, Pagination } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function WorkList() {
+  const { t } = useTranslation();
   const [demandes, setDemandes] = useState<DemandeAnalyse[]>([]);
   const [valeurs, setValeurs] = useState<Record<number, string>>({});
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const STATUT_LABELS: Record<DemandeAnalyse["statut"], string> = {
+    demandee: t("laboratoire.statutDemandee"),
+    preleve: t("laboratoire.statutPreleve"),
+    valide_technicien: t("laboratoire.statutValideTechnicien"),
+    valide: t("laboratoire.statutValide"),
+    annulee: t("laboratoire.statutAnnulee"),
+  };
 
   const load = useCallback(() => {
-    fetchWorkList().then((res) => setDemandes(res.data));
-  }, []);
+    fetchWorkList(page).then((res) => {
+      setDemandes(res.data);
+      setTotalPages(res.meta.last_page);
+    });
+  }, [page]);
 
   useEffect(() => {
     load();
@@ -71,117 +78,120 @@ export function WorkList() {
   }
 
   return (
-    <Card className="p-0 overflow-hidden">
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="text-left border-b border-border">
-            <th className="py-2 px-4">Patient</th>
-            <th className="py-2 px-4">Analyse</th>
-            <th className="py-2 px-4">Statut</th>
-            <th className="py-2 px-4">Résultat</th>
-            <th className="py-2 px-4"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {demandes.map((d) => (
-            <tr
-              key={d.id}
-              className={`border-b border-border last:border-0 ${d.resultat_critique ? "bg-danger-light" : d.urgente ? "bg-warning-light" : ""}`}
-            >
-              <td className="py-2 px-4">
-                {d.patient.prenom} {d.patient.nom}
-                {d.urgente && (
-                  <span className="ml-2">
-                    <Badge tone="danger">URGENT</Badge>
-                  </span>
-                )}
-              </td>
-              <td className="py-2 px-4">{d.analyse_type.nom}</td>
-              <td className="py-2 px-4">
-                <Badge tone="neutral">{STATUT_LABELS[d.statut]}</Badge>
-              </td>
-              <td className="py-2 px-4">
-                {d.resultat_valeur ? (
-                  <span
-                    className={
-                      d.resultat_critique
-                        ? "font-bold text-danger"
-                        : d.resultat_anormal
-                          ? "font-medium text-warning"
-                          : ""
-                    }
-                  >
-                    {d.resultat_valeur} {d.analyse_type.unite}
-                    {d.resultat_critique && " ⚠ critique"}
-                  </span>
-                ) : (
-                  "-"
-                )}
-              </td>
-              <td className="py-2 px-4">
-                <div className="flex items-center gap-2">
-                  {d.statut === "demandee" && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handlePreleve(d.id)}
-                      disabled={busyId === d.id}
-                    >
-                      Prélever
-                    </Button>
+    <div className="flex flex-col gap-2">
+      <Card className="p-0 overflow-hidden">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>{t("laboratoire.colPatient")}</th>
+              <th>{t("laboratoire.colAnalyse")}</th>
+              <th>{t("common.status")}</th>
+              <th>{t("laboratoire.resultat")}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {demandes.map((d) => (
+              <tr
+                key={d.id}
+                className={d.resultat_critique ? "bg-danger-light" : d.urgente ? "bg-warning-light" : ""}
+              >
+                <td>
+                  {d.patient.prenom} {d.patient.nom}
+                  {d.urgente && (
+                    <span className="ml-2">
+                      <Badge tone="danger">{t("laboratoire.urgent")}</Badge>
+                    </span>
                   )}
-                  {d.statut === "preleve" && (
-                    <span className="flex items-center gap-2">
-                      <Input
-                        placeholder="Valeur"
-                        value={valeurs[d.id] ?? ""}
-                        onChange={(e) => setValeurs((v) => ({ ...v, [d.id]: e.target.value }))}
-                        className="w-24"
-                      />
+                </td>
+                <td>{d.analyse_type.nom}</td>
+                <td>
+                  <Badge tone="neutral">{STATUT_LABELS[d.statut]}</Badge>
+                </td>
+                <td>
+                  {d.resultat_valeur ? (
+                    <span
+                      className={
+                        d.resultat_critique
+                          ? "font-bold text-danger"
+                          : d.resultat_anormal
+                            ? "font-medium text-warning"
+                            : ""
+                      }
+                    >
+                      {d.resultat_valeur} {d.analyse_type.unite}
+                      {d.resultat_critique && t("laboratoire.critique")}
+                    </span>
+                  ) : (
+                    "-"
+                  )}
+                </td>
+                <td>
+                  <div className="flex items-center gap-2">
+                    {d.statut === "demandee" && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleSaisirResultat(d.id)}
+                        onClick={() => handlePreleve(d.id)}
                         disabled={busyId === d.id}
                       >
-                        Saisir
+                        {t("laboratoire.preleve")}
                       </Button>
-                    </span>
-                  )}
-                  {d.statut === "valide_technicien" && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleValider(d.id)}
-                      disabled={busyId === d.id}
-                    >
-                      Valider (biologiste)
-                    </Button>
-                  )}
-                  {d.statut !== "valide" && d.statut !== "annulee" && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleAnnuler(d.id)}
-                      disabled={busyId === d.id}
-                      className="text-danger hover:bg-danger-light"
-                    >
-                      Annuler
-                    </Button>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
-          {demandes.length === 0 && (
-            <tr>
-              <td colSpan={5} className="py-2 px-4 text-muted">
-                Aucune demande en cours.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </Card>
+                    )}
+                    {d.statut === "preleve" && (
+                      <span className="flex items-center gap-2">
+                        <Input
+                          placeholder={t("laboratoire.valeurPlaceholder")}
+                          value={valeurs[d.id] ?? ""}
+                          onChange={(e) => setValeurs((v) => ({ ...v, [d.id]: e.target.value }))}
+                          className="w-24"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSaisirResultat(d.id)}
+                          disabled={busyId === d.id}
+                        >
+                          {t("laboratoire.saisir")}
+                        </Button>
+                      </span>
+                    )}
+                    {d.statut === "valide_technicien" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleValider(d.id)}
+                        disabled={busyId === d.id}
+                      >
+                        {t("laboratoire.validerBiologiste")}
+                      </Button>
+                    )}
+                    {d.statut !== "valide" && d.statut !== "annulee" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleAnnuler(d.id)}
+                        disabled={busyId === d.id}
+                        className="text-danger hover:bg-danger-light"
+                      >
+                        {t("common.cancel")}
+                      </Button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {demandes.length === 0 && (
+              <tr>
+                <td colSpan={5} className="text-muted">
+                  {t("laboratoire.noRequests")}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </Card>
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+    </div>
   );
 }

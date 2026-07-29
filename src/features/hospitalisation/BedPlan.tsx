@@ -5,13 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { fetchLits, libererLit } from "./hospitalisation-api";
 import type { Lit, LitStatut } from "./types";
 import { Badge, Button, Card } from "@/components/ui";
-
-const STATUT_LABELS: Record<LitStatut, string> = {
-  libre: "Libre",
-  occupe: "Occupé",
-  reserve: "Réservé",
-  nettoyage: "En nettoyage",
-};
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const STATUT_TONES: Record<LitStatut, "success" | "danger" | "warning" | "neutral"> = {
   libre: "success",
@@ -21,8 +15,16 @@ const STATUT_TONES: Record<LitStatut, "success" | "danger" | "warning" | "neutra
 };
 
 export function BedPlan() {
+  const { t } = useTranslation();
   const [lits, setLits] = useState<Lit[]>([]);
   const [busyId, setBusyId] = useState<number | null>(null);
+
+  const STATUT_LABELS: Record<LitStatut, string> = {
+    libre: t("hospitalisation.bedPlan.statutLibre"),
+    occupe: t("hospitalisation.bedPlan.statutOccupe"),
+    reserve: t("hospitalisation.bedPlan.statutReserve"),
+    nettoyage: t("hospitalisation.bedPlan.statutNettoyage"),
+  };
 
   const load = useCallback(() => {
     fetchLits().then((res) => setLits(res.data));
@@ -53,7 +55,9 @@ export function BedPlan() {
     <div className="flex flex-col gap-6">
       {Object.entries(parChambre).map(([chambre, litsChambre]) => (
         <div key={chambre}>
-          <h2 className="font-medium mb-2 text-foreground">Chambre {chambre}</h2>
+          <h2 className="font-medium mb-2 text-foreground">
+            {t("hospitalisation.bedPlan.room", { chambre })}
+          </h2>
           <div className="flex flex-wrap gap-3">
             {litsChambre.map((lit) => (
               <Card key={lit.id} className="w-56 p-3 text-sm">
@@ -77,7 +81,7 @@ export function BedPlan() {
                     disabled={busyId === lit.id}
                     className="mt-2 px-0"
                   >
-                    Marquer libre
+                    {t("hospitalisation.bedPlan.markFree")}
                   </Button>
                 )}
               </Card>
@@ -85,7 +89,7 @@ export function BedPlan() {
           </div>
         </div>
       ))}
-      {lits.length === 0 && <p className="text-muted">Aucun lit configuré.</p>}
+      {lits.length === 0 && <p className="text-muted">{t("hospitalisation.bedPlan.empty")}</p>}
     </div>
   );
 }

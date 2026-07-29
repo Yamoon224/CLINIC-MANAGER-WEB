@@ -10,8 +10,10 @@ import {
 } from "./hospitalisation-api";
 import type { Lit, Sejour } from "./types";
 import { Button, Card, Field, Input, PageHeader, Select, Textarea } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function SejourDetail({ id }: { id: number }) {
+  const { t } = useTranslation();
   const [sejour, setSejour] = useState<Sejour | null>(null);
   const [litsLibres, setLitsLibres] = useState<Lit[]>([]);
   const [nouveauLitId, setNouveauLitId] = useState<number | "">("");
@@ -73,26 +75,37 @@ export function SejourDetail({ id }: { id: number }) {
     }
   }
 
-  if (!sejour) return <p className="text-muted">Chargement...</p>;
+  if (!sejour) return <p className="text-muted">{t("common.loading")}</p>;
 
   const readOnly = sejour.statut === "termine";
 
   return (
-    <div className="flex flex-col gap-4 max-w-2xl">
+    <div className="flex flex-col gap-4">
       <PageHeader
-        title={`Hospitalisation - ${sejour.patient.prenom} ${sejour.patient.nom}`}
-        description={`Chambre ${sejour.lit.chambre} - ${sejour.lit.numero} · ${sejour.motif}`}
+        title={t("hospitalisation.detail.title", {
+          prenom: sejour.patient.prenom,
+          nom: sejour.patient.nom,
+        })}
+        description={t("hospitalisation.detail.description", {
+          chambre: sejour.lit.chambre,
+          numero: sejour.lit.numero,
+          motif: sejour.motif,
+        })}
       />
 
       {readOnly && (
         <div className="rounded-xl border border-success/30 bg-success-light p-3 text-sm text-success">
-          Sortie enregistrée - {sejour.nombre_jours} jour(s), frais de séjour :{" "}
-          {sejour.frais_sejour} F CFA
+          {t("hospitalisation.detail.dischargedBanner", {
+            days: sejour.nombre_jours,
+            montant: sejour.frais_sejour ?? "",
+          })}
         </div>
       )}
 
       <div>
-        <h2 className="font-semibold mb-2 text-foreground">Feuille de température</h2>
+        <h2 className="font-semibold mb-2 text-foreground">
+          {t("hospitalisation.detail.temperatureSheet")}
+        </h2>
         <ul className="flex flex-col gap-2 mb-3 text-sm">
           {sejour.suivis.map((s) => (
             <li key={s.id} className="rounded-xl border border-border bg-surface p-3">
@@ -105,43 +118,43 @@ export function SejourDetail({ id }: { id: number }) {
             </li>
           ))}
           {sejour.suivis.length === 0 && (
-            <li className="text-muted">Aucun relevé enregistré.</li>
+            <li className="text-muted">{t("hospitalisation.detail.noReadings")}</li>
           )}
         </ul>
 
         {!readOnly && (
           <Card className="flex flex-col gap-3">
             <div className="grid grid-cols-3 gap-2">
-              <Field label="Température">
+              <Field label={t("hospitalisation.detail.temperature")}>
                 <Input
-                  placeholder="°C"
+                  placeholder={t("hospitalisation.detail.temperaturePlaceholder")}
                   value={temperature}
                   onChange={(e) => setTemperature(e.target.value)}
                 />
               </Field>
-              <Field label="Tension">
+              <Field label={t("hospitalisation.detail.tension")}>
                 <Input
-                  placeholder="ex. 12/8"
+                  placeholder={t("hospitalisation.detail.tensionPlaceholder")}
                   value={tension}
                   onChange={(e) => setTension(e.target.value)}
                 />
               </Field>
-              <Field label="Pouls">
+              <Field label={t("hospitalisation.detail.pouls")}>
                 <Input
-                  placeholder="bpm"
+                  placeholder={t("hospitalisation.detail.poulsPlaceholder")}
                   value={pouls}
                   onChange={(e) => setPouls(e.target.value)}
                 />
               </Field>
             </div>
             <Textarea
-              placeholder="Soins administrés, observations..."
+              placeholder={t("hospitalisation.detail.observationsPlaceholder")}
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
               rows={2}
             />
             <Button onClick={handleAjouterSuivi} disabled={busy} className="self-start">
-              Ajouter le relevé
+              {t("hospitalisation.detail.addReading")}
             </Button>
           </Card>
         )}
@@ -154,19 +167,19 @@ export function SejourDetail({ id }: { id: number }) {
             onChange={(e) => setNouveauLitId(e.target.value ? Number(e.target.value) : "")}
             className="max-w-xs"
           >
-            <option value="">Transférer vers...</option>
+            <option value="">{t("hospitalisation.detail.transferPlaceholder")}</option>
             {litsLibres.map((l) => (
               <option key={l.id} value={l.id}>
-                Chambre {l.chambre} - {l.numero}
+                {t("hospitalisation.detail.room", { chambre: l.chambre, numero: l.numero })}
               </option>
             ))}
           </Select>
           <Button variant="outline" onClick={handleTransferer} disabled={busy || !nouveauLitId}>
-            Transférer
+            {t("hospitalisation.detail.transfer")}
           </Button>
 
           <Button onClick={handleSortir} disabled={busy} className="ml-auto">
-            Enregistrer la sortie
+            {t("hospitalisation.detail.discharge")}
           </Button>
         </div>
       )}

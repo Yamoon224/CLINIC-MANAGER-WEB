@@ -3,21 +3,29 @@
 import { useEffect, useState } from "react";
 import { addReleveTemperature, fetchChaineFroid } from "./vaccinations-api";
 import type { ReleveTemperature } from "./types";
-import { Badge, Button, Card, Input } from "@/components/ui";
+import { Badge, Button, Card, Input, Pagination } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function ChaineFroid() {
+  const { t } = useTranslation();
   const [releves, setReleves] = useState<ReleveTemperature[]>([]);
   const [temperature, setTemperature] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   function load() {
-    fetchChaineFroid().then((res) => setReleves(res.data));
+    fetchChaineFroid(page).then((res) => {
+      setReleves(res.data);
+      setTotalPages(res.meta.last_page);
+    });
   }
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   async function handleSubmit() {
     if (!temperature) return;
@@ -40,13 +48,13 @@ export function ChaineFroid() {
     <div className="flex flex-col gap-4">
       <Card className="flex items-center gap-2 max-w-lg p-3">
         <Input
-          placeholder="Température (°C)"
+          placeholder={t("vaccinations.temperaturePlaceholder")}
           value={temperature}
           onChange={(e) => setTemperature(e.target.value)}
           className="w-40"
         />
         <Input
-          placeholder="Notes"
+          placeholder={t("vaccinations.notesPlaceholder")}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           className="flex-1"
@@ -57,7 +65,7 @@ export function ChaineFroid() {
           disabled={isSubmitting}
           className="whitespace-nowrap"
         >
-          Enregistrer le relevé
+          {t("vaccinations.saveReleve")}
         </Button>
       </Card>
 
@@ -70,13 +78,14 @@ export function ChaineFroid() {
             <span>
               {r.releve_at && new Date(r.releve_at).toLocaleString("fr-FR")} - {r.temperature}°C
             </span>
-            {r.anomalie && <Badge tone="danger">⚠ hors plage</Badge>}
+            {r.anomalie && <Badge tone="danger">{t("vaccinations.outOfRange")}</Badge>}
           </li>
         ))}
         {releves.length === 0 && (
-          <li className="text-muted">Aucun relevé enregistré.</li>
+          <li className="text-muted">{t("vaccinations.noReleves")}</li>
         )}
       </ul>
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

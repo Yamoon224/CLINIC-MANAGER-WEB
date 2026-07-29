@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { addCpn } from "./maternite-api";
 import { Button, Field, Input, Textarea } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function CpnForm({
   grossesseId,
@@ -11,6 +12,7 @@ export function CpnForm({
   grossesseId: number;
   onAdded: () => void;
 }) {
+  const { t } = useTranslation();
   const [dateCpn, setDateCpn] = useState(new Date().toISOString().slice(0, 10));
   const [poids, setPoids] = useState("");
   const [tension, setTension] = useState("");
@@ -51,30 +53,34 @@ export function CpnForm({
       className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
     >
       <div className="grid grid-cols-4 gap-3">
-        <Field label="Date">
+        <Field label={t("maternite.cpnForm.date")}>
           <Input type="date" value={dateCpn} onChange={(e) => setDateCpn(e.target.value)} />
         </Field>
-        <Field label="Poids">
-          <Input placeholder="Poids" value={poids} onChange={(e) => setPoids(e.target.value)} />
-        </Field>
-        <Field label="Tension">
+        <Field label={t("maternite.cpnForm.poids")}>
           <Input
-            placeholder="Tension"
+            placeholder={t("maternite.cpnForm.poids")}
+            value={poids}
+            onChange={(e) => setPoids(e.target.value)}
+          />
+        </Field>
+        <Field label={t("maternite.cpnForm.tension")}>
+          <Input
+            placeholder={t("maternite.cpnForm.tension")}
             value={tension}
             onChange={(e) => setTension(e.target.value)}
           />
         </Field>
-        <Field label="Hauteur utérine">
+        <Field label={t("maternite.cpnForm.hauteurUterine")}>
           <Input
-            placeholder="Hauteur utérine"
+            placeholder={t("maternite.cpnForm.hauteurUterine")}
             value={hauteurUterine}
             onChange={(e) => setHauteurUterine(e.target.value)}
           />
         </Field>
       </div>
-      <Field label="Bruits du cœur fœtal">
+      <Field label={t("maternite.cpnForm.bruitsCoeurFoetal")}>
         <Input
-          placeholder="Bruits du cœur fœtal"
+          placeholder={t("maternite.cpnForm.bruitsCoeurFoetal")}
           value={bruitsCoeurFoetal}
           onChange={(e) => setBruitsCoeurFoetal(e.target.value)}
         />
@@ -86,12 +92,12 @@ export function CpnForm({
           onChange={(e) => setRisqueDetecte(e.target.checked)}
           className="h-4 w-4 rounded border-border accent-primary"
         />
-        Grossesse à risque détectée lors de cette CPN
+        {t("maternite.cpnForm.risqueDetecte")}
       </label>
       {risqueDetecte && (
-        <Field label="Détails du risque">
+        <Field label={t("maternite.cpnForm.risqueDetails")}>
           <Textarea
-            placeholder="Détails du risque"
+            placeholder={t("maternite.cpnForm.risqueDetails")}
             value={risqueDetails}
             onChange={(e) => setRisqueDetails(e.target.value)}
             rows={2}
@@ -99,7 +105,7 @@ export function CpnForm({
         </Field>
       )}
       <Button type="submit" disabled={isSubmitting} className="self-start">
-        Ajouter la CPN
+        {t("maternite.cpnForm.submit")}
       </Button>
     </form>
   );

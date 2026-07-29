@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type {
   Depense,
   Facturable,
@@ -12,8 +13,11 @@ export function fetchFacturables(patientId: number): Promise<{ data: Facturable[
   return apiFetch<{ data: Facturable[] }>(`/patients/${patientId}/facturables`);
 }
 
-export function fetchPatientFactures(patientId: number): Promise<{ data: Facture[] }> {
-  return apiFetch<{ data: Facture[] }>(`/patients/${patientId}/factures`);
+export function fetchPatientFactures(
+  patientId: number,
+  page = 1,
+): Promise<PaginatedResponse<Facture>> {
+  return apiFetch<PaginatedResponse<Facture>>(`/patients/${patientId}/factures?page=${page}`);
 }
 
 export function createFacture(
@@ -45,8 +49,8 @@ export function encaisser(
   });
 }
 
-export function fetchCreances(): Promise<{ data: Facture[] }> {
-  return apiFetch<{ data: Facture[] }>("/factures/creances");
+export function fetchCreances(page = 1): Promise<PaginatedResponse<Facture>> {
+  return apiFetch<PaginatedResponse<Facture>>(`/factures/creances?page=${page}`);
 }
 
 export function fetchSessionCourante(): Promise<{ data: SessionCaisse | null }> {
@@ -70,8 +74,8 @@ export function cloturerSession(
   });
 }
 
-export function fetchDepenses(): Promise<{ data: Depense[] }> {
-  return apiFetch<{ data: Depense[] }>("/depenses");
+export function fetchDepenses(page = 1): Promise<PaginatedResponse<Depense>> {
+  return apiFetch<PaginatedResponse<Depense>>(`/depenses?page=${page}`);
 }
 
 export function createDepense(payload: {

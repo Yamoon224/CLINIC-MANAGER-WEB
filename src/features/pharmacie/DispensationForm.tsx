@@ -9,6 +9,7 @@ import {
 } from "./pharmacie-api";
 import type { LotMedicament, Medicament } from "./types";
 import { Badge, Button, Card, Input, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function DispensationForm({
   patientId,
@@ -17,6 +18,7 @@ export function DispensationForm({
   patientId: number;
   onDispensed?: () => void;
 }) {
+  const { t } = useTranslation();
   const [medicaments, setMedicaments] = useState<Medicament[]>([]);
   const [medicamentId, setMedicamentId] = useState<number | "">("");
   const [medicamentOriginalId, setMedicamentOriginalId] = useState<number | null>(null);

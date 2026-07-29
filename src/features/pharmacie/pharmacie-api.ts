@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type {
   Alertes,
   CreerLotPayload,
@@ -47,6 +48,9 @@ export function dispenser(
 
 export function fetchPatientDispensations(
   patientId: number,
-): Promise<{ data: Dispensation[] }> {
-  return apiFetch<{ data: Dispensation[] }>(`/patients/${patientId}/dispensations`);
+  page = 1,
+): Promise<PaginatedResponse<Dispensation>> {
+  return apiFetch<PaginatedResponse<Dispensation>>(
+    `/patients/${patientId}/dispensations?page=${page}`,
+  );
 }

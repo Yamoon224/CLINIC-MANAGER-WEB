@@ -7,15 +7,17 @@ import { CpnForm } from "./CpnForm";
 import { NouveauNeForm } from "./NouveauNeForm";
 import type { Grossesse } from "./types";
 import { Badge, Card } from "@/components/ui";
-
-const STATUT_LABELS: Record<Grossesse["statut"], string> = {
-  suivie: "Suivie",
-  accouchee: "Accouchée",
-  interrompue: "Interrompue",
-};
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function GrossesseDetail({ id }: { id: number }) {
+  const { t } = useTranslation();
   const [grossesse, setGrossesse] = useState<Grossesse | null>(null);
+
+  const STATUT_LABELS: Record<Grossesse["statut"], string> = {
+    suivie: t("maternite.detail.statutSuivie"),
+    accouchee: t("maternite.detail.statutAccouchee"),
+    interrompue: t("maternite.detail.statutInterrompue"),
+  };
 
   const load = useCallback(() => {
     getGrossesse(id).then((res) => setGrossesse(res.data));
@@ -25,42 +27,51 @@ export function GrossesseDetail({ id }: { id: number }) {
     load();
   }, [load]);
 
-  if (!grossesse) return <p className="text-sm text-muted">Chargement...</p>;
+  if (!grossesse) return <p className="text-sm text-muted">{t("maternite.detail.loading")}</p>;
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
       <div>
         <h1 className="text-lg font-semibold text-foreground">
-          Dossier obstétrical - {grossesse.patient.prenom} {grossesse.patient.nom}
+          {t("maternite.detail.title", {
+            prenom: grossesse.patient.prenom,
+            nom: grossesse.patient.nom,
+          })}
         </h1>
-        <p className="text-sm text-muted">Dossier n° {grossesse.patient.numero_dossier}</p>
+        <p className="text-sm text-muted">
+          {t("maternite.detail.dossierNumero", { numero: grossesse.patient.numero_dossier })}
+        </p>
       </div>
 
       {grossesse.a_risque && (
         <div className="rounded-lg bg-danger-light px-3 py-2 text-sm font-semibold text-danger">
-          ⚠ Grossesse à risque
+          {t("maternite.detail.aRisque")}
         </div>
       )}
 
       <Card>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-          <Row label="DDR" value={grossesse.ddr} />
-          <Row label="Terme prévu" value={grossesse.terme} />
+          <Row label={t("maternite.detail.ddr")} value={grossesse.ddr} />
+          <Row label={t("maternite.detail.termePrevu")} value={grossesse.terme} />
           <Row
-            label="Semaines d'aménorrhée"
-            value={grossesse.semaines_amenorrhee ? `${grossesse.semaines_amenorrhee} SA` : null}
+            label={t("maternite.detail.semainesAmenorrhee")}
+            value={
+              grossesse.semaines_amenorrhee
+                ? t("maternite.detail.semainesValue", { sa: grossesse.semaines_amenorrhee })
+                : null
+            }
           />
           <Row
-            label="Gestité / Parité"
+            label={t("maternite.detail.gestiteParite")}
             value={
               grossesse.gestite || grossesse.parite
                 ? `G${grossesse.gestite ?? "?"} P${grossesse.parite ?? "?"}`
                 : null
             }
           />
-          <Row label="Groupe sanguin" value={grossesse.groupe_sanguin} />
+          <Row label={t("maternite.detail.groupeSanguin")} value={grossesse.groupe_sanguin} />
           <div className="contents">
-            <dt className="text-muted">Statut</dt>
+            <dt className="text-muted">{t("maternite.detail.statut")}</dt>
             <dd>
               <Badge tone={grossesse.statut === "suivie" ? "primary" : "neutral"}>
                 {STATUT_LABELS[grossesse.statut]}
@@ -72,27 +83,34 @@ export function GrossesseDetail({ id }: { id: number }) {
 
       {grossesse.facteurs_risque && (
         <div className="rounded-lg bg-danger-light p-3 text-sm">
-          <span className="font-semibold text-danger">Facteurs de risque : </span>
+          <span className="font-semibold text-danger">
+            {t("maternite.detail.facteursRisque")}
+          </span>
           <span className="text-foreground">{grossesse.facteurs_risque}</span>
         </div>
       )}
 
       <div>
         <h2 className="mb-2 font-semibold text-foreground">
-          Consultations prénatales ({grossesse.consultations_prenatales.length})
+          {t("maternite.detail.consultationsPrenatales", {
+            count: grossesse.consultations_prenatales.length,
+          })}
         </h2>
         <div className="mb-3 flex flex-col gap-2 text-sm">
           {grossesse.consultations_prenatales.map((cpn) => (
             <Card key={cpn.id} className="p-3">
               <div className="flex justify-between">
-                <span className="font-medium">CPN {cpn.numero}</span>
+                <span className="font-medium">
+                  {t("maternite.detail.cpnNumero", { numero: cpn.numero })}
+                </span>
                 <span className="text-muted">{cpn.date_cpn}</span>
               </div>
               <p className="text-muted">
                 {[
-                  cpn.poids && `Poids: ${cpn.poids}kg`,
-                  cpn.tension && `Tension: ${cpn.tension}`,
-                  cpn.hauteur_uterine && `HU: ${cpn.hauteur_uterine}cm`,
+                  cpn.poids && t("maternite.detail.poidsValue", { poids: cpn.poids }),
+                  cpn.tension && t("maternite.detail.tensionValue", { tension: cpn.tension }),
+                  cpn.hauteur_uterine &&
+                    t("maternite.detail.huValue", { hu: cpn.hauteur_uterine }),
                 ]
                   .filter(Boolean)
                   .join(" · ")}
@@ -107,12 +125,16 @@ export function GrossesseDetail({ id }: { id: number }) {
       </div>
 
       <div>
-        <h2 className="mb-2 font-semibold text-foreground">Accouchement</h2>
+        <h2 className="mb-2 font-semibold text-foreground">
+          {t("maternite.detail.accouchementTitle")}
+        </h2>
         {grossesse.accouchement ? (
           <Card className="flex flex-col gap-2 text-sm">
             <div className="flex items-center gap-2">
               <Badge tone={grossesse.accouchement.mode === "voie_basse" ? "success" : "accent"}>
-                {grossesse.accouchement.mode === "voie_basse" ? "Voie basse" : "Césarienne"}
+                {grossesse.accouchement.mode === "voie_basse"
+                  ? t("maternite.accouchementForm.voieBasse")
+                  : t("maternite.accouchementForm.cesarienne")}
               </Badge>
               <span className="text-muted">
                 {grossesse.accouchement.date_heure &&
@@ -121,23 +143,34 @@ export function GrossesseDetail({ id }: { id: number }) {
             </div>
             {grossesse.accouchement.complications && (
               <p className="text-danger">
-                Complications : {grossesse.accouchement.complications}
+                {t("maternite.detail.complicationsValue", {
+                  complications: grossesse.accouchement.complications,
+                })}
               </p>
             )}
 
-            <h3 className="mt-2 font-medium text-foreground">Nouveau-nés</h3>
+            <h3 className="mt-2 font-medium text-foreground">
+              {t("maternite.detail.nouveauxNes")}
+            </h3>
             <div className="flex flex-col gap-2">
               {grossesse.accouchement.nouveau_nes.map((bebe) => (
                 <Card key={bebe.id} className="p-3">
                   {bebe.patient.prenom} {bebe.patient.nom} ({bebe.patient.numero_dossier}) -{" "}
-                  {bebe.sexe === "F" ? "Féminin" : bebe.sexe === "M" ? "Masculin" : "?"}
+                  {bebe.sexe === "F"
+                    ? t("maternite.detail.sexeFeminin")
+                    : bebe.sexe === "M"
+                      ? t("maternite.detail.sexeMasculin")
+                      : t("maternite.detail.sexeInconnu")}
                   {bebe.poids && `, ${bebe.poids}kg`}
                   {bebe.score_apgar_1min !== null &&
-                    `, Apgar ${bebe.score_apgar_1min}/${bebe.score_apgar_5min}`}
+                    t("maternite.detail.apgarValue", {
+                      a1: bebe.score_apgar_1min,
+                      a5: bebe.score_apgar_5min ?? "-",
+                    })}
                 </Card>
               ))}
               {grossesse.accouchement.nouveau_nes.length === 0 && (
-                <p className="text-muted">Aucun nouveau-né enregistré.</p>
+                <p className="text-muted">{t("maternite.detail.noNouveauNe")}</p>
               )}
             </div>
 
@@ -146,7 +179,7 @@ export function GrossesseDetail({ id }: { id: number }) {
         ) : grossesse.statut === "suivie" ? (
           <AccouchementForm grossesseId={grossesse.id} onSaved={load} />
         ) : (
-          <p className="text-sm text-muted">Aucun accouchement enregistré.</p>
+          <p className="text-sm text-muted">{t("maternite.detail.noAccouchement")}</p>
         )}
       </div>
     </div>

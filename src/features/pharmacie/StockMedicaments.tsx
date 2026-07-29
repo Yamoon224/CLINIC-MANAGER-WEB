@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { createLot, fetchLots, fetchMedicaments } from "./pharmacie-api";
 import type { LotMedicament, Medicament } from "./types";
 import { Badge, Button, Card, Input } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function StockMedicaments() {
+  const { t } = useTranslation();
   const [medicaments, setMedicaments] = useState<Medicament[]>([]);
   const [selected, setSelected] = useState<number | "">("");
   const [lots, setLots] = useState<LotMedicament[]>([]);
@@ -47,13 +49,13 @@ export function StockMedicaments() {
   return (
     <div className="flex flex-col gap-4">
       <Card className="p-0 max-w-3xl overflow-hidden">
-        <table className="w-full text-sm border-collapse">
+        <table className="table">
           <thead>
-            <tr className="text-left border-b border-border">
-              <th className="py-2 px-4">DCI</th>
-              <th className="py-2 px-4">Forme / Dosage</th>
-              <th className="py-2 px-4">Stock disponible</th>
-              <th className="py-2 px-4">Seuil d&apos;alerte</th>
+            <tr>
+              <th>{t("pharmacie.colDci")}</th>
+              <th>{t("pharmacie.colFormeDosage")}</th>
+              <th>{t("pharmacie.colStockDisponible")}</th>
+              <th>{t("pharmacie.colSeuilAlerte")}</th>
             </tr>
           </thead>
           <tbody>
@@ -61,23 +63,23 @@ export function StockMedicaments() {
               <tr
                 key={m.id}
                 onClick={() => setSelected(m.id)}
-                className={`border-b border-border last:border-0 cursor-pointer transition-colors hover:bg-primary-light/60 ${selected === m.id ? "bg-primary-light" : ""}`}
+                className={`cursor-pointer transition-colors hover:bg-primary-light/60 ${selected === m.id ? "bg-primary-light" : ""}`}
               >
-                <td className="py-2 px-4">
+                <td>
                   {m.dci}
                   {m.nom_commercial && ` (${m.nom_commercial})`}
                 </td>
-                <td className="py-2 px-4">
+                <td>
                   {m.forme} {m.dosage}
                 </td>
-                <td className="py-2 px-4">
+                <td>
                   {m.stock_disponible < m.seuil_alerte ? (
                     <Badge tone="danger">{m.stock_disponible}</Badge>
                   ) : (
                     m.stock_disponible
                   )}
                 </td>
-                <td className="py-2 px-4">{m.seuil_alerte}</td>
+                <td>{m.seuil_alerte}</td>
               </tr>
             ))}
           </tbody>
@@ -87,32 +89,32 @@ export function StockMedicaments() {
       {selected && (
         <>
           <Card className="p-0 max-w-2xl overflow-hidden">
-            <table className="w-full text-sm border-collapse">
+            <table className="table">
               <thead>
-                <tr className="text-left border-b border-border">
-                  <th className="py-2 px-4">Lot</th>
-                  <th className="py-2 px-4">Péremption</th>
-                  <th className="py-2 px-4">Restant / Initial</th>
-                  <th className="py-2 px-4"></th>
+                <tr>
+                  <th>{t("pharmacie.colLot")}</th>
+                  <th>{t("pharmacie.colPeremption")}</th>
+                  <th>{t("pharmacie.colRestantInitial")}</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {lots.map((lot) => (
-                  <tr key={lot.id} className="border-b border-border last:border-0">
-                    <td className="py-2 px-4">{lot.numero_lot}</td>
-                    <td className="py-2 px-4">{lot.date_peremption}</td>
-                    <td className="py-2 px-4">
+                  <tr key={lot.id}>
+                    <td>{lot.numero_lot}</td>
+                    <td>{lot.date_peremption}</td>
+                    <td>
                       {lot.quantite_restante} / {lot.quantite_initiale}
                     </td>
-                    <td className="py-2 px-4">
-                      {lot.est_perime && <Badge tone="danger">Périmé</Badge>}
+                    <td>
+                      {lot.est_perime && <Badge tone="danger">{t("pharmacie.perime")}</Badge>}
                     </td>
                   </tr>
                 ))}
                 {lots.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-2 px-4 text-muted">
-                      Aucun lot enregistré.
+                    <td colSpan={4} className="text-muted">
+                      {t("pharmacie.noLots")}
                     </td>
                   </tr>
                 )}
@@ -122,7 +124,7 @@ export function StockMedicaments() {
 
           <Card className="flex items-center gap-2 max-w-2xl p-3">
             <Input
-              placeholder="N° de lot"
+              placeholder={t("pharmacie.numeroLotPlaceholder")}
               value={numeroLot}
               onChange={(e) => setNumeroLot(e.target.value)}
               className="flex-1"
@@ -134,7 +136,7 @@ export function StockMedicaments() {
               className="w-auto"
             />
             <Input
-              placeholder="Quantité"
+              placeholder={t("pharmacie.quantitePlaceholder")}
               value={quantite}
               onChange={(e) => setQuantite(e.target.value)}
               className="w-28"
@@ -145,7 +147,7 @@ export function StockMedicaments() {
               disabled={isSubmitting}
               className="whitespace-nowrap"
             >
-              Réceptionner
+              {t("pharmacie.receive")}
             </Button>
           </Card>
         </>

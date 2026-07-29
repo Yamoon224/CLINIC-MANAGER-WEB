@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createDemandes, fetchAnalyseTypes } from "./laboratoire-api";
 import type { AnalyseType } from "./types";
 import { Button, Card } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function DemandeAnalysesAction({
   patientId,
@@ -12,6 +13,7 @@ export function DemandeAnalysesAction({
   patientId: number;
   onCreated?: () => void;
 }) {
+  const { t } = useTranslation();
   const [analyseTypes, setAnalyseTypes] = useState<AnalyseType[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
   const [urgente, setUrgente] = useState(false);
@@ -31,7 +33,7 @@ export function DemandeAnalysesAction({
     setIsSubmitting(true);
     try {
       await createDemandes(patientId, { analyse_type_ids: selected, urgente });
-      setConfirmation(`${selected.length} demande(s) transmise(s) au laboratoire.`);
+      setConfirmation(t("laboratoire.sentConfirmation", { count: selected.length }));
       setSelected([]);
       setUrgente(false);
       onCreated?.();
@@ -42,7 +44,7 @@ export function DemandeAnalysesAction({
 
   return (
     <Card className="flex flex-col gap-2 max-w-md p-4">
-      <span className="font-semibold text-sm text-foreground">Demander des analyses</span>
+      <span className="font-semibold text-sm text-foreground">{t("laboratoire.requestTitle")}</span>
       <div className="flex flex-col gap-1 max-h-40 overflow-y-auto text-sm">
         {analyseTypes.map((a) => (
           <label key={a.id} className="flex items-center gap-2">
@@ -57,14 +59,14 @@ export function DemandeAnalysesAction({
       </div>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={urgente} onChange={(e) => setUrgente(e.target.checked)} />
-        Urgent
+        {t("laboratoire.urgentLabel")}
       </label>
       <Button
         onClick={handleSubmit}
         disabled={isSubmitting || selected.length === 0}
         className="self-start"
       >
-        Envoyer au laboratoire
+        {t("laboratoire.send")}
       </Button>
       {confirmation && <p className="text-sm text-success">{confirmation}</p>}
     </Card>

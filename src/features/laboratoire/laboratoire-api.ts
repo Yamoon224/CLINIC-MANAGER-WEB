@@ -1,18 +1,24 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type { AnalyseType, DemandeAnalyse, DemanderAnalysesPayload } from "./types";
 
 export function fetchAnalyseTypes(): Promise<{ data: AnalyseType[] }> {
   return apiFetch<{ data: AnalyseType[] }>("/analyse-types");
 }
 
-export function fetchWorkList(): Promise<{ data: DemandeAnalyse[] }> {
-  return apiFetch<{ data: DemandeAnalyse[] }>("/demandes-analyse");
+export function fetchWorkList(
+  page = 1,
+): Promise<PaginatedResponse<DemandeAnalyse>> {
+  return apiFetch<PaginatedResponse<DemandeAnalyse>>(`/demandes-analyse?page=${page}`);
 }
 
 export function fetchPatientDemandes(
   patientId: number,
-): Promise<{ data: DemandeAnalyse[] }> {
-  return apiFetch<{ data: DemandeAnalyse[] }>(`/patients/${patientId}/demandes-analyse`);
+  page = 1,
+): Promise<PaginatedResponse<DemandeAnalyse>> {
+  return apiFetch<PaginatedResponse<DemandeAnalyse>>(
+    `/patients/${patientId}/demandes-analyse?page=${page}`,
+  );
 }
 
 export function createDemandes(

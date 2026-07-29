@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { fetchAudit, fetchCausers } from "./administration-api";
 import {
-  AUDIT_EVENT_LABELS,
   AUDIT_SUBJECT_TYPES,
   type AuditCauser,
   type AuditEntry,
   type AuditEvent,
 } from "./types";
-import { Badge, Button, Card, Field, Input, Select } from "@/components/ui";
+import { Badge, Button, Card, Field, Input, Pagination, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const AUDIT_EVENT_TONE: Record<AuditEvent, "success" | "primary" | "danger"> = {
   created: "success",
@@ -18,6 +18,7 @@ const AUDIT_EVENT_TONE: Record<AuditEvent, "success" | "primary" | "danger"> = {
 };
 
 export function Audit() {
+  const { t } = useTranslation();
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [causers, setCausers] = useState<AuditCauser[]>([]);
   const [page, setPage] = useState(1);
@@ -29,6 +30,12 @@ export function Audit() {
   const [dateFin, setDateFin] = useState("");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [error, setError] = useState(false);
+
+  const AUDIT_EVENT_LABELS: Record<AuditEvent, string> = {
+    created: t("audit.event.created"),
+    updated: t("audit.event.updated"),
+    deleted: t("audit.event.deleted"),
+  };
 
   useEffect(() => {
     fetchCausers()
@@ -55,17 +62,13 @@ export function Audit() {
   }, [subjectType, causerId, event, dateDebut, dateFin, page]);
 
   if (error) {
-    return (
-      <p className="text-sm text-muted">
-        Journal d&apos;audit réservé au profil administrateur.
-      </p>
-    );
+    return <p className="text-sm text-muted">{t("audit.accessDenied")}</p>;
   }
 
   return (
     <div className="flex flex-col gap-4">
       <Card className="flex flex-wrap gap-3">
-        <Field label="Objet">
+        <Field label={t("audit.filters.objet")}>
           <Select
             value={subjectType}
             onChange={(e) => {
@@ -74,7 +77,7 @@ export function Audit() {
             }}
             className="w-44"
           >
-            <option value="">Tous les objets</option>
+            <option value="">{t("audit.filters.tousObjets")}</option>
             {AUDIT_SUBJECT_TYPES.map((type) => (
               <option key={type} value={type}>
                 {type}
@@ -82,7 +85,7 @@ export function Audit() {
             ))}
           </Select>
         </Field>
-        <Field label="Action">
+        <Field label={t("audit.filters.action")}>
           <Select
             value={event}
             onChange={(e) => {
@@ -91,7 +94,7 @@ export function Audit() {
             }}
             className="w-44"
           >
-            <option value="">Toutes les actions</option>
+            <option value="">{t("audit.filters.toutesActions")}</option>
             {Object.entries(AUDIT_EVENT_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -99,7 +102,7 @@ export function Audit() {
             ))}
           </Select>
         </Field>
-        <Field label="Auteur">
+        <Field label={t("audit.filters.auteur")}>
           <Select
             value={causerId}
             onChange={(e) => {
@@ -108,7 +111,7 @@ export function Audit() {
             }}
             className="w-44"
           >
-            <option value="">Tous les auteurs</option>
+            <option value="">{t("audit.filters.tousAuteurs")}</option>
             {causers.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -116,7 +119,7 @@ export function Audit() {
             ))}
           </Select>
         </Field>
-        <Field label="Du">
+        <Field label={t("audit.filters.du")}>
           <Input
             type="date"
             value={dateDebut}
@@ -126,7 +129,7 @@ export function Audit() {
             }}
           />
         </Field>
-        <Field label="Au">
+        <Field label={t("audit.filters.au")}>
           <Input
             type="date"
             value={dateFin}
@@ -138,81 +141,79 @@ export function Audit() {
         </Field>
       </Card>
 
-      <Card className="p-0">
-        <ul className="divide-y divide-border">
-          {entries.map((entry) => (
-            <li key={entry.id} className="p-3">
-              <button
-                onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
-                className="flex w-full items-center justify-between gap-3 text-left"
-              >
-                <span className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="text-xs text-muted">
+      <Card className="p-0 overflow-hidden">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>{t("audit.table.date")}</th>
+              <th>{t("audit.table.auteur")}</th>
+              <th>{t("audit.table.action")}</th>
+              <th>{t("audit.table.objet")}</th>
+              <th>{t("audit.table.details")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {entries.map((entry) => (
+              <>
+                <tr key={entry.id}>
+                  <td className="whitespace-nowrap text-xs text-muted">
                     {entry.created_at?.replace("T", " ").slice(0, 16)}
-                  </span>
-                  <span className="font-medium">{entry.causer?.name ?? "Système"}</span>
-                  {entry.event && (
-                    <Badge tone={AUDIT_EVENT_TONE[entry.event]}>
-                      {AUDIT_EVENT_LABELS[entry.event]}
-                    </Badge>
-                  )}
-                  <span className="text-muted">
+                  </td>
+                  <td>{entry.causer?.name ?? t("audit.systeme")}</td>
+                  <td>
+                    {entry.event && (
+                      <Badge tone={AUDIT_EVENT_TONE[entry.event]}>
+                        {AUDIT_EVENT_LABELS[entry.event]}
+                      </Badge>
+                    )}
+                  </td>
+                  <td className="text-muted">
                     {entry.subject_type}
                     {entry.subject_id !== null && ` #${entry.subject_id}`}
-                  </span>
-                </span>
-                <span className="whitespace-nowrap text-xs font-medium text-primary">
-                  {expandedId === entry.id ? "Masquer" : "Détails"}
-                </span>
-              </button>
-
-              {expandedId === entry.id && (
-                <div className="mt-3 grid grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <div className="mb-1 font-semibold text-foreground">Avant</div>
-                    <pre className="overflow-x-auto rounded-lg bg-primary-light/40 p-2">
-                      {entry.avant ? JSON.stringify(entry.avant, null, 2) : "-"}
-                    </pre>
-                  </div>
-                  <div>
-                    <div className="mb-1 font-semibold text-foreground">Après</div>
-                    <pre className="overflow-x-auto rounded-lg bg-primary-light/40 p-2">
-                      {entry.apres ? JSON.stringify(entry.apres, null, 2) : "-"}
-                    </pre>
-                  </div>
-                </div>
-              )}
-            </li>
-          ))}
-          {entries.length === 0 && (
-            <li className="p-3 text-sm text-muted">Aucune activité.</li>
-          )}
-        </ul>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
+                      className="whitespace-nowrap text-xs font-medium text-primary"
+                    >
+                      {expandedId === entry.id ? t("audit.masquer") : t("audit.detailsBtn")}
+                    </button>
+                  </td>
+                </tr>
+                {expandedId === entry.id && (
+                  <tr key={`${entry.id}-details`}>
+                    <td colSpan={5}>
+                      <div className="grid grid-cols-2 gap-4 text-xs py-2">
+                        <div>
+                          <div className="mb-1 font-semibold text-foreground">
+                            {t("audit.avant")}
+                          </div>
+                          <pre className="overflow-x-auto rounded-lg bg-primary-light/40 p-2">
+                            {entry.avant ? JSON.stringify(entry.avant, null, 2) : "-"}
+                          </pre>
+                        </div>
+                        <div>
+                          <div className="mb-1 font-semibold text-foreground">
+                            {t("audit.apres")}
+                          </div>
+                          <pre className="overflow-x-auto rounded-lg bg-primary-light/40 p-2">
+                            {entry.apres ? JSON.stringify(entry.apres, null, 2) : "-"}
+                          </pre>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
+            ))}
+          </tbody>
+        </table>
+        {entries.length === 0 && (
+          <p className="p-3 text-sm text-muted">{t("audit.noActivity")}</p>
+        )}
       </Card>
 
-      {lastPage > 1 && (
-        <div className="flex items-center gap-3 text-sm">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1}
-          >
-            Précédent
-          </Button>
-          <span className="text-muted">
-            Page {page} / {lastPage}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
-            disabled={page >= lastPage}
-          >
-            Suivant
-          </Button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={lastPage} onPageChange={setPage} />
     </div>
   );
 }

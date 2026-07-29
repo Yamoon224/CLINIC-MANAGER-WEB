@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { createLot, fetchLots, fetchVaccins } from "./vaccinations-api";
 import type { LotVaccin, Vaccin } from "./types";
 import { Badge, Button, Card, Input, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function StockVaccins() {
+  const { t } = useTranslation();
   const [vaccins, setVaccins] = useState<Vaccin[]>([]);
   const [selected, setSelected] = useState<number | "">("");
   const [lots, setLots] = useState<LotVaccin[]>([]);
@@ -50,7 +52,7 @@ export function StockVaccins() {
         onChange={(e) => setSelected(e.target.value ? Number(e.target.value) : "")}
         className="max-w-sm"
       >
-        <option value="">Choisir un vaccin...</option>
+        <option value="">{t("vaccinations.chooseVaccinPlaceholder")}</option>
         {vaccins.map((v) => (
           <option key={v.id} value={v.id}>
             {v.nom}
@@ -61,32 +63,32 @@ export function StockVaccins() {
       {selected && (
         <>
           <Card className="p-0 max-w-2xl overflow-hidden">
-            <table className="w-full text-sm border-collapse">
+            <table className="table">
               <thead>
-                <tr className="text-left border-b border-border">
-                  <th className="py-2 px-4">Lot</th>
-                  <th className="py-2 px-4">Péremption</th>
-                  <th className="py-2 px-4">Restant / Initial</th>
-                  <th className="py-2 px-4"></th>
+                <tr>
+                  <th>{t("vaccinations.colLot")}</th>
+                  <th>{t("vaccinations.colPeremption")}</th>
+                  <th>{t("vaccinations.colRestantInitial")}</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {lots.map((lot) => (
-                  <tr key={lot.id} className="border-b border-border last:border-0">
-                    <td className="py-2 px-4">{lot.numero_lot}</td>
-                    <td className="py-2 px-4">{lot.date_peremption}</td>
-                    <td className="py-2 px-4">
+                  <tr key={lot.id}>
+                    <td>{lot.numero_lot}</td>
+                    <td>{lot.date_peremption}</td>
+                    <td>
                       {lot.quantite_restante} / {lot.quantite_initiale}
                     </td>
-                    <td className="py-2 px-4">
-                      {lot.est_perime && <Badge tone="danger">Périmé</Badge>}
+                    <td>
+                      {lot.est_perime && <Badge tone="danger">{t("vaccinations.perime")}</Badge>}
                     </td>
                   </tr>
                 ))}
                 {lots.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-2 px-4 text-muted">
-                      Aucun lot enregistré.
+                    <td colSpan={4} className="text-muted">
+                      {t("vaccinations.noLots")}
                     </td>
                   </tr>
                 )}
@@ -96,7 +98,7 @@ export function StockVaccins() {
 
           <Card className="flex items-center gap-2 max-w-2xl p-3">
             <Input
-              placeholder="N° de lot"
+              placeholder={t("vaccinations.numeroLotPlaceholder")}
               value={numeroLot}
               onChange={(e) => setNumeroLot(e.target.value)}
               className="flex-1"
@@ -108,7 +110,7 @@ export function StockVaccins() {
               className="w-auto"
             />
             <Input
-              placeholder="Quantité"
+              placeholder={t("vaccinations.quantitePlaceholder")}
               value={quantite}
               onChange={(e) => setQuantite(e.target.value)}
               className="w-28"
@@ -119,7 +121,7 @@ export function StockVaccins() {
               disabled={isSubmitting}
               className="whitespace-nowrap"
             >
-              Réceptionner
+              {t("vaccinations.receive")}
             </Button>
           </Card>
         </>

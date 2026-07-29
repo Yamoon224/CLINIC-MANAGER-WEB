@@ -48,7 +48,7 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
       setMapiDetails("");
       load();
     } catch {
-      setError("Impossible d'administrer ce vaccin (schéma déjà complet ?).");
+      setError(t("vaccinations.administerError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -58,35 +58,56 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold text-foreground mb-2">Vaccinations</h2>
+      <h2 className="font-semibold text-foreground mb-2">{t("vaccinations.title")}</h2>
 
-      <ul className="flex flex-col gap-2 mb-3 text-sm">
-        {carnet.data.map((v) => (
-          <li key={v.id} className="rounded-lg border border-border p-2">
-            <span className="font-medium text-foreground">
-              {v.vaccin.nom} - dose {v.dose_numero}/{v.vaccin.nombre_doses}
-            </span>{" "}
-            <span className="text-muted">{v.date_administration}</span>
-            {v.mapi_survenue && (
-              <p className="mt-1">
-                <Badge tone="danger">⚠ MAPI : {v.mapi_details}</Badge>
-              </p>
+      <Card className="p-0 overflow-hidden mb-3">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>{t("vaccinations.colVaccin")}</th>
+              <th>{t("vaccinations.colDose")}</th>
+              <th>{t("common.date")}</th>
+              <th>{t("vaccinations.colMapi")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {carnet.data.map((v) => (
+              <tr key={v.id}>
+                <td>{v.vaccin.nom}</td>
+                <td>
+                  {v.dose_numero}/{v.vaccin.nombre_doses}
+                </td>
+                <td>{v.date_administration}</td>
+                <td>
+                  {v.mapi_survenue ? (
+                    <Badge tone="danger">{t("vaccinations.mapiBadge", { details: v.mapi_details ?? "" })}</Badge>
+                  ) : (
+                    "-"
+                  )}
+                </td>
+              </tr>
+            ))}
+            {carnet.data.length === 0 && (
+              <tr>
+                <td colSpan={4} className="text-muted">
+                  {t("vaccinations.noVaccinations")}
+                </td>
+              </tr>
             )}
-          </li>
-        ))}
-        {carnet.data.length === 0 && (
-          <li className="text-muted">Aucune vaccination enregistrée.</li>
-        )}
-      </ul>
+          </tbody>
+        </table>
+      </Card>
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
       {carnet.echeances.length > 0 && (
         <div className="mb-3 text-sm">
-          <span className="font-medium text-foreground">Prochaines échéances : </span>
+          <span className="font-medium text-foreground">{t("vaccinations.upcomingLabel")}</span>
           <span className="text-muted">
             {carnet.echeances
               .map(
                 (e) =>
-                  `${e.vaccin.nom} (dose ${e.prochaine_dose})${e.date_prevue ? ` - ${e.date_prevue}` : ""}`,
+                  t("vaccinations.echeanceItem", { nom: e.vaccin.nom, dose: e.prochaine_dose }) +
+                  (e.date_prevue ? ` - ${e.date_prevue}` : ""),
               )
               .join(" · ")}
           </span>
@@ -100,7 +121,7 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
             onChange={(e) => setVaccinId(e.target.value ? Number(e.target.value) : "")}
             className="flex-1"
           >
-            <option value="">Vaccin...</option>
+            <option value="">{t("vaccinations.selectVaccinPlaceholder")}</option>
             {vaccins.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.nom}
@@ -120,11 +141,11 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
             checked={mapiSurvenue}
             onChange={(e) => setMapiSurvenue(e.target.checked)}
           />
-          MAPI (manifestation adverse post-vaccinale) constatée
+          {t("vaccinations.mapiCheckboxLabel")}
         </label>
         {mapiSurvenue && (
           <Textarea
-            placeholder="Détails de la MAPI"
+            placeholder={t("vaccinations.mapiDetailsPlaceholder")}
             value={mapiDetails}
             onChange={(e) => setMapiDetails(e.target.value)}
             rows={2}
@@ -132,7 +153,7 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
         )}
         {error && <p className="text-sm text-danger">{error}</p>}
         <Button onClick={handleAdminister} disabled={isSubmitting || !vaccinId} className="self-start">
-          Administrer
+          {t("vaccinations.administer")}
         </Button>
       </Card>
     </div>

@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type {
   AssurancePatient,
   BordereauAssurance,
@@ -25,8 +26,13 @@ export function createCompagnie(payload: {
   });
 }
 
-export function fetchAssurancesPatient(patientId: number): Promise<{ data: AssurancePatient[] }> {
-  return apiFetch<{ data: AssurancePatient[] }>(`/patients/${patientId}/assurances`);
+export function fetchAssurancesPatient(
+  patientId: number,
+  page = 1,
+): Promise<PaginatedResponse<AssurancePatient>> {
+  return apiFetch<PaginatedResponse<AssurancePatient>>(
+    `/patients/${patientId}/assurances?page=${page}`,
+  );
 }
 
 export function createAssurancePatient(
@@ -81,8 +87,8 @@ export function traiterPriseEnCharge(
   });
 }
 
-export function fetchBordereaux(): Promise<{ data: BordereauAssurance[] }> {
-  return apiFetch<{ data: BordereauAssurance[] }>("/bordereaux-assurance");
+export function fetchBordereaux(page = 1): Promise<PaginatedResponse<BordereauAssurance>> {
+  return apiFetch<PaginatedResponse<BordereauAssurance>>(`/bordereaux-assurance?page=${page}`);
 }
 
 export function fetchBordereau(id: number): Promise<{ data: BordereauAssurance }> {

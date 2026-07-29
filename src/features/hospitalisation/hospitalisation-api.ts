@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type { AdmettrePayload, AjouterSuiviPayload, Lit, Sejour } from "./types";
 
 export function fetchLits(): Promise<{ data: Lit[] }> {
@@ -23,8 +24,11 @@ export function fetchSejour(id: number): Promise<{ data: Sejour }> {
   return apiFetch<{ data: Sejour }>(`/sejours/${id}`);
 }
 
-export function fetchPatientSejours(patientId: number): Promise<{ data: Sejour[] }> {
-  return apiFetch<{ data: Sejour[] }>(`/patients/${patientId}/sejours`);
+export function fetchPatientSejours(
+  patientId: number,
+  page = 1,
+): Promise<PaginatedResponse<Sejour>> {
+  return apiFetch<PaginatedResponse<Sejour>>(`/patients/${patientId}/sejours?page=${page}`);
 }
 
 export function transferer(sejourId: number, litId: number): Promise<{ data: Sejour }> {

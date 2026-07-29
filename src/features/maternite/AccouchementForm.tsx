@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createAccouchement } from "./maternite-api";
 import type { ModeAccouchement } from "./types";
 import { Button, Field, Input, Select, Textarea } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function AccouchementForm({
   grossesseId,
@@ -12,6 +13,7 @@ export function AccouchementForm({
   grossesseId: number;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<ModeAccouchement>("voie_basse");
   const [dateHeure, setDateHeure] = useState(new Date().toISOString().slice(0, 16));
   const [equipe, setEquipe] = useState("");
@@ -37,16 +39,16 @@ export function AccouchementForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex max-w-lg flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
     >
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Mode d'accouchement">
+        <Field label={t("maternite.accouchementForm.mode")}>
           <Select value={mode} onChange={(e) => setMode(e.target.value as ModeAccouchement)}>
-            <option value="voie_basse">Voie basse</option>
-            <option value="cesarienne">Césarienne</option>
+            <option value="voie_basse">{t("maternite.accouchementForm.voieBasse")}</option>
+            <option value="cesarienne">{t("maternite.accouchementForm.cesarienne")}</option>
           </Select>
         </Field>
-        <Field label="Date et heure">
+        <Field label={t("maternite.accouchementForm.dateHeure")}>
           <Input
             type="datetime-local"
             value={dateHeure}
@@ -54,23 +56,23 @@ export function AccouchementForm({
           />
         </Field>
       </div>
-      <Field label="Équipe présente">
+      <Field label={t("maternite.accouchementForm.equipe")}>
         <Input
-          placeholder="Équipe présente"
+          placeholder={t("maternite.accouchementForm.equipe")}
           value={equipe}
           onChange={(e) => setEquipe(e.target.value)}
         />
       </Field>
-      <Field label="Complications">
+      <Field label={t("maternite.accouchementForm.complications")}>
         <Textarea
-          placeholder="Complications éventuelles"
+          placeholder={t("maternite.accouchementForm.complicationsPlaceholder")}
           value={complications}
           onChange={(e) => setComplications(e.target.value)}
           rows={2}
         />
       </Field>
       <Button type="submit" disabled={isSubmitting} className="self-start">
-        Enregistrer l&apos;accouchement
+        {t("maternite.accouchementForm.submit")}
       </Button>
     </form>
   );

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { annulerFacture, encaisser, fetchFacture } from "./caisse-api";
 import { MODE_PAIEMENT_LABELS, type Facture, type ModePaiement } from "./types";
 import { Badge, Button, Card, Input, PageHeader, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const STATUT_TONES: Record<Facture["statut"], "primary" | "warning" | "success" | "neutral"> = {
   ouverte: "primary",
@@ -12,14 +13,8 @@ const STATUT_TONES: Record<Facture["statut"], "primary" | "warning" | "success" 
   annulee: "neutral",
 };
 
-const STATUT_LABELS: Record<Facture["statut"], string> = {
-  ouverte: "Ouverte",
-  partiellement_payee: "Partiellement payée",
-  payee: "Payée",
-  annulee: "Annulée",
-};
-
 export function FactureDetail({ id }: { id: number }) {
+  const { t } = useTranslation();
   const [facture, setFacture] = useState<Facture | null>(null);
   const [montant, setMontant] = useState("");
   const [modePaiement, setModePaiement] = useState<ModePaiement>("especes");
@@ -49,7 +44,7 @@ export function FactureDetail({ id }: { id: number }) {
       setReference("");
       load();
     } catch {
-      setError("Encaissement impossible (session de caisse ouverte requise, montant valide).");
+      setError(t("caisse.factureDetail.encaisserError"));
     } finally {
       setBusy(false);
     }
@@ -65,35 +60,41 @@ export function FactureDetail({ id }: { id: number }) {
     }
   }
 
-  if (!facture) return <p className="text-muted">Chargement...</p>;
+  if (!facture) return <p className="text-muted">{t("common.loading")}</p>;
 
   const active = facture.statut === "ouverte" || facture.statut === "partiellement_payee";
 
   return (
-    <div className="flex flex-col gap-4 max-w-2xl">
+    <div className="flex flex-col gap-4">
       <PageHeader
-        title={`Facture #${facture.id} - ${facture.patient.prenom} ${facture.patient.nom}`}
-        description={`Dossier n° ${facture.patient.numero_dossier}`}
-        actions={<Badge tone={STATUT_TONES[facture.statut]}>{STATUT_LABELS[facture.statut]}</Badge>}
+        title={t("caisse.factureDetail.title", {
+          id: facture.id,
+          prenom: facture.patient.prenom,
+          nom: facture.patient.nom,
+        })}
+        description={t("caisse.factureDetail.description", {
+          numero: facture.patient.numero_dossier,
+        })}
+        actions={<Badge tone={STATUT_TONES[facture.statut]}>{t(`caisse.factureStatut.${facture.statut}`)}</Badge>}
       />
 
       <Card className="p-0 overflow-hidden">
-        <table className="w-full text-sm border-collapse">
+        <table className="table">
           <thead>
-            <tr className="text-left border-b border-border bg-primary-light/40">
-              <th className="py-2 px-4 font-medium text-muted">Désignation</th>
-              <th className="py-2 px-4 font-medium text-muted">Qté</th>
-              <th className="py-2 px-4 font-medium text-muted">P.U.</th>
-              <th className="py-2 px-4 font-medium text-muted">Montant</th>
+            <tr>
+              <th>{t("caisse.factureDetail.designation")}</th>
+              <th>{t("caisse.factureDetail.quantite")}</th>
+              <th>{t("caisse.factureDetail.prixUnitaire")}</th>
+              <th>{t("caisse.factureDetail.montant")}</th>
             </tr>
           </thead>
           <tbody>
             {facture.lignes.map((l) => (
-              <tr key={l.id} className="border-b border-border last:border-0">
-                <td className="py-2 px-4">{l.designation}</td>
-                <td className="py-2 px-4">{l.quantite}</td>
-                <td className="py-2 px-4">{l.prix_unitaire}</td>
-                <td className="py-2 px-4">{l.montant}</td>
+              <tr key={l.id}>
+                <td>{l.designation}</td>
+                <td>{l.quantite}</td>
+                <td>{l.prix_unitaire}</td>
+                <td>{l.montant}</td>
               </tr>
             ))}
           </tbody>
@@ -102,49 +103,55 @@ export function FactureDetail({ id }: { id: number }) {
 
       <Card className="flex flex-col gap-1.5 max-w-xs text-sm">
         <div className="flex justify-between">
-          <span>Total</span>
+          <span>{t("caisse.factureDetail.total")}</span>
           <span className="font-semibold">{facture.montant_total} F CFA</span>
         </div>
         {facture.assurance_patient && (
           <>
             <div className="flex justify-between text-muted">
-              <span>Part {facture.assurance_patient.compagnie}</span>
+              <span>
+                {t("caisse.factureDetail.partCompagnie", {
+                  compagnie: facture.assurance_patient.compagnie,
+                })}
+              </span>
               <span>{facture.montant_part_assurance} F CFA</span>
             </div>
             <div className="flex justify-between text-muted">
-              <span>Part patient</span>
+              <span>{t("caisse.factureDetail.partPatient")}</span>
               <span>{facture.montant_part_patient} F CFA</span>
             </div>
           </>
         )}
         <div className="flex justify-between">
-          <span>Payé (patient)</span>
+          <span>{t("caisse.factureDetail.paye")}</span>
           <span>{facture.montant_paye} F CFA</span>
         </div>
         <div className="flex justify-between">
-          <span>Solde patient</span>
+          <span>{t("caisse.factureDetail.solde")}</span>
           <span className="font-semibold">{facture.solde} F CFA</span>
         </div>
       </Card>
 
       <div>
-        <h2 className="font-semibold mb-2 text-foreground">Encaissements</h2>
+        <h2 className="font-semibold mb-2 text-foreground">
+          {t("caisse.factureDetail.encaissementsTitle")}
+        </h2>
         <ul className="text-sm flex flex-col gap-2 mb-3">
           {facture.encaissements.map((e) => (
             <li key={e.id} className="rounded-xl border border-border bg-surface p-3">
-              {e.montant} F CFA - {MODE_PAIEMENT_LABELS[e.mode_paiement]}
+              {e.montant} F CFA - {t(`caisse.modePaiement.${e.mode_paiement}`)}
               {e.caissier && ` (${e.caissier.name})`}
             </li>
           ))}
           {facture.encaissements.length === 0 && (
-            <li className="text-muted">Aucun encaissement.</li>
+            <li className="text-muted">{t("caisse.factureDetail.noEncaissements")}</li>
           )}
         </ul>
 
         {active && (
           <Card className="flex items-center gap-2">
             <Input
-              placeholder="Montant"
+              placeholder={t("caisse.factureDetail.montantPlaceholder")}
               value={montant}
               onChange={(e) => setMontant(e.target.value)}
               className="w-32"
@@ -154,20 +161,20 @@ export function FactureDetail({ id }: { id: number }) {
               onChange={(e) => setModePaiement(e.target.value as ModePaiement)}
               className="max-w-[10rem]"
             >
-              {Object.entries(MODE_PAIEMENT_LABELS).map(([value, label]) => (
+              {Object.keys(MODE_PAIEMENT_LABELS).map((value) => (
                 <option key={value} value={value}>
-                  {label}
+                  {t(`caisse.modePaiement.${value}`)}
                 </option>
               ))}
             </Select>
             <Input
-              placeholder="Référence"
+              placeholder={t("caisse.factureDetail.referencePlaceholder")}
               value={reference}
               onChange={(e) => setReference(e.target.value)}
               className="flex-1"
             />
             <Button onClick={handleEncaisser} disabled={busy}>
-              Encaisser
+              {t("caisse.factureDetail.encaisser")}
             </Button>
           </Card>
         )}
@@ -178,7 +185,7 @@ export function FactureDetail({ id }: { id: number }) {
 
       {facture.statut === "ouverte" && (
         <Button variant="ghost" onClick={handleAnnuler} disabled={busy} className="self-start text-danger hover:bg-danger-light">
-          Annuler la facture
+          {t("caisse.factureDetail.annulerFacture")}
         </Button>
       )}
     </div>
