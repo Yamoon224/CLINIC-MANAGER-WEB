@@ -6,6 +6,7 @@ import { fetchPrisesEnCharge } from "@/features/assurances/assurances-api";
 import type { PriseEnCharge } from "@/features/assurances/types";
 import { createFacture, fetchFacturables } from "./caisse-api";
 import type { Facturable, LigneInput } from "./types";
+import { Button, Card, Input, Select } from "@/components/ui";
 
 export function FacturationAction({ patientId }: { patientId: number }) {
   const router = useRouter();
@@ -70,7 +71,7 @@ export function FacturationAction({ patientId }: { patientId: number }) {
   }
 
   return (
-    <div className="border rounded p-4 flex flex-col gap-2 max-w-lg">
+    <Card className="flex flex-col gap-3 max-w-lg">
       <span className="font-semibold text-sm">Facturer</span>
 
       <ul className="flex flex-col gap-1 text-sm">
@@ -83,6 +84,7 @@ export function FacturationAction({ patientId }: { patientId: number }) {
                   type="checkbox"
                   checked={selected.has(key)}
                   onChange={() => toggle(key)}
+                  className="accent-primary"
                 />
                 {f.designation} - {f.prix_unitaire} F CFA × {f.quantite}
               </label>
@@ -90,31 +92,27 @@ export function FacturationAction({ patientId }: { patientId: number }) {
           );
         })}
         {facturables.length === 0 && (
-          <li className="text-gray-500">Aucune prestation en attente de facturation.</li>
+          <li className="text-muted">Aucune prestation en attente de facturation.</li>
         )}
       </ul>
 
-      <div className="flex items-center gap-2 border-t pt-2">
-        <input
+      <div className="flex items-center gap-2 border-t border-border pt-3">
+        <Input
           placeholder="Ligne libre (ex. Consultation)"
           value={designationLibre}
           onChange={(e) => setDesignationLibre(e.target.value)}
-          className="border rounded px-3 py-2 flex-1"
+          className="flex-1"
         />
-        <input
+        <Input
           placeholder="Prix"
           value={prixLibre}
           onChange={(e) => setPrixLibre(e.target.value)}
-          className="border rounded px-3 py-2 w-28"
+          className="w-28"
         />
       </div>
 
       {prisesEnCharge.length > 0 && (
-        <select
-          value={priseEnChargeId}
-          onChange={(e) => setPriseEnChargeId(e.target.value)}
-          className="border rounded px-3 py-2"
-        >
+        <Select value={priseEnChargeId} onChange={(e) => setPriseEnChargeId(e.target.value)}>
           <option value="">Sans prise en charge</option>
           {prisesEnCharge.map((p) => (
             <option key={p.id} value={p.id}>
@@ -122,18 +120,16 @@ export function FacturationAction({ patientId }: { patientId: number }) {
               {p.montant_plafond ? ` (plafond ${p.montant_plafond} F CFA)` : ""}
             </option>
           ))}
-        </select>
+        </Select>
       )}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+      )}
 
-      <button
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-        className="bg-blue-600 text-white rounded px-3 py-2 self-start disabled:opacity-50"
-      >
+      <Button onClick={handleSubmit} disabled={isSubmitting} className="self-start">
         Créer la facture
-      </button>
-    </div>
+      </Button>
+    </Card>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Badge, Card, PageHeader } from "@/components/ui";
 import { callTicket, completeTicket, fetchQueue } from "./queue-api";
 import { SERVICE_LABELS, SERVICES, type Service, type Ticket } from "./types";
 
@@ -9,6 +10,13 @@ const STATUS_LABELS: Record<Ticket["statut"], string> = {
   appele: "Appelé",
   traite: "Traité",
   annule: "Annulé",
+};
+
+const STATUS_TONE: Record<Ticket["statut"], "primary" | "success" | "warning" | "danger"> = {
+  en_attente: "warning",
+  appele: "primary",
+  traite: "success",
+  annule: "danger",
 };
 
 export function QueueBoard() {
@@ -48,10 +56,16 @@ export function QueueBoard() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2 text-sm">
+      <PageHeader title="File d'attente" />
+
+      <div className="flex items-center gap-2 text-sm flex-wrap">
         <button
           onClick={() => setService("")}
-          className={`px-3 py-1 rounded border ${service === "" ? "bg-blue-600 text-white" : ""}`}
+          className={`rounded-full px-3 py-1.5 border transition-colors ${
+            service === ""
+              ? "border-primary bg-primary text-white"
+              : "border-border bg-surface hover:bg-primary-light/60"
+          }`}
         >
           Tous
         </button>
@@ -59,60 +73,72 @@ export function QueueBoard() {
           <button
             key={s}
             onClick={() => setService(s)}
-            className={`px-3 py-1 rounded border ${service === s ? "bg-blue-600 text-white" : ""}`}
+            className={`rounded-full px-3 py-1.5 border transition-colors ${
+              service === s
+                ? "border-primary bg-primary text-white"
+                : "border-border bg-surface hover:bg-primary-light/60"
+            }`}
           >
             {SERVICE_LABELS[s]}
           </button>
         ))}
       </div>
 
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="text-left border-b">
-            <th className="py-2 pr-4">Ticket</th>
-            <th className="py-2 pr-4">Service</th>
-            <th className="py-2 pr-4">Patient</th>
-            <th className="py-2 pr-4">Statut</th>
-            <th className="py-2 pr-4"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {tickets.map((ticket) => (
-            <tr key={ticket.id} className="border-b">
-              <td className="py-2 pr-4 font-semibold">{ticket.label}</td>
-              <td className="py-2 pr-4">{SERVICE_LABELS[ticket.service]}</td>
-              <td className="py-2 pr-4">
-                {ticket.patient.prenom} {ticket.patient.nom}
-              </td>
-              <td className="py-2 pr-4">{STATUS_LABELS[ticket.statut]}</td>
-              <td className="py-2 pr-4 flex gap-2">
-                {ticket.statut === "en_attente" && (
-                  <button
-                    onClick={() => handleCall(ticket)}
-                    disabled={busyId === ticket.id}
-                    className="underline disabled:opacity-50"
-                  >
-                    Appeler
-                  </button>
-                )}
-                {ticket.statut === "appele" && (
-                  <button
-                    onClick={() => handleComplete(ticket)}
-                    disabled={busyId === ticket.id}
-                    className="underline disabled:opacity-50"
-                  >
-                    Marquer traité
-                  </button>
-                )}
-              </td>
+      <Card className="p-0 overflow-hidden">
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr className="text-left border-b border-border bg-primary-light/40">
+              <th className="py-2.5 px-4 font-semibold text-foreground/90">Ticket</th>
+              <th className="py-2.5 px-4 font-semibold text-foreground/90">Service</th>
+              <th className="py-2.5 px-4 font-semibold text-foreground/90">Patient</th>
+              <th className="py-2.5 px-4 font-semibold text-foreground/90">Statut</th>
+              <th className="py-2.5 px-4"></th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {tickets.map((ticket) => (
+              <tr key={ticket.id} className="border-b border-border last:border-0 hover:bg-primary-light/40">
+                <td className="py-2.5 px-4 font-semibold">{ticket.label}</td>
+                <td className="py-2.5 px-4">{SERVICE_LABELS[ticket.service]}</td>
+                <td className="py-2.5 px-4">
+                  {ticket.patient.prenom} {ticket.patient.nom}
+                </td>
+                <td className="py-2.5 px-4">
+                  <Badge tone={STATUS_TONE[ticket.statut]}>
+                    {STATUS_LABELS[ticket.statut]}
+                  </Badge>
+                </td>
+                <td className="py-2.5 px-4">
+                  <div className="flex gap-2">
+                    {ticket.statut === "en_attente" && (
+                      <button
+                        onClick={() => handleCall(ticket)}
+                        disabled={busyId === ticket.id}
+                        className="text-primary hover:underline disabled:opacity-50"
+                      >
+                        Appeler
+                      </button>
+                    )}
+                    {ticket.statut === "appele" && (
+                      <button
+                        onClick={() => handleComplete(ticket)}
+                        disabled={busyId === ticket.id}
+                        className="text-primary hover:underline disabled:opacity-50"
+                      >
+                        Marquer traité
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      {tickets.length === 0 && (
-        <p className="text-sm text-gray-500">File d&apos;attente vide.</p>
-      )}
+        {tickets.length === 0 && (
+          <p className="text-sm text-muted p-4">File d&apos;attente vide.</p>
+        )}
+      </Card>
     </div>
   );
 }

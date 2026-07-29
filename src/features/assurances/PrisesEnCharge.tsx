@@ -3,11 +3,18 @@
 import { useEffect, useState } from "react";
 import { fetchPrisesEnCharge, traiterPriseEnCharge } from "./assurances-api";
 import type { PriseEnCharge, PriseEnChargeStatut } from "./types";
+import { Badge, Button, Select } from "@/components/ui";
 
 const STATUT_LABELS: Record<PriseEnChargeStatut, string> = {
   en_attente: "En attente",
   approuvee: "Approuvée",
   refusee: "Refusée",
+};
+
+const STATUT_TONES: Record<PriseEnChargeStatut, "warning" | "success" | "danger"> = {
+  en_attente: "warning",
+  approuvee: "success",
+  refusee: "danger",
 };
 
 export function PrisesEnCharge() {
@@ -35,10 +42,10 @@ export function PrisesEnCharge() {
 
   return (
     <div className="flex flex-col gap-3 max-w-2xl">
-      <select
+      <Select
         value={statut}
         onChange={(e) => setStatut(e.target.value as PriseEnChargeStatut | "")}
-        className="border rounded px-3 py-2 w-56"
+        className="w-56"
       >
         <option value="">Tous statuts</option>
         {Object.entries(STATUT_LABELS).map(([value, label]) => (
@@ -46,45 +53,49 @@ export function PrisesEnCharge() {
             {label}
           </option>
         ))}
-      </select>
+      </Select>
 
       <ul className="flex flex-col gap-2 text-sm">
         {prises.map((p) => (
-          <li key={p.id} className="border rounded p-2">
+          <li key={p.id} className="rounded-xl border border-border bg-surface p-3">
             <div className="flex items-center justify-between">
               <span className="font-medium">{p.numero}</span>
-              <span className="text-xs text-gray-500">{STATUT_LABELS[p.statut]}</span>
+              <Badge tone={STATUT_TONES[p.statut]}>{STATUT_LABELS[p.statut]}</Badge>
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-muted mt-1">
               {p.assurance_patient.patient &&
                 `${p.assurance_patient.patient.prenom} ${p.assurance_patient.patient.nom} - `}
               {p.assurance_patient.compagnie.nom}
             </div>
-            <div className="text-xs">
+            <div className="text-xs mt-1">
               {p.motif}
               {p.montant_plafond && ` (plafond ${p.montant_plafond} F CFA)`}
             </div>
             {p.statut === "en_attente" && (
               <div className="flex gap-2 mt-2">
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => handleTraiter(p.id, "approuvee")}
                   disabled={busyId === p.id}
-                  className="border rounded px-2 py-1 text-xs text-green-700 disabled:opacity-50"
+                  className="text-success hover:bg-success-light"
                 >
                   Approuver
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => handleTraiter(p.id, "refusee")}
                   disabled={busyId === p.id}
-                  className="border rounded px-2 py-1 text-xs text-red-700 disabled:opacity-50"
+                  className="text-danger hover:bg-danger-light"
                 >
                   Refuser
-                </button>
+                </Button>
               </div>
             )}
           </li>
         ))}
-        {prises.length === 0 && <li className="text-gray-500">Aucune prise en charge.</li>}
+        {prises.length === 0 && <li className="text-muted">Aucune prise en charge.</li>}
       </ul>
     </div>
   );

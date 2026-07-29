@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createLot, fetchLots, fetchVaccins } from "./vaccinations-api";
 import type { LotVaccin, Vaccin } from "./types";
+import { Badge, Button, Card, Input, Select } from "@/components/ui";
 
 export function StockVaccins() {
   const [vaccins, setVaccins] = useState<Vaccin[]>([]);
@@ -44,10 +45,10 @@ export function StockVaccins() {
 
   return (
     <div className="flex flex-col gap-4">
-      <select
+      <Select
         value={selected}
         onChange={(e) => setSelected(e.target.value ? Number(e.target.value) : "")}
-        className="border rounded px-3 py-2 max-w-sm"
+        className="max-w-sm"
       >
         <option value="">Choisir un vaccin...</option>
         {vaccins.map((v) => (
@@ -55,71 +56,72 @@ export function StockVaccins() {
             {v.nom}
           </option>
         ))}
-      </select>
+      </Select>
 
       {selected && (
         <>
-          <table className="w-full text-sm border-collapse max-w-2xl">
-            <thead>
-              <tr className="text-left border-b">
-                <th className="py-2 pr-4">Lot</th>
-                <th className="py-2 pr-4">Péremption</th>
-                <th className="py-2 pr-4">Restant / Initial</th>
-                <th className="py-2 pr-4"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {lots.map((lot) => (
-                <tr key={lot.id} className="border-b">
-                  <td className="py-2 pr-4">{lot.numero_lot}</td>
-                  <td className="py-2 pr-4">{lot.date_peremption}</td>
-                  <td className="py-2 pr-4">
-                    {lot.quantite_restante} / {lot.quantite_initiale}
-                  </td>
-                  <td className="py-2 pr-4">
-                    {lot.est_perime && (
-                      <span className="text-red-600 font-medium">Périmé</span>
-                    )}
-                  </td>
+          <Card className="p-0 max-w-2xl overflow-hidden">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="text-left border-b border-border">
+                  <th className="py-2 px-4">Lot</th>
+                  <th className="py-2 px-4">Péremption</th>
+                  <th className="py-2 px-4">Restant / Initial</th>
+                  <th className="py-2 px-4"></th>
                 </tr>
-              ))}
-              {lots.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-2 text-gray-500">
-                    Aucun lot enregistré.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {lots.map((lot) => (
+                  <tr key={lot.id} className="border-b border-border last:border-0">
+                    <td className="py-2 px-4">{lot.numero_lot}</td>
+                    <td className="py-2 px-4">{lot.date_peremption}</td>
+                    <td className="py-2 px-4">
+                      {lot.quantite_restante} / {lot.quantite_initiale}
+                    </td>
+                    <td className="py-2 px-4">
+                      {lot.est_perime && <Badge tone="danger">Périmé</Badge>}
+                    </td>
+                  </tr>
+                ))}
+                {lots.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="py-2 px-4 text-muted">
+                      Aucun lot enregistré.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </Card>
 
-          <div className="border rounded p-3 flex items-center gap-2 max-w-2xl">
-            <input
+          <Card className="flex items-center gap-2 max-w-2xl p-3">
+            <Input
               placeholder="N° de lot"
               value={numeroLot}
               onChange={(e) => setNumeroLot(e.target.value)}
-              className="border rounded px-3 py-2 flex-1"
+              className="flex-1"
             />
-            <input
+            <Input
               type="date"
               value={datePeremption}
               onChange={(e) => setDatePeremption(e.target.value)}
-              className="border rounded px-3 py-2"
+              className="w-auto"
             />
-            <input
+            <Input
               placeholder="Quantité"
               value={quantite}
               onChange={(e) => setQuantite(e.target.value)}
-              className="border rounded px-3 py-2 w-28"
+              className="w-28"
             />
-            <button
+            <Button
+              variant="outline"
               onClick={handleCreateLot}
               disabled={isSubmitting}
-              className="border rounded px-3 py-2 whitespace-nowrap disabled:opacity-50"
+              className="whitespace-nowrap"
             >
               Réceptionner
-            </button>
-          </div>
+            </Button>
+          </Card>
         </>
       )}
     </div>

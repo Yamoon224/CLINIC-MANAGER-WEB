@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { cloturerSession, fetchSessionCourante, ouvrirSession } from "./caisse-api";
 import type { SessionCaisse } from "./types";
+import { Button, Card, Input } from "@/components/ui";
 
 export function SessionCaisseWidget() {
   const [session, setSession] = useState<SessionCaisse | null | undefined>(undefined);
@@ -49,54 +50,46 @@ export function SessionCaisseWidget() {
     return (
       <div className="flex flex-col gap-4 max-w-md">
         {dernierRapport && (
-          <div className="border rounded p-4 text-sm">
+          <Card className="text-sm">
             <p className="font-semibold">Rapport Z de la dernière session</p>
-            <p>Théorique : {dernierRapport.montant_theorique} F CFA</p>
+            <p className="mt-1">Théorique : {dernierRapport.montant_theorique} F CFA</p>
             <p>Compté : {dernierRapport.montant_cloture} F CFA</p>
-            <p className={Number(dernierRapport.ecart) !== 0 ? "text-red-600 font-semibold" : ""}>
+            <p className={Number(dernierRapport.ecart) !== 0 ? "text-danger font-semibold" : ""}>
               Écart : {dernierRapport.ecart} F CFA
             </p>
-          </div>
+          </Card>
         )}
-        <div className="border rounded p-4 flex items-center gap-2">
-          <input
+        <Card className="flex items-center gap-2">
+          <Input
             placeholder="Fonds de caisse initial"
             value={montantOuverture}
             onChange={(e) => setMontantOuverture(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
+            className="flex-1"
           />
-          <button
-            onClick={handleOuvrir}
-            disabled={busy}
-            className="bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-50"
-          >
+          <Button onClick={handleOuvrir} disabled={busy}>
             Ouvrir la session
-          </button>
-        </div>
+          </Button>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="border rounded p-4 flex flex-col gap-2 max-w-md">
+    <Card className="flex flex-col gap-3 max-w-md">
       <p className="text-sm">
         Session ouverte - fonds initial {session.montant_ouverture} F CFA
       </p>
       <div className="flex items-center gap-2">
-        <input
+        <Input
           placeholder="Montant compté en caisse"
           value={montantCloture}
           onChange={(e) => setMontantCloture(e.target.value)}
-          className="border rounded px-3 py-2 flex-1"
+          className="flex-1"
         />
-        <button
-          onClick={handleCloturer}
-          disabled={busy}
-          className="border rounded px-3 py-2 disabled:opacity-50"
-        >
+        <Button variant="outline" onClick={handleCloturer} disabled={busy}>
           Clôturer (rapport Z)
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }

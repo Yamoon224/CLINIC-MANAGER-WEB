@@ -3,6 +3,21 @@
 import { useCallback, useEffect, useState } from "react";
 import { annulerFacture, encaisser, fetchFacture } from "./caisse-api";
 import { MODE_PAIEMENT_LABELS, type Facture, type ModePaiement } from "./types";
+import { Badge, Button, Card, Input, PageHeader, Select } from "@/components/ui";
+
+const STATUT_TONES: Record<Facture["statut"], "primary" | "warning" | "success" | "neutral"> = {
+  ouverte: "primary",
+  partiellement_payee: "warning",
+  payee: "success",
+  annulee: "neutral",
+};
+
+const STATUT_LABELS: Record<Facture["statut"], string> = {
+  ouverte: "Ouverte",
+  partiellement_payee: "Partiellement payée",
+  payee: "Payée",
+  annulee: "Annulée",
+};
 
 export function FactureDetail({ id }: { id: number }) {
   const [facture, setFacture] = useState<Facture | null>(null);
@@ -50,124 +65,121 @@ export function FactureDetail({ id }: { id: number }) {
     }
   }
 
-  if (!facture) return <p className="text-gray-500">Chargement...</p>;
+  if (!facture) return <p className="text-muted">Chargement...</p>;
 
   const active = facture.statut === "ouverte" || facture.statut === "partiellement_payee";
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <div>
-        <h1 className="text-lg font-semibold">
-          Facture #{facture.id} - {facture.patient.prenom} {facture.patient.nom}
-        </h1>
-        <p className="text-sm text-gray-500">Dossier n° {facture.patient.numero_dossier}</p>
-      </div>
+      <PageHeader
+        title={`Facture #${facture.id} - ${facture.patient.prenom} ${facture.patient.nom}`}
+        description={`Dossier n° ${facture.patient.numero_dossier}`}
+        actions={<Badge tone={STATUT_TONES[facture.statut]}>{STATUT_LABELS[facture.statut]}</Badge>}
+      />
 
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="text-left border-b">
-            <th className="py-2 pr-4">Désignation</th>
-            <th className="py-2 pr-4">Qté</th>
-            <th className="py-2 pr-4">P.U.</th>
-            <th className="py-2 pr-4">Montant</th>
-          </tr>
-        </thead>
-        <tbody>
-          {facture.lignes.map((l) => (
-            <tr key={l.id} className="border-b">
-              <td className="py-2 pr-4">{l.designation}</td>
-              <td className="py-2 pr-4">{l.quantite}</td>
-              <td className="py-2 pr-4">{l.prix_unitaire}</td>
-              <td className="py-2 pr-4">{l.montant}</td>
+      <Card className="p-0 overflow-hidden">
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr className="text-left border-b border-border bg-primary-light/40">
+              <th className="py-2 px-4 font-medium text-muted">Désignation</th>
+              <th className="py-2 px-4 font-medium text-muted">Qté</th>
+              <th className="py-2 px-4 font-medium text-muted">P.U.</th>
+              <th className="py-2 px-4 font-medium text-muted">Montant</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {facture.lignes.map((l) => (
+              <tr key={l.id} className="border-b border-border last:border-0">
+                <td className="py-2 px-4">{l.designation}</td>
+                <td className="py-2 px-4">{l.quantite}</td>
+                <td className="py-2 px-4">{l.prix_unitaire}</td>
+                <td className="py-2 px-4">{l.montant}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
 
-      <div className="flex justify-between text-sm max-w-xs">
-        <span>Total</span>
-        <span className="font-semibold">{facture.montant_total} F CFA</span>
-      </div>
-      {facture.assurance_patient && (
-        <>
-          <div className="flex justify-between text-sm max-w-xs text-gray-600">
-            <span>Part {facture.assurance_patient.compagnie}</span>
-            <span>{facture.montant_part_assurance} F CFA</span>
-          </div>
-          <div className="flex justify-between text-sm max-w-xs text-gray-600">
-            <span>Part patient</span>
-            <span>{facture.montant_part_patient} F CFA</span>
-          </div>
-        </>
-      )}
-      <div className="flex justify-between text-sm max-w-xs">
-        <span>Payé (patient)</span>
-        <span>{facture.montant_paye} F CFA</span>
-      </div>
-      <div className="flex justify-between text-sm max-w-xs">
-        <span>Solde patient</span>
-        <span className="font-semibold">{facture.solde} F CFA</span>
-      </div>
+      <Card className="flex flex-col gap-1.5 max-w-xs text-sm">
+        <div className="flex justify-between">
+          <span>Total</span>
+          <span className="font-semibold">{facture.montant_total} F CFA</span>
+        </div>
+        {facture.assurance_patient && (
+          <>
+            <div className="flex justify-between text-muted">
+              <span>Part {facture.assurance_patient.compagnie}</span>
+              <span>{facture.montant_part_assurance} F CFA</span>
+            </div>
+            <div className="flex justify-between text-muted">
+              <span>Part patient</span>
+              <span>{facture.montant_part_patient} F CFA</span>
+            </div>
+          </>
+        )}
+        <div className="flex justify-between">
+          <span>Payé (patient)</span>
+          <span>{facture.montant_paye} F CFA</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Solde patient</span>
+          <span className="font-semibold">{facture.solde} F CFA</span>
+        </div>
+      </Card>
 
       <div>
-        <h2 className="font-semibold mb-2">Encaissements</h2>
-        <ul className="text-sm flex flex-col gap-1 mb-2">
+        <h2 className="font-semibold mb-2 text-foreground">Encaissements</h2>
+        <ul className="text-sm flex flex-col gap-2 mb-3">
           {facture.encaissements.map((e) => (
-            <li key={e.id} className="border rounded p-2">
+            <li key={e.id} className="rounded-xl border border-border bg-surface p-3">
               {e.montant} F CFA - {MODE_PAIEMENT_LABELS[e.mode_paiement]}
               {e.caissier && ` (${e.caissier.name})`}
             </li>
           ))}
           {facture.encaissements.length === 0 && (
-            <li className="text-gray-500">Aucun encaissement.</li>
+            <li className="text-muted">Aucun encaissement.</li>
           )}
         </ul>
 
         {active && (
-          <div className="border rounded p-3 flex items-center gap-2">
-            <input
+          <Card className="flex items-center gap-2">
+            <Input
               placeholder="Montant"
               value={montant}
               onChange={(e) => setMontant(e.target.value)}
-              className="border rounded px-3 py-2 w-32"
+              className="w-32"
             />
-            <select
+            <Select
               value={modePaiement}
               onChange={(e) => setModePaiement(e.target.value as ModePaiement)}
-              className="border rounded px-3 py-2"
+              className="max-w-[10rem]"
             >
               {Object.entries(MODE_PAIEMENT_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>
               ))}
-            </select>
-            <input
+            </Select>
+            <Input
               placeholder="Référence"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
-              className="border rounded px-3 py-2 flex-1"
+              className="flex-1"
             />
-            <button
-              onClick={handleEncaisser}
-              disabled={busy}
-              className="bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-50"
-            >
+            <Button onClick={handleEncaisser} disabled={busy}>
               Encaisser
-            </button>
-          </div>
+            </Button>
+          </Card>
         )}
-        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+        {error && (
+          <p className="mt-2 rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        )}
       </div>
 
       {facture.statut === "ouverte" && (
-        <button
-          onClick={handleAnnuler}
-          disabled={busy}
-          className="underline text-red-600 self-start disabled:opacity-50"
-        >
+        <Button variant="ghost" onClick={handleAnnuler} disabled={busy} className="self-start text-danger hover:bg-danger-light">
           Annuler la facture
-        </button>
+        </Button>
       )}
     </div>
   );

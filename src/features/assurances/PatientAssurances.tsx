@@ -8,6 +8,7 @@ import {
   fetchCompagnies,
 } from "./assurances-api";
 import type { AssurancePatient, CompagnieAssurance } from "./types";
+import { Badge, Button, Card, Input, Select } from "@/components/ui";
 
 export function PatientAssurances({ patientId }: { patientId: number }) {
   const [assurances, setAssurances] = useState<AssurancePatient[] | null>(null);
@@ -55,62 +56,55 @@ export function PatientAssurances({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold mb-2">Assurances / tiers payant</h2>
+      <h2 className="font-semibold mb-2 text-foreground">Assurances / tiers payant</h2>
       <ul className="flex flex-col gap-2 mb-3 text-sm">
         {assurances.map((a) => (
           <AssuranceRow key={a.id} assurance={a} onChanged={load} />
         ))}
         {assurances.length === 0 && (
-          <li className="text-gray-500">Aucune couverture enregistrée.</li>
+          <li className="text-muted">Aucune couverture enregistrée.</li>
         )}
       </ul>
 
-      <div className="border rounded p-3 flex flex-col gap-2 max-w-lg">
+      <Card className="flex flex-col gap-3 max-w-lg">
         <span className="text-sm font-medium">Ajouter une couverture</span>
         <div className="flex gap-2">
-          <select
-            value={compagnieId}
-            onChange={(e) => setCompagnieId(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
-          >
+          <Select value={compagnieId} onChange={(e) => setCompagnieId(e.target.value)} className="flex-1">
             <option value="">Compagnie…</option>
             {compagnies.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nom} ({c.taux_couverture_defaut}%)
               </option>
             ))}
-          </select>
-          <input
+          </Select>
+          <Input
             placeholder="N° adhérent"
             value={numeroAdherent}
             onChange={(e) => setNumeroAdherent(e.target.value)}
-            className="border rounded px-3 py-2 w-40"
+            className="w-40"
           />
         </div>
         <div className="flex gap-2">
-          <input
+          <Input
             type="date"
             value={dateDebut}
             onChange={(e) => setDateDebut(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
+            className="flex-1"
           />
-          <input
+          <Input
             type="date"
             value={dateFin}
             onChange={(e) => setDateFin(e.target.value)}
-            placeholder="Date de fin (optionnel)"
-            className="border rounded px-3 py-2 flex-1"
+            className="flex-1"
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          onClick={handleSubmit}
-          disabled={busy}
-          className="border rounded px-3 py-2 self-start disabled:opacity-50"
-        >
+        {error && (
+          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        )}
+        <Button onClick={handleSubmit} disabled={busy} className="self-start">
           Enregistrer
-        </button>
-      </div>
+        </Button>
+      </Card>
     </div>
   );
 }
@@ -145,53 +139,45 @@ function AssuranceRow({
   }
 
   return (
-    <li className="border rounded p-2">
+    <li className="rounded-xl border border-border bg-surface p-3">
       <div className="flex items-center justify-between">
         <span>
           {assurance.compagnie.nom} - {assurance.numero_adherent} ({assurance.taux_couverture}%)
         </span>
-        <span
-          className={
-            assurance.active
-              ? "text-green-700 text-xs font-medium"
-              : "text-gray-500 text-xs font-medium"
-          }
-        >
+        <Badge tone={assurance.active ? "success" : "neutral"}>
           {assurance.active ? "Active" : assurance.statut}
-        </span>
+        </Badge>
       </div>
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-muted mt-1">
         Du {assurance.date_debut} {assurance.date_fin ? `au ${assurance.date_fin}` : "(sans échéance)"}
       </div>
 
       {!showForm ? (
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setShowForm(true)}
-          className="text-xs underline text-blue-600 mt-1"
+          className="mt-2 px-0 text-primary"
         >
           Demander une prise en charge
-        </button>
+        </Button>
       ) : (
         <div className="flex gap-2 mt-2">
-          <input
+          <Input
             placeholder="Motif"
             value={motif}
             onChange={(e) => setMotif(e.target.value)}
-            className="border rounded px-2 py-1 flex-1 text-xs"
+            className="flex-1 text-xs"
           />
-          <input
+          <Input
             placeholder="Plafond (optionnel)"
             value={plafond}
             onChange={(e) => setPlafond(e.target.value)}
-            className="border rounded px-2 py-1 w-28 text-xs"
+            className="w-28 text-xs"
           />
-          <button
-            onClick={handleDemander}
-            disabled={busy}
-            className="border rounded px-2 py-1 text-xs disabled:opacity-50"
-          >
+          <Button size="sm" onClick={handleDemander} disabled={busy}>
             Envoyer
-          </button>
+          </Button>
         </div>
       )}
     </li>

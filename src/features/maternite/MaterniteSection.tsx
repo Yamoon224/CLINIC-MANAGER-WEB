@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createGrossesse, fetchGrossesses } from "./maternite-api";
 import type { Grossesse } from "./types";
+import { Badge, Button, Card, Input } from "@/components/ui";
 
 export function MaterniteSection({ patientId }: { patientId: number }) {
   const router = useRouter();
@@ -32,39 +33,35 @@ export function MaterniteSection({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold mb-2">Maternité</h2>
-      <ul className="flex flex-col gap-1 mb-3 text-sm">
+      <h2 className="mb-2 font-semibold text-foreground">Maternité</h2>
+      <div className="mb-3 flex flex-col gap-1 text-sm">
         {grossesses.map((g) => (
-          <li key={g.id}>
-            <Link href={`/grossesses/${g.id}`} className="text-blue-600 underline">
+          <div key={g.id} className="flex items-center gap-2">
+            <Link href={`/grossesses/${g.id}`} className="font-medium text-primary hover:underline">
               Grossesse {g.statut === "suivie" ? "en cours" : g.statut}
-              {g.a_risque && <span className="text-red-600"> - à risque</span>}
             </Link>
-            {g.terme && <span className="text-gray-500"> - terme prévu {g.terme}</span>}
-          </li>
+            {g.a_risque && <Badge tone="danger">À risque</Badge>}
+            {g.terme && <span className="text-muted">terme prévu {g.terme}</span>}
+          </div>
         ))}
         {grossesses.length === 0 && (
-          <li className="text-gray-500">Aucun dossier obstétrical.</li>
+          <p className="text-muted">Aucun dossier obstétrical.</p>
         )}
-      </ul>
+      </div>
 
       {!enCours && (
-        <div className="border rounded p-3 flex items-center gap-2 max-w-md">
-          <input
+        <Card className="flex max-w-md items-center gap-2">
+          <Input
             type="date"
             value={ddr}
             onChange={(e) => setDdr(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
+            className="flex-1"
             aria-label="Date des dernières règles"
           />
-          <button
-            onClick={handleCreate}
-            disabled={isCreating}
-            className="bg-blue-600 text-white rounded px-3 py-2 whitespace-nowrap disabled:opacity-50"
-          >
+          <Button onClick={handleCreate} disabled={isCreating} className="whitespace-nowrap">
             Ouvrir un dossier grossesse
-          </button>
-        </div>
+          </Button>
+        </Card>
       )}
     </div>
   );

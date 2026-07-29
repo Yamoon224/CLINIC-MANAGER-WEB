@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DemandeAnalysesAction } from "./DemandeAnalysesAction";
 import { fetchPatientDemandes } from "./laboratoire-api";
 import type { DemandeAnalyse } from "./types";
+import { Badge } from "@/components/ui";
 
 const STATUT_LABELS: Record<DemandeAnalyse["statut"], string> = {
   demandee: "Demandée",
@@ -28,16 +29,24 @@ export function PatientAnalyses({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold mb-2">Analyses de laboratoire</h2>
-      <ul className="flex flex-col gap-1 mb-3 text-sm">
+      <h2 className="font-semibold text-foreground mb-2">Analyses de laboratoire</h2>
+      <ul className="flex flex-col gap-2 mb-3 text-sm">
         {demandes.map((d) => (
-          <li key={d.id} className="border rounded p-2">
-            <div className="flex justify-between">
-              <span className="font-medium">{d.analyse_type.nom}</span>
-              <span className="text-gray-500">{STATUT_LABELS[d.statut]}</span>
+          <li key={d.id} className="rounded-lg border border-border p-2">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-foreground">{d.analyse_type.nom}</span>
+              <Badge tone="neutral">{STATUT_LABELS[d.statut]}</Badge>
             </div>
             {d.resultat_valeur && d.statut === "valide" && (
-              <p className={d.resultat_critique ? "text-red-700 font-bold" : d.resultat_anormal ? "text-orange-600" : ""}>
+              <p
+                className={`mt-1 ${
+                  d.resultat_critique
+                    ? "font-bold text-danger"
+                    : d.resultat_anormal
+                      ? "text-warning"
+                      : "text-muted"
+                }`}
+              >
                 Résultat : {d.resultat_valeur} {d.analyse_type.unite}
                 {d.resultat_critique && " ⚠ valeur critique"}
               </p>
@@ -45,7 +54,7 @@ export function PatientAnalyses({ patientId }: { patientId: number }) {
           </li>
         ))}
         {demandes.length === 0 && (
-          <li className="text-gray-500">Aucune analyse demandée.</li>
+          <li className="text-muted">Aucune analyse demandée.</li>
         )}
       </ul>
       <DemandeAnalysesAction patientId={patientId} onCreated={load} />

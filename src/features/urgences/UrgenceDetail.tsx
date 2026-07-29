@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Badge, Button, Card, Input, Select } from "@/components/ui";
 import {
   ajouterActe,
   enregistrerConstantes,
@@ -12,11 +13,34 @@ import {
 import {
   ISSUE_LABELS,
   NIVEAUX_TRIAGE,
-  NIVEAU_TRIAGE_COLORS,
   NIVEAU_TRIAGE_LABELS,
+  type AdmissionStatut,
   type AdmissionUrgence,
   type IssueUrgence,
+  type NiveauTriage,
 } from "./types";
+
+const STATUT_TONE: Record<AdmissionStatut, "primary" | "accent" | "success" | "warning" | "danger" | "neutral"> = {
+  admis: "primary",
+  trie: "accent",
+  observation: "warning",
+  sorti: "success",
+};
+
+const STATUT_LABELS: Record<AdmissionStatut, string> = {
+  admis: "Admis",
+  trie: "Trié",
+  observation: "En observation",
+  sorti: "Sorti",
+};
+
+const TRIAGE_SELECTED_CLASSES: Record<NiveauTriage, string> = {
+  reanimation: "bg-danger text-white",
+  tres_urgent: "bg-danger text-white",
+  urgent: "bg-warning text-white",
+  semi_urgent: "bg-primary text-white",
+  non_urgent: "bg-success text-white",
+};
 
 export function UrgenceDetail({ id }: { id: number }) {
   const [admission, setAdmission] = useState<AdmissionUrgence | null>(null);
@@ -103,103 +127,110 @@ export function UrgenceDetail({ id }: { id: number }) {
     }
   }
 
-  if (!admission) return <p className="text-gray-500">Chargement...</p>;
+  if (!admission) return <p className="text-muted">Chargement...</p>;
 
   const readOnly = admission.statut === "sorti";
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <div>
-        <h1 className="text-lg font-semibold">
-          Urgences - {admission.patient.prenom} {admission.patient.nom}
-        </h1>
-        <p className="text-sm text-gray-500">
-          Dossier n° {admission.patient.numero_dossier} · Statut : {admission.statut}
-        </p>
-      </div>
-
-      {admission.patient.allergies && (
-        <div className="border border-red-300 bg-red-50 rounded p-3 text-sm">
-          <span className="font-semibold text-red-700">⚠ Allergies : </span>
-          {admission.patient.allergies}
+      <Card>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">
+              Urgences - {admission.patient.prenom} {admission.patient.nom}
+            </h1>
+            <p className="text-sm text-muted">
+              Dossier n° {admission.patient.numero_dossier}
+            </p>
+          </div>
+          <Badge tone={STATUT_TONE[admission.statut]}>
+            {STATUT_LABELS[admission.statut]}
+          </Badge>
         </div>
-      )}
 
-      {readOnly && (
-        <div className="border border-green-300 bg-green-50 rounded p-3 text-sm text-green-800">
-          Sortie enregistrée : {admission.issue && ISSUE_LABELS[admission.issue]}
-        </div>
-      )}
+        {admission.patient.allergies && (
+          <div className="mt-4 rounded-lg border border-danger/30 bg-danger-light px-3 py-2 text-sm">
+            <span className="font-semibold text-danger">⚠ Allergies : </span>
+            {admission.patient.allergies}
+          </div>
+        )}
 
-      <div>
-        <h2 className="font-semibold mb-2">Triage</h2>
+        {readOnly && (
+          <div className="mt-4 rounded-lg border border-success/30 bg-success-light px-3 py-2 text-sm text-success">
+            Sortie enregistrée : {admission.issue && ISSUE_LABELS[admission.issue]}
+          </div>
+        )}
+      </Card>
+
+      <Card>
+        <h2 className="font-semibold text-foreground mb-3">Triage</h2>
         <div className="flex flex-wrap gap-2">
-          {NIVEAUX_TRIAGE.map((niveau) => (
-            <button
-              key={niveau}
-              disabled={busy || readOnly}
-              onClick={() => handleTrier(niveau)}
-              className={`px-3 py-2 rounded text-sm font-semibold disabled:opacity-50 ${
-                admission.niveau_triage === niveau
-                  ? NIVEAU_TRIAGE_COLORS[niveau]
-                  : "border"
-              }`}
-            >
-              {NIVEAU_TRIAGE_LABELS[niveau]}
-            </button>
-          ))}
+          {NIVEAUX_TRIAGE.map((niveau) => {
+            const selected = admission.niveau_triage === niveau;
+            return (
+              <button
+                key={niveau}
+                disabled={busy || readOnly}
+                onClick={() => handleTrier(niveau)}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors disabled:opacity-50 ${
+                  selected
+                    ? TRIAGE_SELECTED_CLASSES[niveau]
+                    : "border border-border bg-surface hover:bg-primary-light/60"
+                }`}
+              >
+                {NIVEAU_TRIAGE_LABELS[niveau]}
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </Card>
 
-      <div>
-        <h2 className="font-semibold mb-2">Constantes</h2>
+      <Card>
+        <h2 className="font-semibold text-foreground mb-3">Constantes</h2>
         <div className="grid grid-cols-4 gap-3">
-          <input
+          <Input
             placeholder="Température"
             disabled={readOnly}
             value={constantes.temperature}
             onChange={(e) => setConstantes((c) => ({ ...c, temperature: e.target.value }))}
-            className="border rounded px-3 py-2 disabled:bg-gray-100"
           />
-          <input
+          <Input
             placeholder="Tension"
             disabled={readOnly}
             value={constantes.tension}
             onChange={(e) => setConstantes((c) => ({ ...c, tension: e.target.value }))}
-            className="border rounded px-3 py-2 disabled:bg-gray-100"
           />
-          <input
+          <Input
             placeholder="Poids"
             disabled={readOnly}
             value={constantes.poids}
             onChange={(e) => setConstantes((c) => ({ ...c, poids: e.target.value }))}
-            className="border rounded px-3 py-2 disabled:bg-gray-100"
           />
-          <input
+          <Input
             placeholder="Pouls"
             disabled={readOnly}
             value={constantes.pouls}
             onChange={(e) => setConstantes((c) => ({ ...c, pouls: e.target.value }))}
-            className="border rounded px-3 py-2 disabled:bg-gray-100"
           />
         </div>
         {!readOnly && (
-          <button
+          <Button
+            variant="outline"
             onClick={handleSaveConstantes}
             disabled={busy}
-            className="border rounded px-3 py-2 mt-2 disabled:opacity-50"
+            className="mt-3"
           >
             Enregistrer les constantes
-          </button>
+          </Button>
         )}
-      </div>
+      </Card>
 
-      <div>
-        <h2 className="font-semibold mb-2">Gestes et traitements (traçabilité)</h2>
-        <ul className="flex flex-col gap-1 mb-2 text-sm">
+      <Card>
+        <h2 className="font-semibold text-foreground mb-3">Gestes et traitements (traçabilité)</h2>
+        <ul className="flex flex-col gap-1.5 mb-3 text-sm">
           {admission.actes.map((acte) => (
-            <li key={acte.id} className="border rounded p-2">
-              <span className="text-gray-500">
+            <li key={acte.id} className="rounded-lg border border-border px-3 py-2">
+              <span className="text-muted">
                 {acte.created_at &&
                   new Date(acte.created_at).toLocaleTimeString("fr-FR", {
                     hour: "2-digit",
@@ -210,59 +241,47 @@ export function UrgenceDetail({ id }: { id: number }) {
             </li>
           ))}
           {admission.actes.length === 0 && (
-            <li className="text-gray-500">Aucun acte enregistré.</li>
+            <li className="text-muted">Aucun acte enregistré.</li>
           )}
         </ul>
         {!readOnly && (
           <div className="flex gap-2">
-            <input
+            <Input
               placeholder="Ex. pose de voie veineuse, administration de..."
               value={acteDescription}
               onChange={(e) => setActeDescription(e.target.value)}
-              className="border rounded px-3 py-2 flex-1"
+              className="flex-1"
             />
-            <button
-              onClick={handleAddActe}
-              disabled={busy}
-              className="border rounded px-3 py-2 disabled:opacity-50"
-            >
+            <Button variant="outline" onClick={handleAddActe} disabled={busy}>
               Ajouter
-            </button>
+            </Button>
           </div>
         )}
-      </div>
+      </Card>
 
       {!readOnly && (
-        <div className="flex items-center gap-4 border-t pt-4">
+        <Card className="flex items-center gap-4 flex-wrap">
           {admission.statut !== "observation" && (
-            <button
-              onClick={handleObservation}
-              disabled={busy}
-              className="border rounded px-3 py-2 disabled:opacity-50"
-            >
+            <Button variant="outline" onClick={handleObservation} disabled={busy}>
               Mettre en observation
-            </button>
+            </Button>
           )}
 
-          <select
+          <Select
             value={issue}
             onChange={(e) => setIssue(e.target.value as IssueUrgence)}
-            className="border rounded px-3 py-2"
+            className="max-w-xs"
           >
             {Object.entries(ISSUE_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
               </option>
             ))}
-          </select>
-          <button
-            onClick={handleSortie}
-            disabled={busy}
-            className="bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-50"
-          >
+          </Select>
+          <Button onClick={handleSortie} disabled={busy}>
             Enregistrer la sortie
-          </button>
-        </div>
+          </Button>
+        </Card>
       )}
     </div>
   );

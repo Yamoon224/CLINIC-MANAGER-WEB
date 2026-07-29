@@ -9,6 +9,13 @@ import {
   type AuditEntry,
   type AuditEvent,
 } from "./types";
+import { Badge, Button, Card, Field, Input, Select } from "@/components/ui";
+
+const AUDIT_EVENT_TONE: Record<AuditEvent, "success" | "primary" | "danger"> = {
+  created: "success",
+  updated: "primary",
+  deleted: "danger",
+};
 
 export function Audit() {
   const [entries, setEntries] = useState<AuditEntry[]>([]);
@@ -49,7 +56,7 @@ export function Audit() {
 
   if (error) {
     return (
-      <p className="text-gray-500">
+      <p className="text-sm text-muted">
         Journal d&apos;audit réservé au profil administrateur.
       </p>
     );
@@ -57,134 +64,153 @@ export function Audit() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-2">
-        <select
-          value={subjectType}
-          onChange={(e) => {
-            setPage(1);
-            setSubjectType(e.target.value);
-          }}
-          className="border rounded px-3 py-2"
-        >
-          <option value="">Tous les objets</option>
-          {AUDIT_SUBJECT_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
-        <select
-          value={event}
-          onChange={(e) => {
-            setPage(1);
-            setEvent(e.target.value as AuditEvent | "");
-          }}
-          className="border rounded px-3 py-2"
-        >
-          <option value="">Toutes les actions</option>
-          {Object.entries(AUDIT_EVENT_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <select
-          value={causerId}
-          onChange={(e) => {
-            setPage(1);
-            setCauserId(e.target.value);
-          }}
-          className="border rounded px-3 py-2"
-        >
-          <option value="">Tous les auteurs</option>
-          {causers.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        <input
-          type="date"
-          value={dateDebut}
-          onChange={(e) => {
-            setPage(1);
-            setDateDebut(e.target.value);
-          }}
-          className="border rounded px-3 py-2"
-        />
-        <input
-          type="date"
-          value={dateFin}
-          onChange={(e) => {
-            setPage(1);
-            setDateFin(e.target.value);
-          }}
-          className="border rounded px-3 py-2"
-        />
-      </div>
+      <Card className="flex flex-wrap gap-3">
+        <Field label="Objet">
+          <Select
+            value={subjectType}
+            onChange={(e) => {
+              setPage(1);
+              setSubjectType(e.target.value);
+            }}
+            className="w-44"
+          >
+            <option value="">Tous les objets</option>
+            {AUDIT_SUBJECT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="Action">
+          <Select
+            value={event}
+            onChange={(e) => {
+              setPage(1);
+              setEvent(e.target.value as AuditEvent | "");
+            }}
+            className="w-44"
+          >
+            <option value="">Toutes les actions</option>
+            {Object.entries(AUDIT_EVENT_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="Auteur">
+          <Select
+            value={causerId}
+            onChange={(e) => {
+              setPage(1);
+              setCauserId(e.target.value);
+            }}
+            className="w-44"
+          >
+            <option value="">Tous les auteurs</option>
+            {causers.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="Du">
+          <Input
+            type="date"
+            value={dateDebut}
+            onChange={(e) => {
+              setPage(1);
+              setDateDebut(e.target.value);
+            }}
+          />
+        </Field>
+        <Field label="Au">
+          <Input
+            type="date"
+            value={dateFin}
+            onChange={(e) => {
+              setPage(1);
+              setDateFin(e.target.value);
+            }}
+          />
+        </Field>
+      </Card>
 
-      <ul className="flex flex-col gap-1 text-sm">
-        {entries.map((entry) => (
-          <li key={entry.id} className="border rounded p-2">
-            <button
-              onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
-              className="w-full flex items-center justify-between text-left"
-            >
-              <span>
-                <span className="text-gray-500">{entry.created_at?.replace("T", " ").slice(0, 16)}</span>
-                {" - "}
-                <span className="font-medium">{entry.causer?.name ?? "Système"}</span>
-                {" - "}
-                {entry.event ? AUDIT_EVENT_LABELS[entry.event] : entry.event}
-                {" "}
-                {entry.subject_type}
-                {entry.subject_id !== null && ` #${entry.subject_id}`}
-              </span>
-              <span className="text-xs text-blue-600 underline">
-                {expandedId === entry.id ? "Masquer" : "Détails"}
-              </span>
-            </button>
+      <Card className="p-0">
+        <ul className="divide-y divide-border">
+          {entries.map((entry) => (
+            <li key={entry.id} className="p-3">
+              <button
+                onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
+                className="flex w-full items-center justify-between gap-3 text-left"
+              >
+                <span className="flex flex-wrap items-center gap-2 text-sm">
+                  <span className="text-xs text-muted">
+                    {entry.created_at?.replace("T", " ").slice(0, 16)}
+                  </span>
+                  <span className="font-medium">{entry.causer?.name ?? "Système"}</span>
+                  {entry.event && (
+                    <Badge tone={AUDIT_EVENT_TONE[entry.event]}>
+                      {AUDIT_EVENT_LABELS[entry.event]}
+                    </Badge>
+                  )}
+                  <span className="text-muted">
+                    {entry.subject_type}
+                    {entry.subject_id !== null && ` #${entry.subject_id}`}
+                  </span>
+                </span>
+                <span className="whitespace-nowrap text-xs font-medium text-primary">
+                  {expandedId === entry.id ? "Masquer" : "Détails"}
+                </span>
+              </button>
 
-            {expandedId === entry.id && (
-              <div className="mt-2 grid grid-cols-2 gap-4 text-xs">
-                <div>
-                  <div className="font-semibold mb-1">Avant</div>
-                  <pre className="bg-gray-50 rounded p-2 overflow-x-auto">
-                    {entry.avant ? JSON.stringify(entry.avant, null, 2) : "-"}
-                  </pre>
+              {expandedId === entry.id && (
+                <div className="mt-3 grid grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <div className="mb-1 font-semibold text-foreground">Avant</div>
+                    <pre className="overflow-x-auto rounded-lg bg-primary-light/40 p-2">
+                      {entry.avant ? JSON.stringify(entry.avant, null, 2) : "-"}
+                    </pre>
+                  </div>
+                  <div>
+                    <div className="mb-1 font-semibold text-foreground">Après</div>
+                    <pre className="overflow-x-auto rounded-lg bg-primary-light/40 p-2">
+                      {entry.apres ? JSON.stringify(entry.apres, null, 2) : "-"}
+                    </pre>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-semibold mb-1">Après</div>
-                  <pre className="bg-gray-50 rounded p-2 overflow-x-auto">
-                    {entry.apres ? JSON.stringify(entry.apres, null, 2) : "-"}
-                  </pre>
-                </div>
-              </div>
-            )}
-          </li>
-        ))}
-        {entries.length === 0 && <li className="text-gray-500">Aucune activité.</li>}
-      </ul>
+              )}
+            </li>
+          ))}
+          {entries.length === 0 && (
+            <li className="p-3 text-sm text-muted">Aucune activité.</li>
+          )}
+        </ul>
+      </Card>
 
       {lastPage > 1 && (
-        <div className="flex items-center gap-2 text-sm">
-          <button
+        <div className="flex items-center gap-3 text-sm">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="border rounded px-2 py-1 disabled:opacity-50"
           >
             Précédent
-          </button>
-          <span>
+          </Button>
+          <span className="text-muted">
             Page {page} / {lastPage}
           </span>
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
             disabled={page >= lastPage}
-            className="border rounded px-2 py-1 disabled:opacity-50"
           >
             Suivant
-          </button>
+          </Button>
         </div>
       )}
     </div>

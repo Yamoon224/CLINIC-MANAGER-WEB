@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { addCpn } from "./maternite-api";
+import { Button, Field, Input, Textarea } from "@/components/ui";
 
 export function CpnForm({
   grossesseId,
@@ -45,63 +46,61 @@ export function CpnForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border rounded p-3 flex flex-col gap-2">
-      <div className="grid grid-cols-4 gap-2">
-        <input
-          type="date"
-          value={dateCpn}
-          onChange={(e) => setDateCpn(e.target.value)}
-          className="border rounded px-3 py-2"
-        />
-        <input
-          placeholder="Poids"
-          value={poids}
-          onChange={(e) => setPoids(e.target.value)}
-          className="border rounded px-3 py-2"
-        />
-        <input
-          placeholder="Tension"
-          value={tension}
-          onChange={(e) => setTension(e.target.value)}
-          className="border rounded px-3 py-2"
-        />
-        <input
-          placeholder="Hauteur utérine"
-          value={hauteurUterine}
-          onChange={(e) => setHauteurUterine(e.target.value)}
-          className="border rounded px-3 py-2"
-        />
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
+    >
+      <div className="grid grid-cols-4 gap-3">
+        <Field label="Date">
+          <Input type="date" value={dateCpn} onChange={(e) => setDateCpn(e.target.value)} />
+        </Field>
+        <Field label="Poids">
+          <Input placeholder="Poids" value={poids} onChange={(e) => setPoids(e.target.value)} />
+        </Field>
+        <Field label="Tension">
+          <Input
+            placeholder="Tension"
+            value={tension}
+            onChange={(e) => setTension(e.target.value)}
+          />
+        </Field>
+        <Field label="Hauteur utérine">
+          <Input
+            placeholder="Hauteur utérine"
+            value={hauteurUterine}
+            onChange={(e) => setHauteurUterine(e.target.value)}
+          />
+        </Field>
       </div>
-      <input
-        placeholder="Bruits du cœur fœtal"
-        value={bruitsCoeurFoetal}
-        onChange={(e) => setBruitsCoeurFoetal(e.target.value)}
-        className="border rounded px-3 py-2"
-      />
-      <label className="flex items-center gap-2 text-sm">
+      <Field label="Bruits du cœur fœtal">
+        <Input
+          placeholder="Bruits du cœur fœtal"
+          value={bruitsCoeurFoetal}
+          onChange={(e) => setBruitsCoeurFoetal(e.target.value)}
+        />
+      </Field>
+      <label className="flex items-center gap-2 text-sm text-foreground">
         <input
           type="checkbox"
           checked={risqueDetecte}
           onChange={(e) => setRisqueDetecte(e.target.checked)}
+          className="h-4 w-4 rounded border-border accent-primary"
         />
         Grossesse à risque détectée lors de cette CPN
       </label>
       {risqueDetecte && (
-        <textarea
-          placeholder="Détails du risque"
-          value={risqueDetails}
-          onChange={(e) => setRisqueDetails(e.target.value)}
-          className="border rounded px-3 py-2"
-          rows={2}
-        />
+        <Field label="Détails du risque">
+          <Textarea
+            placeholder="Détails du risque"
+            value={risqueDetails}
+            onChange={(e) => setRisqueDetails(e.target.value)}
+            rows={2}
+          />
+        </Field>
       )}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="border rounded px-3 py-2 self-start disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isSubmitting} className="self-start">
         Ajouter la CPN
-      </button>
+      </Button>
     </form>
   );
 }

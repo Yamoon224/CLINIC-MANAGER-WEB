@@ -2,12 +2,21 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { Badge, Card } from "@/components/ui";
 import { fetchFileAttente } from "./urgences-api";
 import {
-  NIVEAU_TRIAGE_COLORS,
   NIVEAU_TRIAGE_LABELS,
   type AdmissionUrgence,
+  type NiveauTriage,
 } from "./types";
+
+const TRIAGE_TONE: Record<NiveauTriage, "primary" | "accent" | "success" | "warning" | "danger"> = {
+  reanimation: "danger",
+  tres_urgent: "danger",
+  urgent: "warning",
+  semi_urgent: "primary",
+  non_urgent: "success",
+};
 
 export function UrgenceQueue() {
   const [admissions, setAdmissions] = useState<AdmissionUrgence[]>([]);
@@ -23,42 +32,36 @@ export function UrgenceQueue() {
   }, [reload]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {admissions.map((a) => (
-        <Link
-          key={a.id}
-          href={`/urgences/${a.id}`}
-          className="border rounded p-3 flex items-center justify-between hover:bg-gray-50"
-        >
-          <div className="flex items-center gap-3">
-            {a.niveau_triage ? (
-              <span
-                className={`text-xs font-semibold px-2 py-1 rounded ${NIVEAU_TRIAGE_COLORS[a.niveau_triage]}`}
-              >
-                {NIVEAU_TRIAGE_LABELS[a.niveau_triage]}
+        <Link key={a.id} href={`/urgences/${a.id}`}>
+          <Card className="flex items-center justify-between hover:bg-primary-light/40 transition-colors">
+            <div className="flex items-center gap-3">
+              {a.niveau_triage ? (
+                <Badge tone={TRIAGE_TONE[a.niveau_triage]}>
+                  {NIVEAU_TRIAGE_LABELS[a.niveau_triage]}
+                </Badge>
+              ) : (
+                <Badge tone="neutral">À trier</Badge>
+              )}
+              <span className="text-foreground">
+                {a.patient.prenom} {a.patient.nom}
               </span>
-            ) : (
-              <span className="text-xs font-semibold px-2 py-1 rounded bg-gray-300 text-black">
-                À trier
-              </span>
-            )}
-            <span>
-              {a.patient.prenom} {a.patient.nom}
+              <span className="text-sm text-muted">{a.patient.numero_dossier}</span>
+            </div>
+            <span className="text-sm text-muted">
+              {a.admitted_at &&
+                new Date(a.admitted_at).toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
             </span>
-            <span className="text-sm text-gray-500">{a.patient.numero_dossier}</span>
-          </div>
-          <span className="text-sm text-gray-500">
-            {a.admitted_at &&
-              new Date(a.admitted_at).toLocaleTimeString("fr-FR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-          </span>
+          </Card>
         </Link>
       ))}
 
       {admissions.length === 0 && (
-        <p className="text-sm text-gray-500">Aucun patient aux urgences actuellement.</p>
+        <p className="text-sm text-muted">Aucun patient aux urgences actuellement.</p>
       )}
     </div>
   );

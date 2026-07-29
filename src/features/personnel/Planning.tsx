@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { assignerPlanning, fetchEmployes, fetchPlanning, retirerPlanning } from "./personnel-api";
 import { CRENEAU_LABELS, type Creneau, type Employe, type Planning as PlanningEntry } from "./types";
+import { Badge, Button, Card, Field, Input, Select } from "@/components/ui";
 
 export function Planning() {
   const [entries, setEntries] = useState<PlanningEntry[]>([]);
@@ -51,75 +52,70 @@ export function Planning() {
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <div className="border rounded p-3 flex flex-col gap-2">
-        <div className="flex gap-2">
-          <select
-            value={employeId}
-            onChange={(e) => setEmployeId(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
-          >
-            <option value="">Employé…</option>
-            {employes.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.prenom} {e.nom}
-              </option>
-            ))}
-          </select>
-          <select
-            value={creneau}
-            onChange={(e) => setCreneau(e.target.value as Creneau)}
-            className="border rounded px-3 py-2"
-          >
-            {Object.entries(CRENEAU_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+      <Card className="flex flex-col gap-3">
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Employé">
+            <Select value={employeId} onChange={(e) => setEmployeId(e.target.value)}>
+              <option value="">Employé…</option>
+              {employes.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.prenom} {e.nom}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Créneau">
+            <Select value={creneau} onChange={(e) => setCreneau(e.target.value as Creneau)}>
+              {Object.entries(CRENEAU_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </Field>
         </div>
-        <div className="flex gap-2">
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
-          />
-          <input
-            placeholder="Service (optionnel)"
-            value={service}
-            onChange={(e) => setService(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
-          />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Date">
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </Field>
+          <Field label="Service">
+            <Input
+              placeholder="Service (optionnel)"
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+            />
+          </Field>
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          onClick={handleAssigner}
-          disabled={busy}
-          className="border rounded px-3 py-2 self-start disabled:opacity-50"
-        >
+        {error && (
+          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        )}
+        <Button onClick={handleAssigner} disabled={busy} className="self-start">
           Affecter au planning
-        </button>
-      </div>
+        </Button>
+      </Card>
 
-      <ul className="flex flex-col gap-1 text-sm">
+      <div className="flex flex-col gap-2">
         {entries.map((p) => (
-          <li key={p.id} className="border rounded p-2 flex items-center justify-between">
-            <span>
-              {p.date} - {CRENEAU_LABELS[p.creneau]}
-              {p.employe && ` - ${p.employe.prenom} ${p.employe.nom}`}
+          <Card key={p.id} className="flex items-center justify-between p-3">
+            <span className="flex items-center gap-2 text-sm">
+              {p.date}
+              <Badge tone="primary">{CRENEAU_LABELS[p.creneau]}</Badge>
+              {p.employe && `${p.employe.prenom} ${p.employe.nom}`}
               {p.service && ` (${p.service})`}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => handleRetirer(p.id)}
               disabled={busy}
-              className="text-xs underline text-red-600 disabled:opacity-50"
+              className="text-danger hover:bg-danger-light"
             >
               Retirer
-            </button>
-          </li>
+            </Button>
+          </Card>
         ))}
-        {entries.length === 0 && <li className="text-gray-500">Aucune affectation.</li>}
-      </ul>
+        {entries.length === 0 && <p className="text-sm text-muted">Aucune affectation.</p>}
+      </div>
     </div>
   );
 }

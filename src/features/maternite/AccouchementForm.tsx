@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createAccouchement } from "./maternite-api";
 import type { ModeAccouchement } from "./types";
+import { Button, Field, Input, Select, Textarea } from "@/components/ui";
 
 export function AccouchementForm({
   grossesseId,
@@ -34,43 +35,43 @@ export function AccouchementForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border rounded p-3 flex flex-col gap-2 max-w-lg">
-      <div className="grid grid-cols-2 gap-2">
-        <select
-          value={mode}
-          onChange={(e) => setMode(e.target.value as ModeAccouchement)}
-          className="border rounded px-3 py-2"
-        >
-          <option value="voie_basse">Voie basse</option>
-          <option value="cesarienne">Césarienne</option>
-        </select>
-        <input
-          type="datetime-local"
-          value={dateHeure}
-          onChange={(e) => setDateHeure(e.target.value)}
-          className="border rounded px-3 py-2"
-        />
+    <form
+      onSubmit={handleSubmit}
+      className="flex max-w-lg flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
+    >
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Mode d'accouchement">
+          <Select value={mode} onChange={(e) => setMode(e.target.value as ModeAccouchement)}>
+            <option value="voie_basse">Voie basse</option>
+            <option value="cesarienne">Césarienne</option>
+          </Select>
+        </Field>
+        <Field label="Date et heure">
+          <Input
+            type="datetime-local"
+            value={dateHeure}
+            onChange={(e) => setDateHeure(e.target.value)}
+          />
+        </Field>
       </div>
-      <input
-        placeholder="Équipe présente"
-        value={equipe}
-        onChange={(e) => setEquipe(e.target.value)}
-        className="border rounded px-3 py-2"
-      />
-      <textarea
-        placeholder="Complications éventuelles"
-        value={complications}
-        onChange={(e) => setComplications(e.target.value)}
-        className="border rounded px-3 py-2"
-        rows={2}
-      />
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="bg-blue-600 text-white rounded px-3 py-2 self-start disabled:opacity-50"
-      >
+      <Field label="Équipe présente">
+        <Input
+          placeholder="Équipe présente"
+          value={equipe}
+          onChange={(e) => setEquipe(e.target.value)}
+        />
+      </Field>
+      <Field label="Complications">
+        <Textarea
+          placeholder="Complications éventuelles"
+          value={complications}
+          onChange={(e) => setComplications(e.target.value)}
+          rows={2}
+        />
+      </Field>
+      <Button type="submit" disabled={isSubmitting} className="self-start">
         Enregistrer l&apos;accouchement
-      </button>
+      </Button>
     </form>
   );
 }

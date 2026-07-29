@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createDemandes, fetchAnalyseTypes } from "./laboratoire-api";
 import type { AnalyseType } from "./types";
+import { Button, Card } from "@/components/ui";
 
 export function DemandeAnalysesAction({
   patientId,
@@ -40,8 +41,8 @@ export function DemandeAnalysesAction({
   }
 
   return (
-    <div className="border rounded p-4 flex flex-col gap-2 max-w-md">
-      <span className="font-semibold text-sm">Demander des analyses</span>
+    <Card className="flex flex-col gap-2 max-w-md p-4">
+      <span className="font-semibold text-sm text-foreground">Demander des analyses</span>
       <div className="flex flex-col gap-1 max-h-40 overflow-y-auto text-sm">
         {analyseTypes.map((a) => (
           <label key={a.id} className="flex items-center gap-2">
@@ -58,14 +59,14 @@ export function DemandeAnalysesAction({
         <input type="checkbox" checked={urgente} onChange={(e) => setUrgente(e.target.checked)} />
         Urgent
       </label>
-      <button
+      <Button
         onClick={handleSubmit}
         disabled={isSubmitting || selected.length === 0}
-        className="bg-blue-600 text-white rounded px-3 py-2 self-start disabled:opacity-50"
+        className="self-start"
       >
         Envoyer au laboratoire
-      </button>
-      {confirmation && <p className="text-sm text-green-700">{confirmation}</p>}
-    </div>
+      </Button>
+      {confirmation && <p className="text-sm text-success">{confirmation}</p>}
+    </Card>
   );
 }

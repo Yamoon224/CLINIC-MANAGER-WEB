@@ -9,12 +9,20 @@ import {
   reglerBordereau,
 } from "./assurances-api";
 import type { BordereauAssurance, CompagnieAssurance } from "./types";
+import { Badge, Button, Card, Input, Select } from "@/components/ui";
 
 const STATUT_LABELS: Record<BordereauAssurance["statut"], string> = {
   brouillon: "Brouillon",
   envoye: "Envoyé",
   paye_partiel: "Payé partiellement",
   paye: "Payé",
+};
+
+const STATUT_TONES: Record<BordereauAssurance["statut"], "neutral" | "primary" | "warning" | "success"> = {
+  brouillon: "neutral",
+  envoye: "primary",
+  paye_partiel: "warning",
+  paye: "success",
 };
 
 export function Bordereaux() {
@@ -73,75 +81,61 @@ export function Bordereaux() {
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <div className="border rounded p-3 flex items-center gap-2">
-        <select
-          value={compagnieId}
-          onChange={(e) => setCompagnieId(e.target.value)}
-          className="border rounded px-3 py-2 flex-1"
-        >
+      <Card className="flex items-center gap-2">
+        <Select value={compagnieId} onChange={(e) => setCompagnieId(e.target.value)} className="flex-1">
           <option value="">Compagnie…</option>
           {compagnies.map((c) => (
             <option key={c.id} value={c.id}>
               {c.nom}
             </option>
           ))}
-        </select>
-        <button
-          onClick={handleCreer}
-          disabled={busy}
-          className="border rounded px-3 py-2 disabled:opacity-50"
-        >
+        </Select>
+        <Button variant="outline" onClick={handleCreer} disabled={busy}>
           Générer un bordereau
-        </button>
-      </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+        </Button>
+      </Card>
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+      )}
 
       <ul className="flex flex-col gap-2 text-sm">
         {bordereaux.map((b) => (
-          <li key={b.id} className="border rounded p-2">
+          <li key={b.id} className="rounded-xl border border-border bg-surface p-3">
             <div className="flex items-center justify-between">
               <span className="font-medium">
                 {b.numero} - {b.compagnie.nom}
               </span>
-              <span className="text-xs text-gray-500">{STATUT_LABELS[b.statut]}</span>
+              <Badge tone={STATUT_TONES[b.statut]}>{STATUT_LABELS[b.statut]}</Badge>
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-muted mt-1">
               {b.montant_regle} / {b.montant_total} F CFA réglés
               {b.nombre_factures !== null && ` - ${b.nombre_factures} facture(s)`}
             </div>
-            <div className="flex gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-2">
               {b.statut === "brouillon" && (
-                <button
-                  onClick={() => handleEnvoyer(b.id)}
-                  disabled={busy}
-                  className="border rounded px-2 py-1 text-xs disabled:opacity-50"
-                >
+                <Button variant="outline" size="sm" onClick={() => handleEnvoyer(b.id)} disabled={busy}>
                   Marquer envoyé
-                </button>
+                </Button>
               )}
               {(b.statut === "envoye" || b.statut === "paye_partiel") && (
                 <>
-                  <input
+                  <Input
                     placeholder="Montant réglé"
                     value={montantRegle[b.id] ?? ""}
                     onChange={(e) =>
                       setMontantRegle((m) => ({ ...m, [b.id]: e.target.value }))
                     }
-                    className="border rounded px-2 py-1 text-xs w-28"
+                    className="w-28 text-xs"
                   />
-                  <button
-                    onClick={() => handleRegler(b.id)}
-                    disabled={busy}
-                    className="border rounded px-2 py-1 text-xs disabled:opacity-50"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => handleRegler(b.id)} disabled={busy}>
                     Enregistrer un règlement
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
           </li>
         ))}
-        {bordereaux.length === 0 && <li className="text-gray-500">Aucun bordereau.</li>}
+        {bordereaux.length === 0 && <li className="text-muted">Aucun bordereau.</li>}
       </ul>
     </div>
   );

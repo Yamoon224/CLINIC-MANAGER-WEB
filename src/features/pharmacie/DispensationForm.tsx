@@ -8,6 +8,7 @@ import {
   fetchSubstitutions,
 } from "./pharmacie-api";
 import type { LotMedicament, Medicament } from "./types";
+import { Badge, Button, Card, Input, Select } from "@/components/ui";
 
 export function DispensationForm({
   patientId,
@@ -90,13 +91,12 @@ export function DispensationForm({
   }
 
   return (
-    <div className="border rounded p-4 flex flex-col gap-2 max-w-md">
-      <span className="font-semibold text-sm">Dispenser un médicament</span>
+    <Card className="flex flex-col gap-3 max-w-md p-4">
+      <span className="font-semibold text-sm text-foreground">Dispenser un médicament</span>
 
-      <select
+      <Select
         value={medicamentId}
         onChange={(e) => chooseMedicament(e.target.value ? Number(e.target.value) : "")}
-        className="border rounded px-3 py-2"
       >
         <option value="">Médicament...</option>
         {medicaments.map((m) => (
@@ -104,31 +104,31 @@ export function DispensationForm({
             {m.dci} {m.dosage} - {m.stock_disponible} en stock
           </option>
         ))}
-      </select>
+      </Select>
 
       {substitutions.length > 0 && (
-        <div className="text-sm border border-orange-300 bg-orange-50 rounded p-2">
-          <p className="font-medium">Rupture - substituts disponibles :</p>
-          <div className="flex flex-wrap gap-2 mt-1">
+        <div className="rounded-lg border border-warning/30 bg-warning-light p-2 text-sm">
+          <p className="font-medium text-foreground">Rupture - substituts disponibles :</p>
+          <div className="flex flex-wrap gap-2 mt-2">
             {substitutions.map((s) => (
-              <button
+              <Button
                 key={s.id}
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => chooseSubstitute(s.id)}
-                className="border rounded px-2 py-1 bg-white"
               >
                 {s.dci} ({s.stock_disponible})
-              </button>
+              </Button>
             ))}
           </div>
         </div>
       )}
 
       {lots.length > 0 && (
-        <select
+        <Select
           value={lotId}
           onChange={(e) => setLotId(e.target.value ? Number(e.target.value) : "")}
-          className="border rounded px-3 py-2"
         >
           <option value="">Lot...</option>
           {lots.map((l) => (
@@ -136,33 +136,35 @@ export function DispensationForm({
               {l.numero_lot} - exp. {l.date_peremption} ({l.quantite_restante} dispo.)
             </option>
           ))}
-        </select>
+        </Select>
       )}
 
-      <div className="flex items-center gap-2">
-        <input
+      <div className="flex items-center gap-3">
+        <Input
           type="number"
           min={1}
+          placeholder="Quantité"
           value={quantite}
           onChange={(e) => setQuantite(e.target.value)}
-          className="border rounded px-3 py-2 w-24"
+          className="w-24"
         />
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-sm text-foreground">
           <input type="checkbox" checked={urgente} onChange={(e) => setUrgente(e.target.checked)} />
           Urgent
         </label>
+        {urgente && <Badge tone="danger">Urgent</Badge>}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {confirmation && <p className="text-sm text-green-700">{confirmation}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
+      {confirmation && <p className="text-sm text-success">{confirmation}</p>}
 
-      <button
+      <Button
         onClick={handleSubmit}
         disabled={isSubmitting || !medicamentId || !lotId}
-        className="bg-blue-600 text-white rounded px-3 py-2 self-start disabled:opacity-50"
+        className="self-start"
       >
         Dispenser
-      </button>
-    </div>
+      </Button>
+    </Card>
   );
 }
