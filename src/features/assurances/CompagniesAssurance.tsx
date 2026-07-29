@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { createCompagnie, fetchCompagnies } from "./assurances-api";
 import type { CompagnieAssurance } from "./types";
 import { Button, Card, Field, Input } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function CompagniesAssurance() {
+  const { t } = useTranslation();
   const [compagnies, setCompagnies] = useState<CompagnieAssurance[]>([]);
   const [nom, setNom] = useState("");
   const [taux, setTaux] = useState("");
@@ -39,37 +41,37 @@ export function CompagniesAssurance() {
   }
 
   return (
-    <div className="flex flex-col gap-4 max-w-lg">
+    <div className="flex flex-col gap-4">
       <Card className="flex flex-col gap-3">
         <div className="flex gap-2">
           <div className="flex-1">
-            <Field label="Nom">
+            <Field label={t("assurances.compagnies.nom")}>
               <Input
-                placeholder="Nom de la compagnie"
+                placeholder={t("assurances.compagnies.nomPlaceholder")}
                 value={nom}
                 onChange={(e) => setNom(e.target.value)}
               />
             </Field>
           </div>
           <div className="w-40">
-            <Field label="Taux couverture %">
+            <Field label={t("assurances.compagnies.tauxCouverture")}>
               <Input
-                placeholder="Taux couverture % défaut"
+                placeholder={t("assurances.compagnies.tauxCouverturePlaceholder")}
                 value={taux}
                 onChange={(e) => setTaux(e.target.value)}
               />
             </Field>
           </div>
         </div>
-        <Field label="Téléphone">
+        <Field label={t("assurances.compagnies.telephone")}>
           <Input
-            placeholder="Téléphone contact"
+            placeholder={t("assurances.compagnies.telephonePlaceholder")}
             value={contactTelephone}
             onChange={(e) => setContactTelephone(e.target.value)}
           />
         </Field>
         <Button onClick={handleSubmit} disabled={busy} className="self-start">
-          Ajouter la compagnie
+          {t("assurances.compagnies.submit")}
         </Button>
       </Card>
 
@@ -86,7 +88,7 @@ export function CompagniesAssurance() {
             <span className="font-semibold">{c.taux_couverture_defaut}%</span>
           </li>
         ))}
-        {compagnies.length === 0 && <li className="text-muted">Aucune compagnie.</li>}
+        {compagnies.length === 0 && <li className="text-muted">{t("assurances.compagnies.empty")}</li>}
       </ul>
     </div>
   );

@@ -4,12 +4,7 @@ import { useEffect, useState } from "react";
 import { fetchPrisesEnCharge, traiterPriseEnCharge } from "./assurances-api";
 import type { PriseEnCharge, PriseEnChargeStatut } from "./types";
 import { Badge, Button, Select } from "@/components/ui";
-
-const STATUT_LABELS: Record<PriseEnChargeStatut, string> = {
-  en_attente: "En attente",
-  approuvee: "Approuvée",
-  refusee: "Refusée",
-};
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const STATUT_TONES: Record<PriseEnChargeStatut, "warning" | "success" | "danger"> = {
   en_attente: "warning",
@@ -18,6 +13,7 @@ const STATUT_TONES: Record<PriseEnChargeStatut, "warning" | "success" | "danger"
 };
 
 export function PrisesEnCharge() {
+  const { t } = useTranslation();
   const [statut, setStatut] = useState<PriseEnChargeStatut | "">("en_attente");
   const [prises, setPrises] = useState<PriseEnCharge[]>([]);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -47,10 +43,10 @@ export function PrisesEnCharge() {
         onChange={(e) => setStatut(e.target.value as PriseEnChargeStatut | "")}
         className="w-56"
       >
-        <option value="">Tous statuts</option>
-        {Object.entries(STATUT_LABELS).map(([value, label]) => (
+        <option value="">{t("assurances.prisesEnCharge.tousStatuts")}</option>
+        {(Object.keys(STATUT_TONES) as PriseEnChargeStatut[]).map((value) => (
           <option key={value} value={value}>
-            {label}
+            {t(`assurances.priseEnChargeStatut.${value}`)}
           </option>
         ))}
       </Select>
@@ -60,7 +56,9 @@ export function PrisesEnCharge() {
           <li key={p.id} className="rounded-xl border border-border bg-surface p-3">
             <div className="flex items-center justify-between">
               <span className="font-medium">{p.numero}</span>
-              <Badge tone={STATUT_TONES[p.statut]}>{STATUT_LABELS[p.statut]}</Badge>
+              <Badge tone={STATUT_TONES[p.statut]}>
+                {t(`assurances.priseEnChargeStatut.${p.statut}`)}
+              </Badge>
             </div>
             <div className="text-xs text-muted mt-1">
               {p.assurance_patient.patient &&
@@ -69,7 +67,8 @@ export function PrisesEnCharge() {
             </div>
             <div className="text-xs mt-1">
               {p.motif}
-              {p.montant_plafond && ` (plafond ${p.montant_plafond} F CFA)`}
+              {p.montant_plafond &&
+                t("assurances.prisesEnCharge.plafondSuffix", { montant: p.montant_plafond })}
             </div>
             {p.statut === "en_attente" && (
               <div className="flex gap-2 mt-2">
@@ -80,7 +79,7 @@ export function PrisesEnCharge() {
                   disabled={busyId === p.id}
                   className="text-success hover:bg-success-light"
                 >
-                  Approuver
+                  {t("assurances.prisesEnCharge.approuver")}
                 </Button>
                 <Button
                   variant="outline"
@@ -89,13 +88,13 @@ export function PrisesEnCharge() {
                   disabled={busyId === p.id}
                   className="text-danger hover:bg-danger-light"
                 >
-                  Refuser
+                  {t("assurances.prisesEnCharge.refuser")}
                 </Button>
               </div>
             )}
           </li>
         ))}
-        {prises.length === 0 && <li className="text-muted">Aucune prise en charge.</li>}
+        {prises.length === 0 && <li className="text-muted">{t("assurances.prisesEnCharge.empty")}</li>}
       </ul>
     </div>
   );

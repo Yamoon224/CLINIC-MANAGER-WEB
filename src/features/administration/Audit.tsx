@@ -154,8 +154,8 @@ export function Audit() {
           </thead>
           <tbody>
             {entries.map((entry) => (
-              <>
-                <tr key={entry.id}>
+              <Fragment key={entry.id}>
+                <tr>
                   <td className="whitespace-nowrap text-xs text-muted">
                     {entry.created_at?.replace("T", " ").slice(0, 16)}
                   </td>
@@ -204,7 +204,7 @@ export function Audit() {
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>

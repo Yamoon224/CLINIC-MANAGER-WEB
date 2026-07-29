@@ -9,14 +9,8 @@ import {
   reglerBordereau,
 } from "./assurances-api";
 import type { BordereauAssurance, CompagnieAssurance } from "./types";
-import { Badge, Button, Card, Input, Select } from "@/components/ui";
-
-const STATUT_LABELS: Record<BordereauAssurance["statut"], string> = {
-  brouillon: "Brouillon",
-  envoye: "Envoyé",
-  paye_partiel: "Payé partiellement",
-  paye: "Payé",
-};
+import { Badge, Button, Card, Input, Pagination, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const STATUT_TONES: Record<BordereauAssurance["statut"], "neutral" | "primary" | "warning" | "success"> = {
   brouillon: "neutral",
@@ -26,7 +20,10 @@ const STATUT_TONES: Record<BordereauAssurance["statut"], "neutral" | "primary" |
 };
 
 export function Bordereaux() {
+  const { t } = useTranslation();
   const [bordereaux, setBordereaux] = useState<BordereauAssurance[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [compagnies, setCompagnies] = useState<CompagnieAssurance[]>([]);
   const [compagnieId, setCompagnieId] = useState("");
   const [montantRegle, setMontantRegle] = useState<Record<number, string>>({});
@@ -34,11 +31,17 @@ export function Bordereaux() {
   const [busy, setBusy] = useState(false);
 
   function load() {
-    fetchBordereaux().then((res) => setBordereaux(res.data));
+    fetchBordereaux(page).then((res) => {
+      setBordereaux(res.data);
+      setTotalPages(res.meta.last_page);
+    });
   }
 
   useEffect(() => {
     load();
+  }, [page]);
+
+  useEffect(() => {
     fetchCompagnies().then((res) => setCompagnies(res.data));
   }, []);
 
@@ -50,7 +53,7 @@ export function Bordereaux() {
       await creerBordereau(Number(compagnieId));
       load();
     } catch {
-      setError("Aucune facture en attente de réclamation pour cette compagnie.");
+      setError(t("assurances.bordereaux.error"));
     } finally {
       setBusy(false);
     }
@@ -80,10 +83,10 @@ export function Bordereaux() {
   }
 
   return (
-    <div className="flex flex-col gap-4 max-w-2xl">
+    <div className="flex flex-col gap-4">
       <Card className="flex items-center gap-2">
         <Select value={compagnieId} onChange={(e) => setCompagnieId(e.target.value)} className="flex-1">
-          <option value="">Compagnie…</option>
+          <option value="">{t("assurances.bordereaux.compagniePlaceholder")}</option>
           {compagnies.map((c) => (
             <option key={c.id} value={c.id}>
               {c.nom}
@@ -91,52 +94,73 @@ export function Bordereaux() {
           ))}
         </Select>
         <Button variant="outline" onClick={handleCreer} disabled={busy}>
-          Générer un bordereau
+          {t("assurances.bordereaux.generer")}
         </Button>
       </Card>
       {error && (
         <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
 
-      <ul className="flex flex-col gap-2 text-sm">
-        {bordereaux.map((b) => (
-          <li key={b.id} className="rounded-xl border border-border bg-surface p-3">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">
-                {b.numero} - {b.compagnie.nom}
-              </span>
-              <Badge tone={STATUT_TONES[b.statut]}>{STATUT_LABELS[b.statut]}</Badge>
-            </div>
-            <div className="text-xs text-muted mt-1">
-              {b.montant_regle} / {b.montant_total} F CFA réglés
-              {b.nombre_factures !== null && ` - ${b.nombre_factures} facture(s)`}
-            </div>
-            <div className="flex items-center gap-2 mt-2">
-              {b.statut === "brouillon" && (
-                <Button variant="outline" size="sm" onClick={() => handleEnvoyer(b.id)} disabled={busy}>
-                  Marquer envoyé
-                </Button>
-              )}
-              {(b.statut === "envoye" || b.statut === "paye_partiel") && (
-                <>
-                  <Input
-                    placeholder="Montant réglé"
-                    value={montantRegle[b.id] ?? ""}
-                    onChange={(e) =>
-                      setMontantRegle((m) => ({ ...m, [b.id]: e.target.value }))
-                    }
-                    className="w-28 text-xs"
-                  />
-                  <Button variant="outline" size="sm" onClick={() => handleRegler(b.id)} disabled={busy}>
-                    Enregistrer un règlement
-                  </Button>
-                </>
-              )}
-            </div>
-          </li>
-        ))}
-        {bordereaux.length === 0 && <li className="text-muted">Aucun bordereau.</li>}
-      </ul>
+      <Card className="p-0 overflow-hidden">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>{t("assurances.bordereaux.numero")}</th>
+              <th>{t("assurances.bordereaux.compagnie")}</th>
+              <th>{t("common.status")}</th>
+              <th>{t("assurances.bordereaux.reglement")}</th>
+              <th>{t("common.actions")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bordereaux.map((b) => (
+              <tr key={b.id}>
+                <td>{b.numero}</td>
+                <td>{b.compagnie.nom}</td>
+                <td>
+                  <Badge tone={STATUT_TONES[b.statut]}>
+                    {t(`assurances.bordereauStatut.${b.statut}`)}
+                  </Badge>
+                </td>
+                <td>
+                  {t("assurances.bordereaux.reglementProgress", {
+                    regle: b.montant_regle,
+                    total: b.montant_total,
+                  })}
+                  {b.nombre_factures !== null &&
+                    ` - ${t("assurances.bordereaux.facturesCount", { count: b.nombre_factures })}`}
+                </td>
+                <td>
+                  {b.statut === "brouillon" && (
+                    <Button variant="outline" size="sm" onClick={() => handleEnvoyer(b.id)} disabled={busy}>
+                      {t("assurances.bordereaux.marquerEnvoye")}
+                    </Button>
+                  )}
+                  {(b.statut === "envoye" || b.statut === "paye_partiel") && (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder={t("assurances.bordereaux.montantReglePlaceholder")}
+                        value={montantRegle[b.id] ?? ""}
+                        onChange={(e) =>
+                          setMontantRegle((m) => ({ ...m, [b.id]: e.target.value }))
+                        }
+                        className="w-28 text-xs"
+                      />
+                      <Button variant="outline" size="sm" onClick={() => handleRegler(b.id)} disabled={busy}>
+                        {t("assurances.bordereaux.enregistrerReglement")}
+                      </Button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {bordereaux.length === 0 && (
+          <p className="text-sm text-muted p-4">{t("assurances.bordereaux.empty")}</p>
+        )}
+      </Card>
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
