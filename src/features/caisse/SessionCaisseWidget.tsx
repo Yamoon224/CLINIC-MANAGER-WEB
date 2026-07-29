@@ -4,8 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { cloturerSession, fetchSessionCourante, ouvrirSession } from "./caisse-api";
 import type { SessionCaisse } from "./types";
 import { Button, Card, Input } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function SessionCaisseWidget() {
+  const { t } = useTranslation();
   const [session, setSession] = useState<SessionCaisse | null | undefined>(undefined);
   const [dernierRapport, setDernierRapport] = useState<SessionCaisse | null>(null);
   const [montantOuverture, setMontantOuverture] = useState("20000");
@@ -48,26 +50,28 @@ export function SessionCaisseWidget() {
 
   if (!session) {
     return (
-      <div className="flex flex-col gap-4 max-w-md">
+      <div className="flex flex-col gap-4">
         {dernierRapport && (
           <Card className="text-sm">
-            <p className="font-semibold">Rapport Z de la dernière session</p>
-            <p className="mt-1">Théorique : {dernierRapport.montant_theorique} F CFA</p>
-            <p>Compté : {dernierRapport.montant_cloture} F CFA</p>
+            <p className="font-semibold">{t("caisse.session.rapportTitle")}</p>
+            <p className="mt-1">
+              {t("caisse.session.theorique", { montant: dernierRapport.montant_theorique ?? "" })}
+            </p>
+            <p>{t("caisse.session.compte", { montant: dernierRapport.montant_cloture ?? "" })}</p>
             <p className={Number(dernierRapport.ecart) !== 0 ? "text-danger font-semibold" : ""}>
-              Écart : {dernierRapport.ecart} F CFA
+              {t("caisse.session.ecart", { montant: dernierRapport.ecart ?? "" })}
             </p>
           </Card>
         )}
         <Card className="flex items-center gap-2">
           <Input
-            placeholder="Fonds de caisse initial"
+            placeholder={t("caisse.session.fondsInitialPlaceholder")}
             value={montantOuverture}
             onChange={(e) => setMontantOuverture(e.target.value)}
             className="flex-1"
           />
           <Button onClick={handleOuvrir} disabled={busy}>
-            Ouvrir la session
+            {t("caisse.session.ouvrir")}
           </Button>
         </Card>
       </div>
@@ -75,19 +79,19 @@ export function SessionCaisseWidget() {
   }
 
   return (
-    <Card className="flex flex-col gap-3 max-w-md">
+    <Card className="flex flex-col gap-3">
       <p className="text-sm">
-        Session ouverte - fonds initial {session.montant_ouverture} F CFA
+        {t("caisse.session.ouverte", { montant: session.montant_ouverture })}
       </p>
       <div className="flex items-center gap-2">
         <Input
-          placeholder="Montant compté en caisse"
+          placeholder={t("caisse.session.montantComptePlaceholder")}
           value={montantCloture}
           onChange={(e) => setMontantCloture(e.target.value)}
           className="flex-1"
         />
         <Button variant="outline" onClick={handleCloturer} disabled={busy}>
-          Clôturer (rapport Z)
+          {t("caisse.session.cloturer")}
         </Button>
       </div>
     </Card>

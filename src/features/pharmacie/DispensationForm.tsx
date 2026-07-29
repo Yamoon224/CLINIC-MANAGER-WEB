@@ -78,7 +78,7 @@ export function DispensationForm({
         medicament_original_id: medicamentOriginalId ?? undefined,
         urgente,
       });
-      setConfirmation("Médicament dispensé.");
+      setConfirmation(t("pharmacie.dispensedConfirmation"));
       setMedicamentId("");
       setMedicamentOriginalId(null);
       setLotId("");
@@ -86,31 +86,31 @@ export function DispensationForm({
       setUrgente(false);
       onDispensed?.();
     } catch {
-      setError("Impossible de dispenser (stock insuffisant ?).");
+      setError(t("pharmacie.dispenseError"));
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <Card className="flex flex-col gap-3 max-w-md p-4">
-      <span className="font-semibold text-sm text-foreground">Dispenser un médicament</span>
+    <Card className="flex flex-col gap-3 p-4">
+      <span className="font-semibold text-sm text-foreground">{t("pharmacie.dispenseTitle")}</span>
 
       <Select
         value={medicamentId}
         onChange={(e) => chooseMedicament(e.target.value ? Number(e.target.value) : "")}
       >
-        <option value="">Médicament...</option>
+        <option value="">{t("pharmacie.selectMedicamentPlaceholder")}</option>
         {medicaments.map((m) => (
           <option key={m.id} value={m.id} disabled={m.stock_disponible === 0}>
-            {m.dci} {m.dosage} - {m.stock_disponible} en stock
+            {t("pharmacie.medicamentOption", { dci: m.dci, dosage: m.dosage ?? "", stock: m.stock_disponible })}
           </option>
         ))}
       </Select>
 
       {substitutions.length > 0 && (
         <div className="rounded-lg border border-warning/30 bg-warning-light p-2 text-sm">
-          <p className="font-medium text-foreground">Rupture - substituts disponibles :</p>
+          <p className="font-medium text-foreground">{t("pharmacie.rupture")}</p>
           <div className="flex flex-wrap gap-2 mt-2">
             {substitutions.map((s) => (
               <Button
@@ -120,7 +120,7 @@ export function DispensationForm({
                 size="sm"
                 onClick={() => chooseSubstitute(s.id)}
               >
-                {s.dci} ({s.stock_disponible})
+                {t("pharmacie.substitutionOption", { dci: s.dci, stock: s.stock_disponible })}
               </Button>
             ))}
           </div>
@@ -132,10 +132,14 @@ export function DispensationForm({
           value={lotId}
           onChange={(e) => setLotId(e.target.value ? Number(e.target.value) : "")}
         >
-          <option value="">Lot...</option>
+          <option value="">{t("pharmacie.selectLotPlaceholder")}</option>
           {lots.map((l) => (
             <option key={l.id} value={l.id}>
-              {l.numero_lot} - exp. {l.date_peremption} ({l.quantite_restante} dispo.)
+              {t("pharmacie.lotOption", {
+                numero: l.numero_lot,
+                date: l.date_peremption ?? "",
+                stock: l.quantite_restante,
+              })}
             </option>
           ))}
         </Select>
@@ -145,16 +149,16 @@ export function DispensationForm({
         <Input
           type="number"
           min={1}
-          placeholder="Quantité"
+          placeholder={t("pharmacie.quantitePlaceholder")}
           value={quantite}
           onChange={(e) => setQuantite(e.target.value)}
           className="w-24"
         />
         <label className="flex items-center gap-2 text-sm text-foreground">
           <input type="checkbox" checked={urgente} onChange={(e) => setUrgente(e.target.checked)} />
-          Urgent
+          {t("pharmacie.urgentLabel")}
         </label>
-        {urgente && <Badge tone="danger">Urgent</Badge>}
+        {urgente && <Badge tone="danger">{t("pharmacie.urgentLabel")}</Badge>}
       </div>
 
       {error && <p className="text-sm text-danger">{error}</p>}
@@ -165,7 +169,7 @@ export function DispensationForm({
         disabled={isSubmitting || !medicamentId || !lotId}
         className="self-start"
       >
-        Dispenser
+        {t("pharmacie.dispense")}
       </Button>
     </Card>
   );

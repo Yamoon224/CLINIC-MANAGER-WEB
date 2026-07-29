@@ -7,8 +7,10 @@ import type { PriseEnCharge } from "@/features/assurances/types";
 import { createFacture, fetchFacturables } from "./caisse-api";
 import type { Facturable, LigneInput } from "./types";
 import { Button, Card, Input, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function FacturationAction({ patientId }: { patientId: number }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [facturables, setFacturables] = useState<Facturable[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -50,7 +52,7 @@ export function FacturationAction({ patientId }: { patientId: number }) {
     }
 
     if (lignes.length === 0) {
-      setError("Sélectionnez au moins une prestation à facturer.");
+      setError(t("caisse.facturation.errorEmpty"));
       return;
     }
 
@@ -64,15 +66,15 @@ export function FacturationAction({ patientId }: { patientId: number }) {
       );
       router.push(`/factures/${data.id}`);
     } catch {
-      setError("Impossible de créer la facture.");
+      setError(t("caisse.facturation.errorSubmit"));
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <Card className="flex flex-col gap-3 max-w-lg">
-      <span className="font-semibold text-sm">Facturer</span>
+    <Card className="flex flex-col gap-3">
+      <span className="font-semibold text-sm">{t("caisse.facturation.title")}</span>
 
       <ul className="flex flex-col gap-1 text-sm">
         {facturables.map((f) => {
@@ -86,25 +88,29 @@ export function FacturationAction({ patientId }: { patientId: number }) {
                   onChange={() => toggle(key)}
                   className="accent-primary"
                 />
-                {f.designation} - {f.prix_unitaire} F CFA × {f.quantite}
+                {t("caisse.facturation.line", {
+                  designation: f.designation,
+                  prix: f.prix_unitaire,
+                  quantite: f.quantite,
+                })}
               </label>
             </li>
           );
         })}
         {facturables.length === 0 && (
-          <li className="text-muted">Aucune prestation en attente de facturation.</li>
+          <li className="text-muted">{t("caisse.facturation.empty")}</li>
         )}
       </ul>
 
       <div className="flex items-center gap-2 border-t border-border pt-3">
         <Input
-          placeholder="Ligne libre (ex. Consultation)"
+          placeholder={t("caisse.facturation.ligneLibrePlaceholder")}
           value={designationLibre}
           onChange={(e) => setDesignationLibre(e.target.value)}
           className="flex-1"
         />
         <Input
-          placeholder="Prix"
+          placeholder={t("caisse.facturation.prixPlaceholder")}
           value={prixLibre}
           onChange={(e) => setPrixLibre(e.target.value)}
           className="w-28"
@@ -113,11 +119,16 @@ export function FacturationAction({ patientId }: { patientId: number }) {
 
       {prisesEnCharge.length > 0 && (
         <Select value={priseEnChargeId} onChange={(e) => setPriseEnChargeId(e.target.value)}>
-          <option value="">Sans prise en charge</option>
+          <option value="">{t("caisse.facturation.sansPriseEnCharge")}</option>
           {prisesEnCharge.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.numero} - {p.assurance_patient.compagnie.nom}
-              {p.montant_plafond ? ` (plafond ${p.montant_plafond} F CFA)` : ""}
+              {t("caisse.facturation.priseEnChargeOption", {
+                numero: p.numero,
+                compagnie: p.assurance_patient.compagnie.nom,
+              })}
+              {p.montant_plafond
+                ? t("caisse.facturation.plafondSuffix", { montant: p.montant_plafond })
+                : ""}
             </option>
           ))}
         </Select>
@@ -128,7 +139,7 @@ export function FacturationAction({ patientId }: { patientId: number }) {
       )}
 
       <Button onClick={handleSubmit} disabled={isSubmitting} className="self-start">
-        Créer la facture
+        {t("caisse.facturation.submit")}
       </Button>
     </Card>
   );

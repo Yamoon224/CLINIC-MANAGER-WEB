@@ -8,10 +8,14 @@ import {
   fetchCompagnies,
 } from "./assurances-api";
 import type { AssurancePatient, CompagnieAssurance } from "./types";
-import { Badge, Button, Card, Input, Select } from "@/components/ui";
+import { Badge, Button, Card, Input, Pagination, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function PatientAssurances({ patientId }: { patientId: number }) {
+  const { t } = useTranslation();
   const [assurances, setAssurances] = useState<AssurancePatient[] | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [compagnies, setCompagnies] = useState<CompagnieAssurance[]>([]);
   const [compagnieId, setCompagnieId] = useState("");
   const [numeroAdherent, setNumeroAdherent] = useState("");
@@ -21,8 +25,11 @@ export function PatientAssurances({ patientId }: { patientId: number }) {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
-    fetchAssurancesPatient(patientId).then((res) => setAssurances(res.data));
-  }, [patientId]);
+    fetchAssurancesPatient(patientId, page).then((res) => {
+      setAssurances(res.data);
+      setTotalPages(res.meta.last_page);
+    });
+  }, [patientId, page]);
 
   useEffect(() => {
     load();
@@ -46,7 +53,7 @@ export function PatientAssurances({ patientId }: { patientId: number }) {
       setDateFin("");
       load();
     } catch {
-      setError("Impossible d'enregistrer cette couverture.");
+      setError(t("assurances.patientAssurances.error"));
     } finally {
       setBusy(false);
     }
@@ -56,21 +63,38 @@ export function PatientAssurances({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold mb-2 text-foreground">Assurances / tiers payant</h2>
-      <ul className="flex flex-col gap-2 mb-3 text-sm">
-        {assurances.map((a) => (
-          <AssuranceRow key={a.id} assurance={a} onChanged={load} />
-        ))}
+      <h2 className="font-semibold mb-2 text-foreground">
+        {t("assurances.patientAssurances.title")}
+      </h2>
+      <Card className="p-0 overflow-hidden mb-3">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>{t("assurances.patientAssurances.compagnie")}</th>
+              <th>{t("assurances.patientAssurances.numeroAdherent")}</th>
+              <th>{t("assurances.patientAssurances.taux")}</th>
+              <th>{t("assurances.patientAssurances.periode")}</th>
+              <th>{t("common.status")}</th>
+              <th>{t("common.actions")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {assurances.map((a) => (
+              <AssuranceRow key={a.id} assurance={a} onChanged={load} />
+            ))}
+          </tbody>
+        </table>
         {assurances.length === 0 && (
-          <li className="text-muted">Aucune couverture enregistrée.</li>
+          <p className="text-sm text-muted p-4">{t("assurances.patientAssurances.empty")}</p>
         )}
-      </ul>
+      </Card>
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
-      <Card className="flex flex-col gap-3 max-w-lg">
-        <span className="text-sm font-medium">Ajouter une couverture</span>
+      <Card className="flex flex-col gap-3 mt-3">
+        <span className="text-sm font-medium">{t("assurances.patientAssurances.addTitle")}</span>
         <div className="flex gap-2">
           <Select value={compagnieId} onChange={(e) => setCompagnieId(e.target.value)} className="flex-1">
-            <option value="">Compagnie…</option>
+            <option value="">{t("assurances.patientAssurances.compagniePlaceholder")}</option>
             {compagnies.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nom} ({c.taux_couverture_defaut}%)
@@ -78,7 +102,7 @@ export function PatientAssurances({ patientId }: { patientId: number }) {
             ))}
           </Select>
           <Input
-            placeholder="N° adhérent"
+            placeholder={t("assurances.patientAssurances.numeroAdherentPlaceholder")}
             value={numeroAdherent}
             onChange={(e) => setNumeroAdherent(e.target.value)}
             className="w-40"
@@ -102,7 +126,7 @@ export function PatientAssurances({ patientId }: { patientId: number }) {
           <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
         )}
         <Button onClick={handleSubmit} disabled={busy} className="self-start">
-          Enregistrer
+          {t("assurances.patientAssurances.submit")}
         </Button>
       </Card>
     </div>
@@ -116,6 +140,7 @@ function AssuranceRow({
   assurance: AssurancePatient;
   onChanged: () => void;
 }) {
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [motif, setMotif] = useState("");
   const [plafond, setPlafond] = useState("");
@@ -139,47 +164,51 @@ function AssuranceRow({
   }
 
   return (
-    <li className="rounded-xl border border-border bg-surface p-3">
-      <div className="flex items-center justify-between">
-        <span>
-          {assurance.compagnie.nom} - {assurance.numero_adherent} ({assurance.taux_couverture}%)
-        </span>
+    <tr>
+      <td>{assurance.compagnie.nom}</td>
+      <td>{assurance.numero_adherent}</td>
+      <td>{assurance.taux_couverture}%</td>
+      <td>
+        {t("assurances.patientAssurances.period", { debut: assurance.date_debut })}{" "}
+        {assurance.date_fin
+          ? t("assurances.patientAssurances.au", { fin: assurance.date_fin })
+          : t("assurances.patientAssurances.noEcheance")}
+      </td>
+      <td>
         <Badge tone={assurance.active ? "success" : "neutral"}>
-          {assurance.active ? "Active" : assurance.statut}
+          {t(`assurances.assuranceStatut.${assurance.statut}`)}
         </Badge>
-      </div>
-      <div className="text-xs text-muted mt-1">
-        Du {assurance.date_debut} {assurance.date_fin ? `au ${assurance.date_fin}` : "(sans échéance)"}
-      </div>
-
-      {!showForm ? (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowForm(true)}
-          className="mt-2 px-0 text-primary"
-        >
-          Demander une prise en charge
-        </Button>
-      ) : (
-        <div className="flex gap-2 mt-2">
-          <Input
-            placeholder="Motif"
-            value={motif}
-            onChange={(e) => setMotif(e.target.value)}
-            className="flex-1 text-xs"
-          />
-          <Input
-            placeholder="Plafond (optionnel)"
-            value={plafond}
-            onChange={(e) => setPlafond(e.target.value)}
-            className="w-28 text-xs"
-          />
-          <Button size="sm" onClick={handleDemander} disabled={busy}>
-            Envoyer
+      </td>
+      <td>
+        {!showForm ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowForm(true)}
+            className="px-0 text-primary"
+          >
+            {t("assurances.patientAssurances.demanderPriseEnCharge")}
           </Button>
-        </div>
-      )}
-    </li>
+        ) : (
+          <div className="flex gap-2">
+            <Input
+              placeholder={t("assurances.patientAssurances.motifPlaceholder")}
+              value={motif}
+              onChange={(e) => setMotif(e.target.value)}
+              className="w-32 text-xs"
+            />
+            <Input
+              placeholder={t("assurances.patientAssurances.plafondPlaceholder")}
+              value={plafond}
+              onChange={(e) => setPlafond(e.target.value)}
+              className="w-24 text-xs"
+            />
+            <Button size="sm" onClick={handleDemander} disabled={busy}>
+              {t("assurances.patientAssurances.envoyer")}
+            </Button>
+          </div>
+        )}
+      </td>
+    </tr>
   );
 }
