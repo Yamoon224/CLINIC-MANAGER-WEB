@@ -60,3 +60,23 @@ export interface AjouterSuiviPayload {
   soins_administres?: string;
   observations?: string;
 }
+
+export type OperationStatut = "planifiee" | "realisee" | "annulee";
+
+export interface Operation {
+  id: number;
+  sejour_id: number;
+  type_operation: string;
+  date_prevue: string | null;
+  date_realisee: string | null;
+  statut: OperationStatut;
+  compte_rendu: string | null;
+  praticien: { id: number; name: string } | null;
+  created_at: string | null;
+}
+
+export interface PlanifierOperationPayload {
+  type_operation: string;
+  date_prevue: string;
+  praticien_id?: number;
+}
