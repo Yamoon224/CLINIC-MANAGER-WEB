@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { fetchDashboard } from "./administration-api";
 import type { DashboardStats } from "./types";
 import { Card } from "@/components/ui";
+import { BarChart } from "@/components/charts/BarChart";
+import type { BarChartDatum } from "@/components/charts/BarChart";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 type Tone = "primary" | "accent" | "success" | "warning" | "danger" | "neutral";
@@ -15,6 +17,15 @@ const TONE_TEXT: Record<Tone, string> = {
   warning: "text-warning",
   danger: "text-danger",
   neutral: "text-foreground",
+};
+
+const TONE_COLOR: Record<Tone, string> = {
+  primary: "var(--color-primary)",
+  accent: "var(--color-accent)",
+  success: "var(--color-success)",
+  warning: "var(--color-warning)",
+  danger: "var(--color-danger)",
+  neutral: "var(--color-muted)",
 };
 
 function StatCard({
@@ -36,6 +47,23 @@ function StatCard({
 
 function fcfa(montant: number): string {
   return `${montant.toLocaleString("fr-FR")} F CFA`;
+}
+
+function ChartCard({
+  title,
+  data,
+  formatValue,
+}: {
+  title: string;
+  data: BarChartDatum[];
+  formatValue?: (value: number) => string;
+}) {
+  return (
+    <Card>
+      <h3 className="mb-2 text-xs font-medium text-muted">{title}</h3>
+      <BarChart data={data} formatValue={formatValue} />
+    </Card>
+  );
 }
 
 const NIVEAU_TRIAGE_TONE: Record<string, Tone> = {
@@ -100,51 +128,73 @@ export function Dashboard() {
       </div>
 
       {tab === "reception" && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard
-            label={t("dashboard.reception.patientsTotal")}
-            value={stats.reception.patients_total}
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatCard
+              label={t("dashboard.reception.patientsTotal")}
+              value={stats.reception.patients_total}
+            />
+            <StatCard
+              label={t("dashboard.reception.nouveauxAujourdhui")}
+              value={stats.reception.nouveaux_patients_aujourdhui}
+              tone="primary"
+            />
+            <StatCard
+              label={t("dashboard.reception.ticketsEnAttente")}
+              value={stats.reception.tickets_en_attente}
+              tone="warning"
+            />
+            <StatCard
+              label={t("dashboard.reception.ticketsTraites")}
+              value={stats.reception.tickets_traites_aujourdhui}
+              tone="success"
+            />
+          </div>
+          <ChartCard
+            title={t("dashboard.tabs.reception")}
+            data={[
+              { label: t("dashboard.reception.patientsTotal"), value: stats.reception.patients_total, color: TONE_COLOR.primary },
+              { label: t("dashboard.reception.nouveauxAujourdhui"), value: stats.reception.nouveaux_patients_aujourdhui, color: TONE_COLOR.primary },
+              { label: t("dashboard.reception.ticketsEnAttente"), value: stats.reception.tickets_en_attente, color: TONE_COLOR.warning },
+              { label: t("dashboard.reception.ticketsTraites"), value: stats.reception.tickets_traites_aujourdhui, color: TONE_COLOR.success },
+            ]}
           />
-          <StatCard
-            label={t("dashboard.reception.nouveauxAujourdhui")}
-            value={stats.reception.nouveaux_patients_aujourdhui}
-            tone="primary"
-          />
-          <StatCard
-            label={t("dashboard.reception.ticketsEnAttente")}
-            value={stats.reception.tickets_en_attente}
-            tone="warning"
-          />
-          <StatCard
-            label={t("dashboard.reception.ticketsTraites")}
-            value={stats.reception.tickets_traites_aujourdhui}
-            tone="success"
-          />
-        </div>
+        </>
       )}
 
       {tab === "rendezVous" && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard
-            label={t("dashboard.rendezVous.total")}
-            value={stats.rendez_vous.aujourdhui_total}
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatCard
+              label={t("dashboard.rendezVous.total")}
+              value={stats.rendez_vous.aujourdhui_total}
+            />
+            <StatCard
+              label={t("dashboard.rendezVous.honores")}
+              value={stats.rendez_vous.honores}
+              tone="success"
+            />
+            <StatCard
+              label={t("dashboard.rendezVous.aVenir")}
+              value={stats.rendez_vous.a_venir}
+              tone="primary"
+            />
+            <StatCard
+              label={t("dashboard.rendezVous.annulesOuAbsents")}
+              value={stats.rendez_vous.annules_ou_absents}
+              tone="danger"
+            />
+          </div>
+          <ChartCard
+            title={t("dashboard.tabs.rendezVous")}
+            data={[
+              { label: t("dashboard.rendezVous.total"), value: stats.rendez_vous.aujourdhui_total, color: TONE_COLOR.neutral },
+              { label: t("dashboard.rendezVous.honores"), value: stats.rendez_vous.honores, color: TONE_COLOR.success },
+              { label: t("dashboard.rendezVous.aVenir"), value: stats.rendez_vous.a_venir, color: TONE_COLOR.primary },
+              { label: t("dashboard.rendezVous.annulesOuAbsents"), value: stats.rendez_vous.annules_ou_absents, color: TONE_COLOR.danger },
+            ]}
           />
-          <StatCard
-            label={t("dashboard.rendezVous.honores")}
-            value={stats.rendez_vous.honores}
-            tone="success"
-          />
-          <StatCard
-            label={t("dashboard.rendezVous.aVenir")}
-            value={stats.rendez_vous.a_venir}
-            tone="primary"
-          />
-          <StatCard
-            label={t("dashboard.rendezVous.annulesOuAbsents")}
-            value={stats.rendez_vous.annules_ou_absents}
-            tone="danger"
-          />
-        </div>
+        </>
       )}
 
       {tab === "urgences" && (
@@ -172,119 +222,187 @@ export function Dashboard() {
               />
             ))}
           </div>
+          <ChartCard
+            title={t("dashboard.tabs.urgences")}
+            data={Object.entries(stats.urgences.par_niveau_triage).map(([niveau, count]) => ({
+              label: t(
+                `dashboard.urgences.${niveau.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())}`,
+              ),
+              value: count,
+              color: TONE_COLOR[NIVEAU_TRIAGE_TONE[niveau] ?? "neutral"],
+            }))}
+          />
         </div>
       )}
 
       {tab === "hospitalisation" && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard
-            label={t("dashboard.hospitalisation.litsTotal")}
-            value={stats.hospitalisation.lits_total}
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatCard
+              label={t("dashboard.hospitalisation.litsTotal")}
+              value={stats.hospitalisation.lits_total}
+            />
+            <StatCard
+              label={t("dashboard.hospitalisation.litsOccupes")}
+              value={stats.hospitalisation.lits_occupes}
+              tone="primary"
+            />
+            <StatCard
+              label={t("dashboard.hospitalisation.tauxOccupation")}
+              value={`${stats.hospitalisation.taux_occupation}%`}
+              tone="accent"
+            />
+            <StatCard
+              label={t("dashboard.hospitalisation.sejoursEnCours")}
+              value={stats.hospitalisation.sejours_en_cours}
+            />
+          </div>
+          <ChartCard
+            title={t("dashboard.tabs.hospitalisation")}
+            data={[
+              { label: t("dashboard.hospitalisation.litsTotal"), value: stats.hospitalisation.lits_total, color: TONE_COLOR.neutral },
+              { label: t("dashboard.hospitalisation.litsOccupes"), value: stats.hospitalisation.lits_occupes, color: TONE_COLOR.primary },
+              { label: t("dashboard.hospitalisation.sejoursEnCours"), value: stats.hospitalisation.sejours_en_cours, color: TONE_COLOR.accent },
+            ]}
           />
-          <StatCard
-            label={t("dashboard.hospitalisation.litsOccupes")}
-            value={stats.hospitalisation.lits_occupes}
-            tone="primary"
-          />
-          <StatCard
-            label={t("dashboard.hospitalisation.tauxOccupation")}
-            value={`${stats.hospitalisation.taux_occupation}%`}
-            tone="accent"
-          />
-          <StatCard
-            label={t("dashboard.hospitalisation.sejoursEnCours")}
-            value={stats.hospitalisation.sejours_en_cours}
-          />
-        </div>
+        </>
       )}
 
       {tab === "laboratoire" && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard
-            label={t("dashboard.laboratoire.enAttente")}
-            value={stats.laboratoire.en_attente}
-            tone="warning"
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatCard
+              label={t("dashboard.laboratoire.enAttente")}
+              value={stats.laboratoire.en_attente}
+              tone="warning"
+            />
+            <StatCard
+              label={t("dashboard.laboratoire.aValiderBiologiste")}
+              value={stats.laboratoire.a_valider_biologiste}
+              tone="primary"
+            />
+            <StatCard
+              label={t("dashboard.laboratoire.resultatsAnormaux")}
+              value={stats.laboratoire.resultats_anormaux_non_valides}
+              tone="danger"
+            />
+          </div>
+          <ChartCard
+            title={t("dashboard.tabs.laboratoire")}
+            data={[
+              { label: t("dashboard.laboratoire.enAttente"), value: stats.laboratoire.en_attente, color: TONE_COLOR.warning },
+              { label: t("dashboard.laboratoire.aValiderBiologiste"), value: stats.laboratoire.a_valider_biologiste, color: TONE_COLOR.primary },
+              { label: t("dashboard.laboratoire.resultatsAnormaux"), value: stats.laboratoire.resultats_anormaux_non_valides, color: TONE_COLOR.danger },
+            ]}
           />
-          <StatCard
-            label={t("dashboard.laboratoire.aValiderBiologiste")}
-            value={stats.laboratoire.a_valider_biologiste}
-            tone="primary"
-          />
-          <StatCard
-            label={t("dashboard.laboratoire.resultatsAnormaux")}
-            value={stats.laboratoire.resultats_anormaux_non_valides}
-            tone="danger"
-          />
-        </div>
+        </>
       )}
 
       {tab === "pharmacie" && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard
-            label={t("dashboard.pharmacie.rupturesStock")}
-            value={stats.pharmacie.ruptures_stock}
-            tone="danger"
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatCard
+              label={t("dashboard.pharmacie.rupturesStock")}
+              value={stats.pharmacie.ruptures_stock}
+              tone="danger"
+            />
+            <StatCard
+              label={t("dashboard.pharmacie.peremptionsProches")}
+              value={stats.pharmacie.peremptions_proches}
+              tone="warning"
+            />
+          </div>
+          <ChartCard
+            title={t("dashboard.tabs.pharmacie")}
+            data={[
+              { label: t("dashboard.pharmacie.rupturesStock"), value: stats.pharmacie.ruptures_stock, color: TONE_COLOR.danger },
+              { label: t("dashboard.pharmacie.peremptionsProches"), value: stats.pharmacie.peremptions_proches, color: TONE_COLOR.warning },
+            ]}
           />
-          <StatCard
-            label={t("dashboard.pharmacie.peremptionsProches")}
-            value={stats.pharmacie.peremptions_proches}
-            tone="warning"
-          />
-        </div>
+        </>
       )}
 
       {tab === "caisse" && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard
-            label={t("dashboard.caisse.chiffreAffaires")}
-            value={fcfa(stats.caisse.chiffre_affaires_aujourdhui)}
-            tone="success"
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatCard
+              label={t("dashboard.caisse.chiffreAffaires")}
+              value={fcfa(stats.caisse.chiffre_affaires_aujourdhui)}
+              tone="success"
+            />
+            <StatCard
+              label={t("dashboard.caisse.depenses")}
+              value={fcfa(stats.caisse.depenses_aujourdhui)}
+            />
+            <StatCard
+              label={t("dashboard.caisse.facturesImpayees")}
+              value={stats.caisse.factures_impayees}
+              tone="warning"
+            />
+            <StatCard
+              label={t("dashboard.caisse.creancesTotal")}
+              value={fcfa(stats.caisse.creances_total)}
+              tone="danger"
+            />
+          </div>
+          <ChartCard
+            title={t("dashboard.tabs.caisse")}
+            formatValue={fcfa}
+            data={[
+              { label: t("dashboard.caisse.chiffreAffaires"), value: stats.caisse.chiffre_affaires_aujourdhui, color: TONE_COLOR.success },
+              { label: t("dashboard.caisse.depenses"), value: stats.caisse.depenses_aujourdhui, color: TONE_COLOR.neutral },
+              { label: t("dashboard.caisse.creancesTotal"), value: stats.caisse.creances_total, color: TONE_COLOR.danger },
+            ]}
           />
-          <StatCard
-            label={t("dashboard.caisse.depenses")}
-            value={fcfa(stats.caisse.depenses_aujourdhui)}
-          />
-          <StatCard
-            label={t("dashboard.caisse.facturesImpayees")}
-            value={stats.caisse.factures_impayees}
-            tone="warning"
-          />
-          <StatCard
-            label={t("dashboard.caisse.creancesTotal")}
-            value={fcfa(stats.caisse.creances_total)}
-            tone="danger"
-          />
-        </div>
+        </>
       )}
 
       {tab === "assurances" && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard
-            label={t("dashboard.assurances.prisesEnChargeEnAttente")}
-            value={stats.assurances.prises_en_charge_en_attente}
-            tone="warning"
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatCard
+              label={t("dashboard.assurances.prisesEnChargeEnAttente")}
+              value={stats.assurances.prises_en_charge_en_attente}
+              tone="warning"
+            />
+            <StatCard
+              label={t("dashboard.assurances.montantReclame")}
+              value={fcfa(stats.assurances.montant_reclame_non_regle)}
+              tone="danger"
+            />
+          </div>
+          <ChartCard
+            title={t("dashboard.tabs.assurances")}
+            formatValue={fcfa}
+            data={[
+              { label: t("dashboard.assurances.montantReclame"), value: stats.assurances.montant_reclame_non_regle, color: TONE_COLOR.danger },
+            ]}
           />
-          <StatCard
-            label={t("dashboard.assurances.montantReclame")}
-            value={fcfa(stats.assurances.montant_reclame_non_regle)}
-            tone="danger"
-          />
-        </div>
+        </>
       )}
 
       {tab === "personnel" && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard
-            label={t("dashboard.personnel.effectifActif")}
-            value={stats.personnel.effectif_actif}
-            tone="primary"
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatCard
+              label={t("dashboard.personnel.effectifActif")}
+              value={stats.personnel.effectif_actif}
+              tone="primary"
+            />
+            <StatCard
+              label={t("dashboard.personnel.congesEnAttente")}
+              value={stats.personnel.conges_en_attente}
+              tone="warning"
+            />
+          </div>
+          <ChartCard
+            title={t("dashboard.tabs.personnel")}
+            data={[
+              { label: t("dashboard.personnel.effectifActif"), value: stats.personnel.effectif_actif, color: TONE_COLOR.primary },
+              { label: t("dashboard.personnel.congesEnAttente"), value: stats.personnel.conges_en_attente, color: TONE_COLOR.warning },
+            ]}
           />
-          <StatCard
-            label={t("dashboard.personnel.congesEnAttente")}
-            value={stats.personnel.conges_en_attente}
-            tone="warning"
-          />
-        </div>
+        </>
       )}
     </div>
   );

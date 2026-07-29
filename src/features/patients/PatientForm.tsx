@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
+import { Button, Field, Input, Select, Textarea } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { registerPatient } from "./patients-api";
 import type { RegisterPatientPayload } from "./types";
@@ -19,7 +19,7 @@ const EMPTY_FORM: RegisterPatientPayload = {
   allergies: "",
 };
 
-export function PatientForm() {
+export function PatientForm({ onCancel }: { onCancel?: () => void }) {
   const router = useRouter();
   const { t } = useTranslation();
   const [form, setForm] = useState<RegisterPatientPayload>(EMPTY_FORM);
@@ -48,8 +48,7 @@ export function PatientForm() {
   }
 
   return (
-    <Card>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
           <Field label={t("patients.form.nom")} required>
             <Input
@@ -136,10 +135,16 @@ export function PatientForm() {
           </p>
         )}
 
-        <Button type="submit" disabled={isSubmitting} className="self-start">
-          {isSubmitting ? t("patients.form.submitting") : t("patients.form.submit")}
-        </Button>
-      </form>
-    </Card>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? t("patients.form.submitting") : t("patients.form.submit")}
+          </Button>
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              {t("common.cancel")}
+            </Button>
+          )}
+        </div>
+    </form>
   );
 }
