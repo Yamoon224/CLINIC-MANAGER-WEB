@@ -42,6 +42,8 @@ export interface Facture {
   id: number;
   statut: FactureStatut;
   montant_total: string;
+  montant_part_assurance: string;
+  montant_part_patient: string;
   montant_paye: string;
   solde: number;
   patient: {
@@ -50,6 +52,13 @@ export interface Facture {
     prenom: string;
     numero_dossier: string;
   };
+  assurance_patient?: {
+    id: number;
+    numero_adherent: string;
+    taux_couverture: string;
+    compagnie: string;
+  };
+  bordereau_assurance_id: number | null;
   lignes: LigneFacture[];
   encaissements: Encaissement[];
   created_at: string | null;

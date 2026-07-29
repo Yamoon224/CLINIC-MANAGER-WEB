@@ -88,12 +88,24 @@ export function FactureDetail({ id }: { id: number }) {
         <span>Total</span>
         <span className="font-semibold">{facture.montant_total} F CFA</span>
       </div>
+      {facture.assurance_patient && (
+        <>
+          <div className="flex justify-between text-sm max-w-xs text-gray-600">
+            <span>Part {facture.assurance_patient.compagnie}</span>
+            <span>{facture.montant_part_assurance} F CFA</span>
+          </div>
+          <div className="flex justify-between text-sm max-w-xs text-gray-600">
+            <span>Part patient</span>
+            <span>{facture.montant_part_patient} F CFA</span>
+          </div>
+        </>
+      )}
       <div className="flex justify-between text-sm max-w-xs">
-        <span>Payé</span>
+        <span>Payé (patient)</span>
         <span>{facture.montant_paye} F CFA</span>
       </div>
       <div className="flex justify-between text-sm max-w-xs">
-        <span>Solde</span>
+        <span>Solde patient</span>
         <span className="font-semibold">{facture.solde} F CFA</span>
       </div>
 

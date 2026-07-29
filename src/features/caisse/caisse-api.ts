@@ -19,10 +19,11 @@ export function fetchPatientFactures(patientId: number): Promise<{ data: Facture
 export function createFacture(
   patientId: number,
   lignes: LigneInput[],
+  priseEnChargeId?: number,
 ): Promise<{ data: Facture }> {
   return apiFetch<{ data: Facture }>(`/patients/${patientId}/factures`, {
     method: "POST",
-    body: JSON.stringify({ lignes }),
+    body: JSON.stringify({ lignes, prise_en_charge_id: priseEnChargeId }),
   });
 }
 

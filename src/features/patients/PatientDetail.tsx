@@ -1,3 +1,4 @@
+import { PatientAssurances } from "@/features/assurances/PatientAssurances";
 import { PatientFactures } from "@/features/caisse/PatientFactures";
 import { PatientHistory } from "@/features/consultations/PatientHistory";
 import { StartConsultationAction } from "@/features/consultations/StartConsultationAction";
@@ -70,6 +71,8 @@ export function PatientDetail({ patient }: { patient: Patient }) {
       <PatientDispensations patientId={patient.id} />
 
       <PatientSejours patientId={patient.id} />
+
+      <PatientAssurances patientId={patient.id} />
 
       <PatientFactures patientId={patient.id} />
 

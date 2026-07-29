@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { fetchPrisesEnCharge } from "@/features/assurances/assurances-api";
+import type { PriseEnCharge } from "@/features/assurances/types";
 import { createFacture, fetchFacturables } from "./caisse-api";
 import type { Facturable, LigneInput } from "./types";
 
@@ -11,11 +13,16 @@ export function FacturationAction({ patientId }: { patientId: number }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [designationLibre, setDesignationLibre] = useState("");
   const [prixLibre, setPrixLibre] = useState("");
+  const [prisesEnCharge, setPrisesEnCharge] = useState<PriseEnCharge[]>([]);
+  const [priseEnChargeId, setPriseEnChargeId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchFacturables(patientId).then((res) => setFacturables(res.data));
+    fetchPrisesEnCharge("approuvee").then((res) =>
+      setPrisesEnCharge(res.data.filter((p) => p.assurance_patient.patient?.id === patientId)),
+    );
   }, [patientId]);
 
   function toggle(key: string) {
@@ -49,7 +56,11 @@ export function FacturationAction({ patientId }: { patientId: number }) {
     setIsSubmitting(true);
     setError(null);
     try {
-      const { data } = await createFacture(patientId, lignes);
+      const { data } = await createFacture(
+        patientId,
+        lignes,
+        priseEnChargeId ? Number(priseEnChargeId) : undefined,
+      );
       router.push(`/factures/${data.id}`);
     } catch {
       setError("Impossible de créer la facture.");
@@ -97,6 +108,22 @@ export function FacturationAction({ patientId }: { patientId: number }) {
           className="border rounded px-3 py-2 w-28"
         />
       </div>
+
+      {prisesEnCharge.length > 0 && (
+        <select
+          value={priseEnChargeId}
+          onChange={(e) => setPriseEnChargeId(e.target.value)}
+          className="border rounded px-3 py-2"
+        >
+          <option value="">Sans prise en charge</option>
+          {prisesEnCharge.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.numero} — {p.assurance_patient.compagnie.nom}
+              {p.montant_plafond ? ` (plafond ${p.montant_plafond} F CFA)` : ""}
+            </option>
+          ))}
+        </select>
+      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
