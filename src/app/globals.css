@@ -51,3 +51,10 @@ body {
 :root[data-density="compact"] {
   font-size: 14px;
 }
+
+/* Design carré : aucun angle arrondi nulle part dans l'application. */
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
