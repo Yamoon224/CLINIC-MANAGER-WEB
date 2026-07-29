@@ -52,3 +52,67 @@ export interface DashboardStats {
     conges_en_attente: number;
   };
 }
+
+export type AuditEvent = "created" | "updated" | "deleted";
+
+export const AUDIT_EVENT_LABELS: Record<AuditEvent, string> = {
+  created: "Création",
+  updated: "Modification",
+  deleted: "Suppression",
+};
+
+export const AUDIT_SUBJECT_TYPES = [
+  "Accouchement",
+  "AdmissionUrgence",
+  "BordereauAssurance",
+  "Conge",
+  "Consultation",
+  "DemandeAnalyse",
+  "Dispensation",
+  "Employe",
+  "Encaissement",
+  "Facture",
+  "Grossesse",
+  "Patient",
+  "PriseEnCharge",
+  "RendezVous",
+  "Sejour",
+  "Ticket",
+  "User",
+  "Vaccination",
+] as const;
+
+export interface AuditEntry {
+  id: number;
+  event: AuditEvent | null;
+  description: string;
+  subject_type: string | null;
+  subject_id: number | null;
+  causer: { id: number; name: string } | null;
+  avant: Record<string, unknown> | null;
+  apres: Record<string, unknown> | null;
+  created_at: string | null;
+}
+
+export interface AuditCauser {
+  id: number;
+  name: string;
+}
+
+export interface AuditFilters {
+  subject_type?: string;
+  causer_id?: number;
+  event?: AuditEvent;
+  date_debut?: string;
+  date_fin?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    current_page: number;
+    last_page: number;
+    total: number;
+    per_page: number;
+  };
+}

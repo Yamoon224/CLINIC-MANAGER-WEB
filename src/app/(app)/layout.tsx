@@ -18,6 +18,7 @@ const NAV_LINKS = [
   { href: "/caisse", label: "Caisse" },
   { href: "/assurances", label: "Assurances" },
   { href: "/personnel", label: "Personnel" },
+  { href: "/audit", label: "Audit" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
