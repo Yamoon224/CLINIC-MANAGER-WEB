@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type { Service, Ticket } from "./types";
 
 export function orientPatient(
@@ -11,9 +12,13 @@ export function orientPatient(
   });
 }
 
-export function fetchQueue(service?: Service): Promise<{ data: Ticket[] }> {
-  const params = service ? `?service=${service}` : "";
-  return apiFetch<{ data: Ticket[] }>(`/tickets${params}`);
+export function fetchQueue(
+  service?: Service,
+  page = 1,
+): Promise<PaginatedResponse<Ticket>> {
+  const params = new URLSearchParams({ page: String(page) });
+  if (service) params.set("service", service);
+  return apiFetch<PaginatedResponse<Ticket>>(`/tickets?${params}`);
 }
 
 export function callTicket(id: number): Promise<{ data: Ticket }> {

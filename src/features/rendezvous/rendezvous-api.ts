@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type {
   CreateRendezVousPayload,
   Praticien,
@@ -12,11 +13,12 @@ export function fetchPraticiens(): Promise<{ data: Praticien[] }> {
 
 export function fetchAgenda(
   date: string,
+  page = 1,
   praticienId?: number,
-): Promise<{ data: RendezVous[] }> {
-  const params = new URLSearchParams({ from: date, to: date });
+): Promise<PaginatedResponse<RendezVous>> {
+  const params = new URLSearchParams({ from: date, to: date, page: String(page) });
   if (praticienId) params.set("praticien_id", String(praticienId));
-  return apiFetch<{ data: RendezVous[] }>(`/rendez-vous?${params}`);
+  return apiFetch<PaginatedResponse<RendezVous>>(`/rendez-vous?${params}`);
 }
 
 export function createRendezVous(

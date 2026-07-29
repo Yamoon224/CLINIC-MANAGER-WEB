@@ -9,9 +9,12 @@ import { PatientDispensations } from "@/features/pharmacie/PatientDispensations"
 import { OrientPatientAction } from "@/features/queue/OrientPatientAction";
 import { CarnetVaccination } from "@/features/vaccinations/CarnetVaccination";
 import { Badge, Card } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 import type { Patient } from "./types";
 
 export function PatientDetail({ patient }: { patient: Patient }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
       <Card>
@@ -21,34 +24,36 @@ export function PatientDetail({ patient }: { patient: Patient }) {
               {patient.prenom} {patient.nom}
             </h1>
             <p className="text-sm text-muted">
-              Dossier n° {patient.numero_dossier}
+              {t("patients.detail.dossierNumero", { numero: patient.numero_dossier })}
             </p>
           </div>
           {patient.sexe && (
             <Badge tone={patient.sexe === "F" ? "accent" : "primary"}>
-              {patient.sexe === "F" ? "Féminin" : "Masculin"}
+              {patient.sexe === "F"
+                ? t("patients.detail.sexeFeminin")
+                : t("patients.detail.sexeMasculin")}
             </Badge>
           )}
         </div>
 
         <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-          <Row label="Date de naissance" value={patient.date_naissance} />
-          <Row label="Téléphone" value={patient.telephone} />
-          <Row label="Adresse" value={patient.adresse} />
+          <Row label={t("patients.detail.dateNaissance")} value={patient.date_naissance} />
+          <Row label={t("patients.detail.telephone")} value={patient.telephone} />
+          <Row label={t("patients.detail.adresse")} value={patient.adresse} />
           <Row
-            label="Personne à prévenir"
+            label={t("patients.detail.personneAPrevenir")}
             value={
               patient.personne_a_prevenir_nom
                 ? `${patient.personne_a_prevenir_nom} (${patient.personne_a_prevenir_telephone ?? "-"})`
                 : null
             }
           />
-          <Row label="Assurance" value={patient.assurance_nom} />
+          <Row label={t("patients.detail.assurance")} value={patient.assurance_nom} />
         </dl>
 
         {patient.allergies && (
           <div className="mt-4 rounded-lg border border-danger/30 bg-danger-light px-3 py-2 text-sm">
-            <span className="font-semibold text-danger">Allergies : </span>
+            <span className="font-semibold text-danger">{t("patients.detail.allergies")}</span>
             {patient.allergies}
           </div>
         )}
@@ -60,7 +65,9 @@ export function PatientDetail({ patient }: { patient: Patient }) {
       </div>
 
       <div>
-        <h2 className="font-semibold text-foreground mb-2">Historique des consultations</h2>
+        <h2 className="font-semibold text-foreground mb-2">
+          {t("patients.detail.historiqueConsultations")}
+        </h2>
         <PatientHistory patientId={patient.id} />
       </div>
 

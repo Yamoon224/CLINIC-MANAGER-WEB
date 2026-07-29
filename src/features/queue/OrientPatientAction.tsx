@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { Button, Card, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { orientPatient } from "./queue-api";
-import { SERVICE_LABELS, SERVICES, type Service } from "./types";
+import { SERVICES, type Service } from "./types";
 
 export function OrientPatientAction({ patientId }: { patientId: number }) {
+  const { t } = useTranslation();
   const [service, setService] = useState<Service>(SERVICES[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [ticketLabel, setTicketLabel] = useState<string | null>(null);
@@ -18,7 +20,7 @@ export function OrientPatientAction({ patientId }: { patientId: number }) {
       const { data } = await orientPatient(patientId, service);
       setTicketLabel(data.label);
     } catch {
-      setError("Impossible de créer le ticket.");
+      setError(t("queue.orient.error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -26,7 +28,7 @@ export function OrientPatientAction({ patientId }: { patientId: number }) {
 
   return (
     <Card className="flex flex-col gap-2 max-w-md">
-      <span className="font-semibold text-sm text-foreground">Orienter vers un service</span>
+      <span className="font-semibold text-sm text-foreground">{t("queue.orient.title")}</span>
       <div className="flex items-center gap-2">
         <Select
           value={service}
@@ -35,17 +37,18 @@ export function OrientPatientAction({ patientId }: { patientId: number }) {
         >
           {SERVICES.map((s) => (
             <option key={s} value={s}>
-              {SERVICE_LABELS[s]}
+              {t(`queue.service.${s}`)}
             </option>
           ))}
         </Select>
         <Button onClick={handleOrient} disabled={isSubmitting} className="whitespace-nowrap">
-          {isSubmitting ? "..." : "Créer le ticket"}
+          {isSubmitting ? t("queue.orient.submitting") : t("queue.orient.submit")}
         </Button>
       </div>
       {ticketLabel && (
         <p className="text-sm text-success">
-          Ticket créé : <span className="font-semibold">{ticketLabel}</span>
+          {t("queue.orient.createdPrefix")}
+          <span className="font-semibold">{ticketLabel}</span>
         </p>
       )}
       {error && <p className="text-sm text-danger">{error}</p>}

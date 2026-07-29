@@ -14,8 +14,10 @@ import {
   type UpdateConsultationPayload,
 } from "./types";
 import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function ConsultationScreen({ id }: { id: number }) {
+  const { t } = useTranslation();
   const [consultation, setConsultation] = useState<Consultation | null>(null);
   const [form, setForm] = useState<UpdateConsultationPayload>({});
   const [isSaving, setIsSaving] = useState(false);

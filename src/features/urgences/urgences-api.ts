@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type {
   AdmettreUrgencePayload,
   AdmissionUrgence,
@@ -15,8 +16,11 @@ export function admettre(
   });
 }
 
-export function fetchFileAttente(): Promise<{ data: AdmissionUrgence[] }> {
-  return apiFetch<{ data: AdmissionUrgence[] }>("/urgences");
+export function fetchFileAttente(
+  page = 1,
+): Promise<PaginatedResponse<AdmissionUrgence>> {
+  const params = new URLSearchParams({ page: String(page) });
+  return apiFetch<PaginatedResponse<AdmissionUrgence>>(`/urgences?${params}`);
 }
 
 export function getAdmission(id: number): Promise<{ data: AdmissionUrgence }> {

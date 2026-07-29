@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import { searchPatients } from "@/features/patients/patients-api";
 import type { Patient } from "@/features/patients/types";
 import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 import {
   createRendezVous,
   fetchCreneauxDisponibles,
   fetchPraticiens,
 } from "./rendezvous-api";
 import {
-  RENDEZ_VOUS_TYPE_LABELS,
   RENDEZ_VOUS_TYPES,
   type Praticien,
   type RendezVousType,
@@ -19,6 +19,7 @@ import {
 
 export function RendezVousForm() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [patientQuery, setPatientQuery] = useState("");
   const [patientResults, setPatientResults] = useState<Patient[]>([]);
@@ -66,7 +67,7 @@ export function RendezVousForm() {
     event.preventDefault();
     setError(null);
     if (!patient || !praticienId || !startsAt) {
-      setError("Patient, praticien et créneau sont requis.");
+      setError(t("rendezvous.form.requiredError"));
       return;
     }
     setIsSubmitting(true);
@@ -80,16 +81,16 @@ export function RendezVousForm() {
       });
       router.push("/rendez-vous");
     } catch {
-      setError("Impossible de créer le rendez-vous (créneau indisponible ?).");
+      setError(t("rendezvous.form.submitError"));
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <Card className="max-w-xl">
+    <Card>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Field label="Patient">
+        <Field label={t("rendezvous.form.patient")}>
           {patient ? (
             <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm">
               <span>
@@ -100,13 +101,13 @@ export function RendezVousForm() {
                 onClick={() => setPatient(null)}
                 className="text-sm text-primary hover:underline"
               >
-                Changer
+                {t("rendezvous.form.changePatient")}
               </button>
             </div>
           ) : (
             <div className="flex flex-col gap-1.5">
               <Input
-                placeholder="Rechercher un patient..."
+                placeholder={t("rendezvous.form.searchPatientPlaceholder")}
                 value={patientQuery}
                 onChange={(e) => setPatientQuery(e.target.value)}
               />
@@ -134,7 +135,7 @@ export function RendezVousForm() {
         </Field>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Praticien">
+          <Field label={t("rendezvous.form.praticien")}>
             <Select
               value={praticienId}
               onChange={(e) =>
@@ -150,20 +151,20 @@ export function RendezVousForm() {
             </Select>
           </Field>
 
-          <Field label="Type">
+          <Field label={t("rendezvous.form.type")}>
             <Select
               value={type}
               onChange={(e) => setType(e.target.value as RendezVousType)}
             >
-              {RENDEZ_VOUS_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {RENDEZ_VOUS_TYPE_LABELS[t]}
+              {RENDEZ_VOUS_TYPES.map((rt) => (
+                <option key={rt} value={rt}>
+                  {t(`rendezvous.type.${rt}`)}
                 </option>
               ))}
             </Select>
           </Field>
 
-          <Field label="Date">
+          <Field label={t("rendezvous.form.date")}>
             <Input
               type="date"
               value={date}
@@ -172,7 +173,7 @@ export function RendezVousForm() {
           </Field>
         </div>
 
-        <Field label="Créneau disponible">
+        <Field label={t("rendezvous.form.creneauDisponible")}>
           {praticienId ? (
             creneaux.length > 0 ? (
               <div className="flex flex-wrap gap-2">
@@ -195,20 +196,16 @@ export function RendezVousForm() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted">
-                Aucun créneau disponible ce jour-là.
-              </p>
+              <p className="text-sm text-muted">{t("rendezvous.form.noCreneaux")}</p>
             )
           ) : (
-            <p className="text-sm text-muted">
-              Choisissez un praticien pour voir les créneaux.
-            </p>
+            <p className="text-sm text-muted">{t("rendezvous.form.choosePraticien")}</p>
           )}
         </Field>
 
-        <Field label="Motif">
+        <Field label={t("rendezvous.form.motif")}>
           <Textarea
-            placeholder="Motif du rendez-vous"
+            placeholder={t("rendezvous.form.motifPlaceholder")}
             value={motif}
             onChange={(e) => setMotif(e.target.value)}
             rows={2}
@@ -222,7 +219,7 @@ export function RendezVousForm() {
         )}
 
         <Button type="submit" disabled={isSubmitting} className="self-start">
-          {isSubmitting ? "Enregistrement..." : "Prendre le rendez-vous"}
+          {isSubmitting ? t("rendezvous.form.submitting") : t("rendezvous.form.submit")}
         </Button>
       </form>
     </Card>

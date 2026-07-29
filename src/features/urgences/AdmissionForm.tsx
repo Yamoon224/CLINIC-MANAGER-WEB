@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 import { searchPatients } from "@/features/patients/patients-api";
 import type { Patient } from "@/features/patients/types";
 import { Button, Card, Field, Input, Textarea } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { admettre } from "./urgences-api";
 
 export function AdmissionForm() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [patientQuery, setPatientQuery] = useState("");
   const [patientResults, setPatientResults] = useState<Patient[]>([]);
@@ -44,21 +46,18 @@ export function AdmissionForm() {
       });
       router.push(`/urgences/${data.id}`);
     } catch {
-      setError("Impossible d'admettre le patient.");
+      setError(t("urgences.form.error"));
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <Card className="max-w-xl">
+    <Card>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <p className="text-sm text-muted">
-          Patient inconnu ou inconscient ? Laissez la recherche vide et
-          validez directement - un dossier minimal sera créé.
-        </p>
+        <p className="text-sm text-muted">{t("urgences.form.unknownPatientHint")}</p>
 
-        <Field label="Patient déjà connu (optionnel)">
+        <Field label={t("urgences.form.patientConnu")}>
           {patient ? (
             <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm">
               <span>
@@ -69,13 +68,13 @@ export function AdmissionForm() {
                 onClick={() => setPatient(null)}
                 className="text-sm text-primary hover:underline"
               >
-                Changer
+                {t("urgences.form.changePatient")}
               </button>
             </div>
           ) : (
             <div className="flex flex-col gap-1.5">
               <Input
-                placeholder="Rechercher un patient..."
+                placeholder={t("urgences.form.searchPatientPlaceholder")}
                 value={patientQuery}
                 onChange={(e) => setPatientQuery(e.target.value)}
               />
@@ -104,16 +103,16 @@ export function AdmissionForm() {
 
         {!patient && (
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Nom (si connu)">
+            <Field label={t("urgences.form.nomSiConnu")}>
               <Input
-                placeholder="si connu"
+                placeholder={t("urgences.form.siConnuPlaceholder")}
                 value={nom}
                 onChange={(e) => setNom(e.target.value)}
               />
             </Field>
-            <Field label="Prénom (si connu)">
+            <Field label={t("urgences.form.prenomSiConnu")}>
               <Input
-                placeholder="si connu"
+                placeholder={t("urgences.form.siConnuPlaceholder")}
                 value={prenom}
                 onChange={(e) => setPrenom(e.target.value)}
               />
@@ -121,9 +120,9 @@ export function AdmissionForm() {
           </div>
         )}
 
-        <Field label="Notes d'admission">
+        <Field label={t("urgences.form.notesAdmission")}>
           <Textarea
-            placeholder="Notes d'admission, circonstances..."
+            placeholder={t("urgences.form.notesAdmissionPlaceholder")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
@@ -137,7 +136,7 @@ export function AdmissionForm() {
         )}
 
         <Button type="submit" variant="danger" disabled={isSubmitting} className="self-start">
-          {isSubmitting ? "Admission..." : "Admettre aux urgences"}
+          {isSubmitting ? t("urgences.form.submitting") : t("urgences.form.submit")}
         </Button>
       </form>
     </Card>

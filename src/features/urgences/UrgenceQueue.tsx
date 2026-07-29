@@ -2,13 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Card, Pagination } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { fetchFileAttente } from "./urgences-api";
-import {
-  NIVEAU_TRIAGE_LABELS,
-  type AdmissionUrgence,
-  type NiveauTriage,
-} from "./types";
+import { type AdmissionUrgence, type NiveauTriage } from "./types";
 
 const TRIAGE_TONE: Record<NiveauTriage, "primary" | "accent" | "success" | "warning" | "danger"> = {
   reanimation: "danger",
@@ -19,11 +16,17 @@ const TRIAGE_TONE: Record<NiveauTriage, "primary" | "accent" | "success" | "warn
 };
 
 export function UrgenceQueue() {
+  const { t } = useTranslation();
   const [admissions, setAdmissions] = useState<AdmissionUrgence[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const reload = useCallback(() => {
-    fetchFileAttente().then((res) => setAdmissions(res.data));
-  }, []);
+    fetchFileAttente(page).then((res) => {
+      setAdmissions(res.data);
+      setTotalPages(res.meta.last_page);
+    });
+  }, [page]);
 
   useEffect(() => {
     reload();
@@ -39,10 +42,10 @@ export function UrgenceQueue() {
             <div className="flex items-center gap-3">
               {a.niveau_triage ? (
                 <Badge tone={TRIAGE_TONE[a.niveau_triage]}>
-                  {NIVEAU_TRIAGE_LABELS[a.niveau_triage]}
+                  {t(`urgences.niveau.${a.niveau_triage}`)}
                 </Badge>
               ) : (
-                <Badge tone="neutral">À trier</Badge>
+                <Badge tone="neutral">{t("urgences.aTrier")}</Badge>
               )}
               <span className="text-foreground">
                 {a.patient.prenom} {a.patient.nom}
@@ -61,8 +64,10 @@ export function UrgenceQueue() {
       ))}
 
       {admissions.length === 0 && (
-        <p className="text-sm text-muted">Aucun patient aux urgences actuellement.</p>
+        <p className="text-sm text-muted">{t("urgences.empty")}</p>
       )}
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

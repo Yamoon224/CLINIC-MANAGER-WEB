@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type {
   Consultation,
   Prescription,
@@ -49,8 +50,9 @@ export function completeConsultation(
 
 export function fetchPatientHistory(
   patientId: number,
-): Promise<{ data: Consultation[] }> {
-  return apiFetch<{ data: Consultation[] }>(
-    `/patients/${patientId}/consultations`,
+  page = 1,
+): Promise<PaginatedResponse<Consultation>> {
+  return apiFetch<PaginatedResponse<Consultation>>(
+    `/patients/${patientId}/consultations?page=${page}`,
   );
 }

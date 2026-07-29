@@ -1,9 +1,14 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type { Patient, RegisterPatientPayload } from "./types";
 
-export function searchPatients(query: string): Promise<{ data: Patient[] }> {
-  const params = query ? `?q=${encodeURIComponent(query)}` : "";
-  return apiFetch<{ data: Patient[] }>(`/patients${params}`);
+export function searchPatients(
+  query: string,
+  page = 1,
+): Promise<PaginatedResponse<Patient>> {
+  const params = new URLSearchParams({ page: String(page) });
+  if (query) params.set("q", query);
+  return apiFetch<PaginatedResponse<Patient>>(`/patients?${params}`);
 }
 
 export function getPatient(id: number): Promise<{ data: Patient }> {
