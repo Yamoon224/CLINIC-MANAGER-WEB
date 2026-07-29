@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { startConsultation } from "./consultations-api";
 import { Button, Card, Input } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function StartConsultationAction({ patientId }: { patientId: number }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [motif, setMotif] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -13,7 +15,7 @@ export function StartConsultationAction({ patientId }: { patientId: number }) {
 
   async function handleStart() {
     if (!motif.trim()) {
-      setError("Le motif est requis.");
+      setError(t("consultations.motifRequired"));
       return;
     }
     setIsSubmitting(true);
@@ -22,7 +24,7 @@ export function StartConsultationAction({ patientId }: { patientId: number }) {
       const { data } = await startConsultation({ patient_id: patientId, motif });
       router.push(`/consultations/${data.id}`);
     } catch {
-      setError("Impossible de démarrer la consultation.");
+      setError(t("consultations.startError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -30,16 +32,16 @@ export function StartConsultationAction({ patientId }: { patientId: number }) {
 
   return (
     <Card className="flex flex-col gap-2 max-w-md p-4">
-      <span className="font-semibold text-sm text-foreground">Démarrer une consultation</span>
+      <span className="font-semibold text-sm text-foreground">{t("consultations.startTitle")}</span>
       <div className="flex items-center gap-2">
         <Input
-          placeholder="Motif de la consultation"
+          placeholder={t("consultations.motifPlaceholder")}
           value={motif}
           onChange={(e) => setMotif(e.target.value)}
           className="flex-1"
         />
         <Button onClick={handleStart} disabled={isSubmitting} className="whitespace-nowrap">
-          {isSubmitting ? "..." : "Démarrer"}
+          {isSubmitting ? t("consultations.starting") : t("consultations.start")}
         </Button>
       </div>
       {error && <p className="text-sm text-danger">{error}</p>}

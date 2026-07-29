@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from "@/lib/pagination";
+
 export interface Vaccin {
   id: number;
   nom: string;
@@ -36,6 +38,7 @@ export interface Echeance {
 
 export interface Carnet {
   data: Vaccination[];
+  meta: PaginatedResponse<unknown>["meta"];
   echeances: Echeance[];
 }
 

@@ -88,72 +88,78 @@ export function ConsultationScreen({ id }: { id: number }) {
     }
   }
 
-  if (!consultation) return <p className="text-sm text-muted">Chargement...</p>;
+  if (!consultation) return <p className="text-sm text-muted">{t("common.loading")}</p>;
 
   const readOnly = consultation.statut === "terminee";
 
   return (
-    <div className="flex flex-col gap-4 max-w-2xl">
+    <div className="flex flex-col gap-4">
       <div>
         <h1 className="text-lg font-semibold text-foreground">
-          Consultation - {consultation.patient.prenom} {consultation.patient.nom}
+          {t("consultations.header", {
+            prenom: consultation.patient.prenom,
+            nom: consultation.patient.nom,
+          })}
         </h1>
         <p className="text-sm text-muted">
-          Dossier n° {consultation.patient.numero_dossier} · Motif : {consultation.motif}
+          {t("consultations.subHeader", {
+            numero: consultation.patient.numero_dossier,
+            motif: consultation.motif,
+          })}
         </p>
       </div>
 
       {consultation.patient.allergies && (
         <div className="rounded-xl border border-danger/30 bg-danger-light p-3 text-sm">
-          <span className="font-semibold text-danger">⚠ Allergies : </span>
+          <span className="font-semibold text-danger">⚠ {t("consultations.allergiesLabel")}</span>
           {consultation.patient.allergies}
         </div>
       )}
 
       {readOnly && (
         <div className="rounded-xl border border-success/30 bg-success-light p-3 text-sm text-success">
-          Consultation terminée.
+          {t("consultations.completed")}
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Température (°C)">
+        <Field label={t("consultations.temperature")}>
           <Input
             type="number"
             step="0.1"
             disabled={readOnly}
-            placeholder="37.0"
+            placeholder={t("consultations.temperaturePlaceholder")}
             value={form.temperature ?? ""}
             onChange={(e) =>
               setForm((f) => ({ ...f, temperature: e.target.value ? Number(e.target.value) : undefined }))
             }
           />
         </Field>
-        <Field label="Tension">
+        <Field label={t("consultations.tension")}>
           <Input
             disabled={readOnly}
-            placeholder="120/80"
+            placeholder={t("consultations.tensionPlaceholder")}
             value={form.tension ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, tension: e.target.value }))}
           />
         </Field>
-        <Field label="Poids (kg)">
+        <Field label={t("consultations.poids")}>
           <Input
             type="number"
             step="0.1"
             disabled={readOnly}
-            placeholder="Poids en kg"
+            placeholder={t("consultations.poidsPlaceholder")}
             value={form.poids ?? ""}
             onChange={(e) =>
               setForm((f) => ({ ...f, poids: e.target.value ? Number(e.target.value) : undefined }))
             }
           />
         </Field>
-        <Field label="Pouls (bpm)">
+        <Field label={t("consultations.pouls")}>
           <Input
             type="number"
             disabled={readOnly}
-            placeholder="Pouls/min"
+            placeholder={t("consultations.poulsPlaceholder")}
             value={form.pouls ?? ""}
             onChange={(e) =>
               setForm((f) => ({ ...f, pouls: e.target.value ? Number(e.target.value) : undefined }))
@@ -162,11 +168,11 @@ export function ConsultationScreen({ id }: { id: number }) {
         </Field>
       </div>
 
-      <Field label="Examen clinique">
+      <Field label={t("consultations.examenClinique")}>
         <Textarea
           disabled={readOnly}
           rows={3}
-          placeholder="Résultats de l'examen clinique..."
+          placeholder={t("consultations.examenCliniquePlaceholder")}
           value={form.examen_clinique ?? ""}
           onChange={(e) => setForm((f) => ({ ...f, examen_clinique: e.target.value }))}
         />
@@ -174,30 +180,30 @@ export function ConsultationScreen({ id }: { id: number }) {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2">
-          <Field label="Diagnostic">
+          <Field label={t("consultations.diagnostic")}>
             <Input
               disabled={readOnly}
-              placeholder="Diagnostic"
+              placeholder={t("consultations.diagnosticPlaceholder")}
               value={form.diagnostic ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, diagnostic: e.target.value }))}
             />
           </Field>
         </div>
-        <Field label="Code CIM-10">
+        <Field label={t("consultations.cim10")}>
           <Input
             disabled={readOnly}
-            placeholder="Code CIM-10"
+            placeholder={t("consultations.cim10")}
             value={form.cim10_code ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, cim10_code: e.target.value }))}
           />
         </Field>
       </div>
 
-      <Field label="Conduite à tenir">
+      <Field label={t("consultations.conduiteATenir")}>
         <Textarea
           disabled={readOnly}
           rows={2}
-          placeholder="Conduite à tenir, traitement, recommandations..."
+          placeholder={t("consultations.conduiteATenirPlaceholder")}
           value={form.conduite_a_tenir ?? ""}
           onChange={(e) => setForm((f) => ({ ...f, conduite_a_tenir: e.target.value }))}
         />
@@ -205,12 +211,12 @@ export function ConsultationScreen({ id }: { id: number }) {
 
       {!readOnly && (
         <Button variant="outline" onClick={handleSave} disabled={isSaving} className="self-start">
-          {isSaving ? "Enregistrement..." : "Enregistrer"}
+          {isSaving ? t("consultations.saving") : t("consultations.save")}
         </Button>
       )}
 
       <Card className="p-4">
-        <h2 className="font-semibold text-foreground mb-3">Prescriptions</h2>
+        <h2 className="font-semibold text-foreground mb-3">{t("consultations.prescriptions")}</h2>
         <ul className="flex flex-col gap-2 mb-3 text-sm">
           {consultation.prescriptions.map((p) => (
             <li key={p.id} className="rounded-lg border border-border p-2">
@@ -219,7 +225,7 @@ export function ConsultationScreen({ id }: { id: number }) {
             </li>
           ))}
           {consultation.prescriptions.length === 0 && (
-            <li className="text-muted">Aucune prescription.</li>
+            <li className="text-muted">{t("consultations.noPrescriptions")}</li>
           )}
         </ul>
 
@@ -237,14 +243,14 @@ export function ConsultationScreen({ id }: { id: number }) {
                 ))}
               </Select>
               <Input
-                placeholder="Désignation (médicament, analyse...)"
+                placeholder={t("consultations.designationPlaceholder")}
                 value={designation}
                 onChange={(e) => setDesignation(e.target.value)}
                 className="flex-1"
               />
             </div>
             <Input
-              placeholder="Instructions (posologie...)"
+              placeholder={t("consultations.instructionsPlaceholder")}
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
             />
@@ -253,7 +259,7 @@ export function ConsultationScreen({ id }: { id: number }) {
               disabled={isAddingPrescription}
               className="self-start"
             >
-              Ajouter
+              {t("consultations.add")}
             </Button>
           </div>
         )}
@@ -261,7 +267,7 @@ export function ConsultationScreen({ id }: { id: number }) {
 
       {!readOnly && (
         <Button onClick={handleFinish} disabled={isFinishing} className="self-start">
-          {isFinishing ? "..." : "Terminer la consultation"}
+          {isFinishing ? t("consultations.finishing") : t("consultations.finish")}
         </Button>
       )}
     </div>

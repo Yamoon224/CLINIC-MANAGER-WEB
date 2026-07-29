@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type {
   AdministrerVaccinPayload,
   Carnet,
@@ -28,8 +29,8 @@ export function createLot(
   });
 }
 
-export function fetchCarnet(patientId: number): Promise<Carnet> {
-  return apiFetch<Carnet>(`/patients/${patientId}/vaccinations`);
+export function fetchCarnet(patientId: number, page = 1): Promise<Carnet> {
+  return apiFetch<Carnet>(`/patients/${patientId}/vaccinations?page=${page}`);
 }
 
 export function administrerVaccin(
@@ -42,8 +43,10 @@ export function administrerVaccin(
   });
 }
 
-export function fetchChaineFroid(): Promise<{ data: ReleveTemperature[] }> {
-  return apiFetch<{ data: ReleveTemperature[] }>("/chaine-froid");
+export function fetchChaineFroid(
+  page = 1,
+): Promise<PaginatedResponse<ReleveTemperature>> {
+  return apiFetch<PaginatedResponse<ReleveTemperature>>(`/chaine-froid?page=${page}`);
 }
 
 export function addReleveTemperature(

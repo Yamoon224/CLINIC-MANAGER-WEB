@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { administrerVaccin, fetchCarnet, fetchVaccins } from "./vaccinations-api";
 import type { Carnet, Vaccin } from "./types";
-import { Badge, Button, Card, Input, Select, Textarea } from "@/components/ui";
+import { Badge, Button, Card, Input, Pagination, Select, Textarea } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function CarnetVaccination({ patientId }: { patientId: number }) {
+  const { t } = useTranslation();
   const [carnet, setCarnet] = useState<Carnet | null>(null);
   const [vaccins, setVaccins] = useState<Vaccin[]>([]);
   const [vaccinId, setVaccinId] = useState<number | "">("");
@@ -16,10 +18,15 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
   const [mapiDetails, setMapiDetails] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const load = useCallback(() => {
-    fetchCarnet(patientId).then(setCarnet);
-  }, [patientId]);
+    fetchCarnet(patientId, page).then((res) => {
+      setCarnet(res);
+      setTotalPages(res.meta.last_page);
+    });
+  }, [patientId, page]);
 
   useEffect(() => {
     load();

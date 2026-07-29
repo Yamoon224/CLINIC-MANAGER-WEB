@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/pagination";
 import type { Conge, CongeStatut, Employe, Planning, TypeContrat } from "./types";
 
 export function fetchEmployes(statut?: string): Promise<{ data: Employe[] }> {
@@ -22,9 +23,13 @@ export function createEmploye(payload: {
   });
 }
 
-export function fetchConges(statut?: CongeStatut | ""): Promise<{ data: Conge[] }> {
-  const query = statut ? `?statut=${statut}` : "";
-  return apiFetch<{ data: Conge[] }>(`/conges${query}`);
+export function fetchConges(
+  statut?: CongeStatut | "",
+  page = 1,
+): Promise<PaginatedResponse<Conge>> {
+  const params = new URLSearchParams({ page: String(page) });
+  if (statut) params.set("statut", statut);
+  return apiFetch<PaginatedResponse<Conge>>(`/conges?${params}`);
 }
 
 export function demanderConge(
@@ -48,12 +53,15 @@ export function traiterConge(
   });
 }
 
-export function fetchPlanning(dateDebut?: string, dateFin?: string): Promise<{ data: Planning[] }> {
-  const params = new URLSearchParams();
+export function fetchPlanning(
+  dateDebut?: string,
+  dateFin?: string,
+  page = 1,
+): Promise<PaginatedResponse<Planning>> {
+  const params = new URLSearchParams({ page: String(page) });
   if (dateDebut) params.set("date_debut", dateDebut);
   if (dateFin) params.set("date_fin", dateFin);
-  const query = params.toString() ? `?${params.toString()}` : "";
-  return apiFetch<{ data: Planning[] }>(`/planning${query}`);
+  return apiFetch<PaginatedResponse<Planning>>(`/planning?${params}`);
 }
 
 export function assignerPlanning(

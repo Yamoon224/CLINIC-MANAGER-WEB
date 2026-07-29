@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { createEmploye, fetchEmployes } from "./personnel-api";
-import { TYPE_CONTRAT_LABELS, type Employe, type TypeContrat } from "./types";
+import type { Employe, TypeContrat } from "./types";
 import { Badge, Button, Card, Field, Input, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function Employes() {
+  const { t } = useTranslation();
   const [employes, setEmployes] = useState<Employe[]>([]);
   const [nom, setNom] = useState("");
   const [prenom, setPrenom] = useState("");
@@ -14,6 +16,13 @@ export function Employes() {
   const [typeContrat, setTypeContrat] = useState<TypeContrat>("cdi");
   const [dateEmbauche, setDateEmbauche] = useState("");
   const [busy, setBusy] = useState(false);
+
+  const TYPE_CONTRAT_LABELS: Record<TypeContrat, string> = {
+    cdi: t("personnel.typeContrat.cdi"),
+    cdd: t("personnel.typeContrat.cdd"),
+    vacataire: t("personnel.typeContrat.vacataire"),
+    stage: t("personnel.typeContrat.stage"),
+  };
 
   function load() {
     fetchEmployes().then((res) => setEmployes(res.data));
@@ -47,38 +56,42 @@ export function Employes() {
   }
 
   return (
-    <div className="flex flex-col gap-4 max-w-2xl">
+    <div className="flex flex-col gap-4">
       <Card className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Nom">
-            <Input placeholder="Nom" value={nom} onChange={(e) => setNom(e.target.value)} />
-          </Field>
-          <Field label="Prénom">
+          <Field label={t("personnel.employes.formNom")}>
             <Input
-              placeholder="Prénom"
+              placeholder={t("personnel.employes.formNom")}
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+            />
+          </Field>
+          <Field label={t("personnel.employes.formPrenom")}>
+            <Input
+              placeholder={t("personnel.employes.formPrenom")}
               value={prenom}
               onChange={(e) => setPrenom(e.target.value)}
             />
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Fonction">
+          <Field label={t("personnel.employes.formFonction")}>
             <Input
-              placeholder="Fonction"
+              placeholder={t("personnel.employes.formFonction")}
               value={fonction}
               onChange={(e) => setFonction(e.target.value)}
             />
           </Field>
-          <Field label="Service">
+          <Field label={t("personnel.employes.formService")}>
             <Input
-              placeholder="Service"
+              placeholder={t("personnel.employes.formService")}
               value={service}
               onChange={(e) => setService(e.target.value)}
             />
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Type de contrat">
+          <Field label={t("personnel.employes.formTypeContrat")}>
             <Select
               value={typeContrat}
               onChange={(e) => setTypeContrat(e.target.value as TypeContrat)}
@@ -90,7 +103,7 @@ export function Employes() {
               ))}
             </Select>
           </Field>
-          <Field label="Date d'embauche">
+          <Field label={t("personnel.employes.formDateEmbauche")}>
             <Input
               type="date"
               value={dateEmbauche}
@@ -99,25 +112,41 @@ export function Employes() {
           </Field>
         </div>
         <Button onClick={handleSubmit} disabled={busy} className="self-start">
-          Ajouter l&apos;employé
+          {t("personnel.employes.submit")}
         </Button>
       </Card>
 
-      <div className="flex flex-col gap-2">
-        {employes.map((e) => (
-          <Card key={e.id} className="flex items-center justify-between p-3">
-            <span className="text-sm">
-              {e.prenom} {e.nom} - {e.fonction}
-              {e.service && ` (${e.service})`}
-            </span>
-            <span className="flex items-center gap-2 text-xs text-muted">
-              {e.matricule}
-              <Badge tone="neutral">{TYPE_CONTRAT_LABELS[e.type_contrat]}</Badge>
-            </span>
-          </Card>
-        ))}
-        {employes.length === 0 && <p className="text-sm text-muted">Aucun employé.</p>}
-      </div>
+      <Card className="p-0 overflow-hidden">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>{t("personnel.employes.tableMatricule")}</th>
+              <th>{t("personnel.employes.tableNom")}</th>
+              <th>{t("personnel.employes.tablePrenom")}</th>
+              <th>{t("personnel.employes.tableFonction")}</th>
+              <th>{t("personnel.employes.tableService")}</th>
+              <th>{t("personnel.employes.tableTypeContrat")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employes.map((e) => (
+              <tr key={e.id}>
+                <td>{e.matricule}</td>
+                <td>{e.nom}</td>
+                <td>{e.prenom}</td>
+                <td>{e.fonction}</td>
+                <td>{e.service ?? "-"}</td>
+                <td>
+                  <Badge tone="neutral">{TYPE_CONTRAT_LABELS[e.type_contrat]}</Badge>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {employes.length === 0 && (
+          <p className="text-sm text-muted p-4">{t("personnel.employes.noEmployes")}</p>
+        )}
+      </Card>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Badge, Button, Card, Input, Select } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 import {
   ajouterActe,
   enregistrerConstantes,
@@ -13,7 +14,6 @@ import {
 import {
   ISSUE_LABELS,
   NIVEAUX_TRIAGE,
-  NIVEAU_TRIAGE_LABELS,
   type AdmissionStatut,
   type AdmissionUrgence,
   type IssueUrgence,
@@ -27,13 +27,6 @@ const STATUT_TONE: Record<AdmissionStatut, "primary" | "accent" | "success" | "w
   sorti: "success",
 };
 
-const STATUT_LABELS: Record<AdmissionStatut, string> = {
-  admis: "Admis",
-  trie: "Trié",
-  observation: "En observation",
-  sorti: "Sorti",
-};
-
 const TRIAGE_SELECTED_CLASSES: Record<NiveauTriage, string> = {
   reanimation: "bg-danger text-white",
   tres_urgent: "bg-danger text-white",
@@ -43,6 +36,7 @@ const TRIAGE_SELECTED_CLASSES: Record<NiveauTriage, string> = {
 };
 
 export function UrgenceDetail({ id }: { id: number }) {
+  const { t } = useTranslation();
   const [admission, setAdmission] = useState<AdmissionUrgence | null>(null);
   const [acteDescription, setActeDescription] = useState("");
   const [constantes, setConstantes] = useState({
@@ -127,7 +121,7 @@ export function UrgenceDetail({ id }: { id: number }) {
     }
   }
 
-  if (!admission) return <p className="text-muted">Chargement...</p>;
+  if (!admission) return <p className="text-muted">{t("common.loading")}</p>;
 
   const readOnly = admission.statut === "sorti";
 
@@ -137,33 +131,37 @@ export function UrgenceDetail({ id }: { id: number }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-lg font-semibold text-foreground">
-              Urgences - {admission.patient.prenom} {admission.patient.nom}
+              {t("urgences.detail.title", {
+                prenom: admission.patient.prenom,
+                nom: admission.patient.nom,
+              })}
             </h1>
             <p className="text-sm text-muted">
-              Dossier n° {admission.patient.numero_dossier}
+              {t("urgences.detail.dossierNumero", { numero: admission.patient.numero_dossier })}
             </p>
           </div>
           <Badge tone={STATUT_TONE[admission.statut]}>
-            {STATUT_LABELS[admission.statut]}
+            {t(`urgences.statut.${admission.statut}`)}
           </Badge>
         </div>
 
         {admission.patient.allergies && (
           <div className="mt-4 rounded-lg border border-danger/30 bg-danger-light px-3 py-2 text-sm">
-            <span className="font-semibold text-danger">⚠ Allergies : </span>
+            <span className="font-semibold text-danger">{t("urgences.detail.allergies")}</span>
             {admission.patient.allergies}
           </div>
         )}
 
         {readOnly && (
           <div className="mt-4 rounded-lg border border-success/30 bg-success-light px-3 py-2 text-sm text-success">
-            Sortie enregistrée : {admission.issue && ISSUE_LABELS[admission.issue]}
+            {t("urgences.detail.sortieEnregistree")}
+            {admission.issue && t(`urgences.issue.${admission.issue}`)}
           </div>
         )}
       </Card>
 
       <Card>
-        <h2 className="font-semibold text-foreground mb-3">Triage</h2>
+        <h2 className="font-semibold text-foreground mb-3">{t("urgences.detail.triage")}</h2>
         <div className="flex flex-wrap gap-2">
           {NIVEAUX_TRIAGE.map((niveau) => {
             const selected = admission.niveau_triage === niveau;
@@ -178,7 +176,7 @@ export function UrgenceDetail({ id }: { id: number }) {
                     : "border border-border bg-surface hover:bg-primary-light/60"
                 }`}
               >
-                {NIVEAU_TRIAGE_LABELS[niveau]}
+                {t(`urgences.niveau.${niveau}`)}
               </button>
             );
           })}
@@ -186,28 +184,28 @@ export function UrgenceDetail({ id }: { id: number }) {
       </Card>
 
       <Card>
-        <h2 className="font-semibold text-foreground mb-3">Constantes</h2>
+        <h2 className="font-semibold text-foreground mb-3">{t("urgences.detail.constantes")}</h2>
         <div className="grid grid-cols-4 gap-3">
           <Input
-            placeholder="Température"
+            placeholder={t("urgences.detail.temperature")}
             disabled={readOnly}
             value={constantes.temperature}
             onChange={(e) => setConstantes((c) => ({ ...c, temperature: e.target.value }))}
           />
           <Input
-            placeholder="Tension"
+            placeholder={t("urgences.detail.tension")}
             disabled={readOnly}
             value={constantes.tension}
             onChange={(e) => setConstantes((c) => ({ ...c, tension: e.target.value }))}
           />
           <Input
-            placeholder="Poids"
+            placeholder={t("urgences.detail.poids")}
             disabled={readOnly}
             value={constantes.poids}
             onChange={(e) => setConstantes((c) => ({ ...c, poids: e.target.value }))}
           />
           <Input
-            placeholder="Pouls"
+            placeholder={t("urgences.detail.pouls")}
             disabled={readOnly}
             value={constantes.pouls}
             onChange={(e) => setConstantes((c) => ({ ...c, pouls: e.target.value }))}
@@ -220,13 +218,13 @@ export function UrgenceDetail({ id }: { id: number }) {
             disabled={busy}
             className="mt-3"
           >
-            Enregistrer les constantes
+            {t("urgences.detail.saveConstantes")}
           </Button>
         )}
       </Card>
 
       <Card>
-        <h2 className="font-semibold text-foreground mb-3">Gestes et traitements (traçabilité)</h2>
+        <h2 className="font-semibold text-foreground mb-3">{t("urgences.detail.gestesTraitements")}</h2>
         <ul className="flex flex-col gap-1.5 mb-3 text-sm">
           {admission.actes.map((acte) => (
             <li key={acte.id} className="rounded-lg border border-border px-3 py-2">
@@ -241,19 +239,19 @@ export function UrgenceDetail({ id }: { id: number }) {
             </li>
           ))}
           {admission.actes.length === 0 && (
-            <li className="text-muted">Aucun acte enregistré.</li>
+            <li className="text-muted">{t("urgences.detail.noActes")}</li>
           )}
         </ul>
         {!readOnly && (
           <div className="flex gap-2">
             <Input
-              placeholder="Ex. pose de voie veineuse, administration de..."
+              placeholder={t("urgences.detail.actePlaceholder")}
               value={acteDescription}
               onChange={(e) => setActeDescription(e.target.value)}
               className="flex-1"
             />
             <Button variant="outline" onClick={handleAddActe} disabled={busy}>
-              Ajouter
+              {t("urgences.detail.add")}
             </Button>
           </div>
         )}
@@ -263,7 +261,7 @@ export function UrgenceDetail({ id }: { id: number }) {
         <Card className="flex items-center gap-4 flex-wrap">
           {admission.statut !== "observation" && (
             <Button variant="outline" onClick={handleObservation} disabled={busy}>
-              Mettre en observation
+              {t("urgences.detail.miseEnObservation")}
             </Button>
           )}
 
@@ -272,14 +270,14 @@ export function UrgenceDetail({ id }: { id: number }) {
             onChange={(e) => setIssue(e.target.value as IssueUrgence)}
             className="max-w-xs"
           >
-            {Object.entries(ISSUE_LABELS).map(([value, label]) => (
+            {Object.keys(ISSUE_LABELS).map((value) => (
               <option key={value} value={value}>
-                {label}
+                {t(`urgences.issue.${value}`)}
               </option>
             ))}
           </Select>
           <Button onClick={handleSortie} disabled={busy}>
-            Enregistrer la sortie
+            {t("urgences.detail.sortie")}
           </Button>
         </Card>
       )}
