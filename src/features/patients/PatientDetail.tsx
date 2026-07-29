@@ -1,5 +1,6 @@
 import { PatientHistory } from "@/features/consultations/PatientHistory";
 import { StartConsultationAction } from "@/features/consultations/StartConsultationAction";
+import { PatientSejours } from "@/features/hospitalisation/PatientSejours";
 import { PatientAnalyses } from "@/features/laboratoire/PatientAnalyses";
 import { MaterniteSection } from "@/features/maternite/MaterniteSection";
 import { PatientDispensations } from "@/features/pharmacie/PatientDispensations";
@@ -66,6 +67,8 @@ export function PatientDetail({ patient }: { patient: Patient }) {
       <PatientAnalyses patientId={patient.id} />
 
       <PatientDispensations patientId={patient.id} />
+
+      <PatientSejours patientId={patient.id} />
 
       {patient.sexe !== "M" && <MaterniteSection patientId={patient.id} />}
     </div>
