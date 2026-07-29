@@ -1,10 +1,11 @@
 import { cloneElement, isValidElement, useId } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { Input } from "./Input";
+import { PasswordInput } from "./PasswordInput";
 import { Select } from "./Select";
 import { Textarea } from "./Textarea";
 
-const FLOATABLE_TYPES: unknown[] = [Input, Select, Textarea];
+const FLOATABLE_TYPES: unknown[] = [Input, Select, Textarea, PasswordInput];
 
 type FloatableProps = {
   id?: string;

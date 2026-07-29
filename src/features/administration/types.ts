@@ -116,3 +116,19 @@ export interface PaginatedResponse<T> {
     per_page: number;
   };
 }
+
+export interface AdminUser {
+  id: number;
+  name: string;
+  email: string;
+  roles: string[];
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface CreateUserPayload {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+}

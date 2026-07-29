@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "./auth-context";
-import { Button, Field, Input } from "@/components/ui";
+import { Button, Field, Input, PasswordInput } from "@/components/ui";
 
 export function LoginForm() {
   const { login } = useAuth();
@@ -38,9 +38,8 @@ export function LoginForm() {
         />
       </Field>
       <Field label="Mot de passe">
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           required
           autoComplete="current-password"
           placeholder="••••••••"

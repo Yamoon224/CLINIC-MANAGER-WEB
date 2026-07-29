@@ -9,13 +9,14 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import * as authApi from "./auth-api";
-import type { LoginCredentials, User } from "./types";
+import type { LoginCredentials, UpdateProfilePayload, User } from "./types";
 
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (payload: UpdateProfilePayload) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -54,8 +55,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/");
   }, [router]);
 
+  const updateProfile = useCallback(async (payload: UpdateProfilePayload) => {
+    setUser(await authApi.updateProfile(payload));
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, login, logout, updateProfile }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,5 +1,13 @@
 import { apiFetch } from "@/lib/api-client";
-import type { AuditCauser, AuditEntry, AuditFilters, DashboardStats, PaginatedResponse } from "./types";
+import type {
+  AdminUser,
+  AuditCauser,
+  AuditEntry,
+  AuditFilters,
+  CreateUserPayload,
+  DashboardStats,
+  PaginatedResponse,
+} from "./types";
 
 export function fetchDashboard(): Promise<{ data: DashboardStats }> {
   return apiFetch<{ data: DashboardStats }>("/statistiques");
@@ -22,4 +30,39 @@ export function fetchAudit(
 
 export function fetchCausers(): Promise<{ data: AuditCauser[] }> {
   return apiFetch<{ data: AuditCauser[] }>("/audit/causers");
+}
+
+export function fetchUsers(): Promise<{ data: AdminUser[] }> {
+  return apiFetch<{ data: AdminUser[] }>("/utilisateurs");
+}
+
+export function fetchRoles(): Promise<{ data: string[] }> {
+  return apiFetch<{ data: string[] }>("/roles");
+}
+
+export function createUser(payload: CreateUserPayload): Promise<{ data: AdminUser }> {
+  return apiFetch<{ data: AdminUser }>("/utilisateurs", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function changeUserRole(
+  userId: number,
+  role: string,
+): Promise<{ data: AdminUser }> {
+  return apiFetch<{ data: AdminUser }>(`/utilisateurs/${userId}/role`, {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
+}
+
+export function changeUserStatus(
+  userId: number,
+  isActive: boolean,
+): Promise<{ data: AdminUser }> {
+  return apiFetch<{ data: AdminUser }>(`/utilisateurs/${userId}/statut`, {
+    method: "PATCH",
+    body: JSON.stringify({ is_active: isActive }),
+  });
 }
