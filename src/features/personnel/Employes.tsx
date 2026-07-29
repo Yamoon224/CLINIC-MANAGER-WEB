@@ -108,11 +108,11 @@ export function Employes() {
         {employes.map((e) => (
           <li key={e.id} className="border rounded p-2 flex justify-between">
             <span>
-              {e.prenom} {e.nom} — {e.fonction}
+              {e.prenom} {e.nom} - {e.fonction}
               {e.service && ` (${e.service})`}
             </span>
             <span className="text-gray-500 text-xs">
-              {e.matricule} — {TYPE_CONTRAT_LABELS[e.type_contrat]}
+              {e.matricule} - {TYPE_CONTRAT_LABELS[e.type_contrat]}
             </span>
           </li>
         ))}

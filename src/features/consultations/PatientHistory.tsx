@@ -38,7 +38,7 @@ export function PatientHistory({ patientId }: { patientId: number }) {
           </div>
           <p className="text-gray-600">
             Dr {c.praticien.name}
-            {c.diagnostic && <> — {c.diagnostic}</>}
+            {c.diagnostic && <> - {c.diagnostic}</>}
           </p>
         </li>
       ))}

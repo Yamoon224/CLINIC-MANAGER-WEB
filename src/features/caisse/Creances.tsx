@@ -17,7 +17,7 @@ export function Creances() {
       {creances.map((f) => (
         <li key={f.id} className="border rounded p-2 flex justify-between">
           <Link href={`/factures/${f.id}`} className="text-blue-600 underline">
-            {f.patient.prenom} {f.patient.nom} — Facture #{f.id}
+            {f.patient.prenom} {f.patient.nom} - Facture #{f.id}
           </Link>
           <span className="font-medium">{f.solde} F CFA dû</span>
         </li>

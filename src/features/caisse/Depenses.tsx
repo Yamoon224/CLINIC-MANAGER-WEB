@@ -74,7 +74,7 @@ export function Depenses() {
           <li key={d.id} className="border rounded p-2 flex justify-between">
             <span>
               {d.categorie}
-              {d.description && ` — ${d.description}`}
+              {d.description && ` - ${d.description}`}
             </span>
             <span className="font-medium">{d.montant} F CFA</span>
           </li>

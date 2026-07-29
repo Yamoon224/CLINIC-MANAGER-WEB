@@ -57,7 +57,7 @@ export function PrisesEnCharge() {
             </div>
             <div className="text-xs text-gray-600">
               {p.assurance_patient.patient &&
-                `${p.assurance_patient.patient.prenom} ${p.assurance_patient.patient.nom} — `}
+                `${p.assurance_patient.patient.prenom} ${p.assurance_patient.patient.nom} - `}
               {p.assurance_patient.compagnie.nom}
             </div>
             <div className="text-xs">

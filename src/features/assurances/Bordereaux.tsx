@@ -101,13 +101,13 @@ export function Bordereaux() {
           <li key={b.id} className="border rounded p-2">
             <div className="flex items-center justify-between">
               <span className="font-medium">
-                {b.numero} — {b.compagnie.nom}
+                {b.numero} - {b.compagnie.nom}
               </span>
               <span className="text-xs text-gray-500">{STATUT_LABELS[b.statut]}</span>
             </div>
             <div className="text-xs text-gray-600">
               {b.montant_regle} / {b.montant_total} F CFA réglés
-              {b.nombre_factures !== null && ` — ${b.nombre_factures} facture(s)`}
+              {b.nombre_factures !== null && ` - ${b.nombre_factures} facture(s)`}
             </div>
             <div className="flex gap-2 mt-2">
               {b.statut === "brouillon" && (

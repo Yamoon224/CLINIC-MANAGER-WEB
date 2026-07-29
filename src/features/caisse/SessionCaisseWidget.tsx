@@ -80,7 +80,7 @@ export function SessionCaisseWidget() {
   return (
     <div className="border rounded p-4 flex flex-col gap-2 max-w-md">
       <p className="text-sm">
-        Session ouverte — fonds initial {session.montant_ouverture} F CFA
+        Session ouverte - fonds initial {session.montant_ouverture} F CFA
       </p>
       <div className="flex items-center gap-2">
         <input

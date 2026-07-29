@@ -53,7 +53,7 @@ export function AdmissionForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-xl">
       <p className="text-sm text-gray-600">
         Patient inconnu ou inconscient ? Laissez la recherche vide et
-        validez directement — un dossier minimal sera créé.
+        validez directement - un dossier minimal sera créé.
       </p>
 
       <div className="flex flex-col gap-1">

@@ -111,7 +111,7 @@ export function UrgenceDetail({ id }: { id: number }) {
     <div className="flex flex-col gap-4 max-w-2xl">
       <div>
         <h1 className="text-lg font-semibold">
-          Urgences — {admission.patient.prenom} {admission.patient.nom}
+          Urgences - {admission.patient.prenom} {admission.patient.nom}
         </h1>
         <p className="text-sm text-gray-500">
           Dossier n° {admission.patient.numero_dossier} · Statut : {admission.statut}
@@ -206,7 +206,7 @@ export function UrgenceDetail({ id }: { id: number }) {
                     minute: "2-digit",
                   })}
               </span>{" "}
-              — {acte.description}
+              - {acte.description}
             </li>
           ))}
           {admission.actes.length === 0 && (

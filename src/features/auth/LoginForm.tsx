@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "./auth-context";
+import { Button, Field, Input } from "@/components/ui";
 
 export function LoginForm() {
   const { login } = useAuth();
@@ -25,36 +26,36 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="email">Email</label>
-        <input
+      <Field label="Email">
+        <Input
           id="email"
           type="email"
           required
+          autoComplete="email"
+          placeholder="vous@clinique.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border rounded px-3 py-2"
         />
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="password">Mot de passe</label>
-        <input
+      </Field>
+      <Field label="Mot de passe">
+        <Input
           id="password"
           type="password"
           required
+          autoComplete="current-password"
+          placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border rounded px-3 py-2"
         />
-      </div>
-      {error && <p className="text-red-600 text-sm">{error}</p>}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-50"
-      >
+      </Field>
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">
+          {error}
+        </p>
+      )}
+      <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting ? "Connexion..." : "Se connecter"}
-      </button>
+      </Button>
     </form>
   );
 }

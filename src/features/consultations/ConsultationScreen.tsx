@@ -93,7 +93,7 @@ export function ConsultationScreen({ id }: { id: number }) {
     <div className="flex flex-col gap-4 max-w-2xl">
       <div>
         <h1 className="text-lg font-semibold">
-          Consultation — {consultation.patient.prenom} {consultation.patient.nom}
+          Consultation - {consultation.patient.prenom} {consultation.patient.nom}
         </h1>
         <p className="text-sm text-gray-500">
           Dossier n° {consultation.patient.numero_dossier} · Motif : {consultation.motif}
@@ -216,7 +216,7 @@ export function ConsultationScreen({ id }: { id: number }) {
         <ul className="flex flex-col gap-1 mb-3 text-sm">
           {consultation.prescriptions.map((p) => (
             <li key={p.id} className="border rounded p-2">
-              <span className="font-medium">{PRESCRIPTION_TYPE_LABELS[p.type]}</span> — {p.designation}
+              <span className="font-medium">{PRESCRIPTION_TYPE_LABELS[p.type]}</span> - {p.designation}
               {p.instructions && <p className="text-gray-500">{p.instructions}</p>}
             </li>
           ))}

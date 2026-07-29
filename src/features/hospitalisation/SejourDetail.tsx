@@ -80,16 +80,16 @@ export function SejourDetail({ id }: { id: number }) {
     <div className="flex flex-col gap-4 max-w-2xl">
       <div>
         <h1 className="text-lg font-semibold">
-          Hospitalisation — {sejour.patient.prenom} {sejour.patient.nom}
+          Hospitalisation - {sejour.patient.prenom} {sejour.patient.nom}
         </h1>
         <p className="text-sm text-gray-500">
-          Chambre {sejour.lit.chambre} — {sejour.lit.numero} · {sejour.motif}
+          Chambre {sejour.lit.chambre} - {sejour.lit.numero} · {sejour.motif}
         </p>
       </div>
 
       {readOnly && (
         <div className="border border-green-300 bg-green-50 rounded p-3 text-sm text-green-800">
-          Sortie enregistrée — {sejour.nombre_jours} jour(s), frais de séjour :{" "}
+          Sortie enregistrée - {sejour.nombre_jours} jour(s), frais de séjour :{" "}
           {sejour.frais_sejour} F CFA
         </div>
       )}
@@ -162,7 +162,7 @@ export function SejourDetail({ id }: { id: number }) {
             <option value="">Transférer vers...</option>
             {litsLibres.map((l) => (
               <option key={l.id} value={l.id}>
-                Chambre {l.chambre} — {l.numero}
+                Chambre {l.chambre} - {l.numero}
               </option>
             ))}
           </select>

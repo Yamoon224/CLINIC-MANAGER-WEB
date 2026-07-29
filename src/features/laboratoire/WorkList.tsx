@@ -99,7 +99,7 @@ export function WorkList() {
                   {d.resultat_critique && " ⚠ critique"}
                 </span>
               ) : (
-                "—"
+                "-"
               )}
             </td>
             <td className="py-2 pr-4">

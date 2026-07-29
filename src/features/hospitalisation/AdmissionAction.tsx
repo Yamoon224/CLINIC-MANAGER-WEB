@@ -45,7 +45,7 @@ export function AdmissionAction({ patientId }: { patientId: number }) {
         <option value="">Lit disponible...</option>
         {lits.map((l) => (
           <option key={l.id} value={l.id}>
-            Chambre {l.chambre} — {l.numero}
+            Chambre {l.chambre} - {l.numero}
           </option>
         ))}
       </select>

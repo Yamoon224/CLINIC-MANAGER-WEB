@@ -84,7 +84,7 @@ export function FacturationAction({ patientId }: { patientId: number }) {
                   checked={selected.has(key)}
                   onChange={() => toggle(key)}
                 />
-                {f.designation} — {f.prix_unitaire} F CFA × {f.quantite}
+                {f.designation} - {f.prix_unitaire} F CFA × {f.quantite}
               </label>
             </li>
           );
@@ -118,7 +118,7 @@ export function FacturationAction({ patientId }: { patientId: number }) {
           <option value="">Sans prise en charge</option>
           {prisesEnCharge.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.numero} — {p.assurance_patient.compagnie.nom}
+              {p.numero} - {p.assurance_patient.compagnie.nom}
               {p.montant_plafond ? ` (plafond ${p.montant_plafond} F CFA)` : ""}
             </option>
           ))}

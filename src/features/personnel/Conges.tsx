@@ -126,7 +126,7 @@ export function Conges() {
           <li key={c.id} className="border rounded p-2">
             <div className="flex items-center justify-between">
               <span className="font-medium">
-                {c.employe && `${c.employe.prenom} ${c.employe.nom}`} — {CONGE_TYPE_LABELS[c.type]}
+                {c.employe && `${c.employe.prenom} ${c.employe.nom}`} - {CONGE_TYPE_LABELS[c.type]}
               </span>
               <span className="text-xs text-gray-500">{CONGE_STATUT_LABELS[c.statut]}</span>
             </div>

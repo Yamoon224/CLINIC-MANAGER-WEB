@@ -24,7 +24,7 @@ export function GrossesseDetail({ id }: { id: number }) {
     <div className="flex flex-col gap-4 max-w-2xl">
       <div>
         <h1 className="text-lg font-semibold">
-          Dossier obstétrical — {grossesse.patient.prenom} {grossesse.patient.nom}
+          Dossier obstétrical - {grossesse.patient.prenom} {grossesse.patient.nom}
         </h1>
         <p className="text-sm text-gray-500">Dossier n° {grossesse.patient.numero_dossier}</p>
       </div>
@@ -95,7 +95,7 @@ export function GrossesseDetail({ id }: { id: number }) {
         {grossesse.accouchement ? (
           <div className="border rounded p-3 text-sm flex flex-col gap-2">
             <p>
-              {grossesse.accouchement.mode === "voie_basse" ? "Voie basse" : "Césarienne"} —{" "}
+              {grossesse.accouchement.mode === "voie_basse" ? "Voie basse" : "Césarienne"} -{" "}
               {grossesse.accouchement.date_heure &&
                 new Date(grossesse.accouchement.date_heure).toLocaleString("fr-FR")}
             </p>
@@ -109,7 +109,7 @@ export function GrossesseDetail({ id }: { id: number }) {
             <ul className="flex flex-col gap-1">
               {grossesse.accouchement.nouveau_nes.map((bebe) => (
                 <li key={bebe.id} className="border rounded p-2">
-                  {bebe.patient.prenom} {bebe.patient.nom} ({bebe.patient.numero_dossier}) —{" "}
+                  {bebe.patient.prenom} {bebe.patient.nom} ({bebe.patient.numero_dossier}) -{" "}
                   {bebe.sexe === "F" ? "Féminin" : bebe.sexe === "M" ? "Masculin" : "?"}
                   {bebe.poids && `, ${bebe.poids}kg`}
                   {bebe.score_apgar_1min !== null &&
@@ -137,7 +137,7 @@ function Row({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="contents">
       <dt className="text-gray-500">{label}</dt>
-      <dd>{value || "—"}</dd>
+      <dd>{value || "-"}</dd>
     </div>
   );
 }

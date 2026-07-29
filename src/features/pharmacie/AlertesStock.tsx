@@ -20,7 +20,7 @@ export function AlertesStock() {
         <ul className="text-sm flex flex-col gap-1">
           {alertes.ruptures.map((m) => (
             <li key={m.id} className="border border-red-300 bg-red-50 rounded p-2">
-              {m.dci} — {m.stock_disponible} restant(s) (seuil {m.seuil_alerte})
+              {m.dci} - {m.stock_disponible} restant(s) (seuil {m.seuil_alerte})
             </li>
           ))}
           {alertes.ruptures.length === 0 && (
@@ -34,7 +34,7 @@ export function AlertesStock() {
         <ul className="text-sm flex flex-col gap-1">
           {alertes.peremptions_proches.map((lot) => (
             <li key={lot.id} className="border border-orange-300 bg-orange-50 rounded p-2">
-              {lot.medicament.dci} — lot {lot.numero_lot} — {lot.date_peremption} (
+              {lot.medicament.dci} - lot {lot.numero_lot} - {lot.date_peremption} (
               {lot.quantite_restante} restant(s))
             </li>
           ))}

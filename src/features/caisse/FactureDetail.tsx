@@ -58,7 +58,7 @@ export function FactureDetail({ id }: { id: number }) {
     <div className="flex flex-col gap-4 max-w-2xl">
       <div>
         <h1 className="text-lg font-semibold">
-          Facture #{facture.id} — {facture.patient.prenom} {facture.patient.nom}
+          Facture #{facture.id} - {facture.patient.prenom} {facture.patient.nom}
         </h1>
         <p className="text-sm text-gray-500">Dossier n° {facture.patient.numero_dossier}</p>
       </div>
@@ -114,7 +114,7 @@ export function FactureDetail({ id }: { id: number }) {
         <ul className="text-sm flex flex-col gap-1 mb-2">
           {facture.encaissements.map((e) => (
             <li key={e.id} className="border rounded p-2">
-              {e.montant} F CFA — {MODE_PAIEMENT_LABELS[e.mode_paiement]}
+              {e.montant} F CFA - {MODE_PAIEMENT_LABELS[e.mode_paiement]}
               {e.caissier && ` (${e.caissier.name})`}
             </li>
           ))}

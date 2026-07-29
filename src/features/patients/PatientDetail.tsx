@@ -40,7 +40,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
           label="Personne à prévenir"
           value={
             patient.personne_a_prevenir_nom
-              ? `${patient.personne_a_prevenir_nom} (${patient.personne_a_prevenir_telephone ?? "—"})`
+              ? `${patient.personne_a_prevenir_nom} (${patient.personne_a_prevenir_telephone ?? "-"})`
               : null
           }
         />
@@ -85,7 +85,7 @@ function Row({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="contents">
       <dt className="text-gray-500">{label}</dt>
-      <dd>{value || "—"}</dd>
+      <dd>{value || "-"}</dd>
     </div>
   );
 }

@@ -148,7 +148,7 @@ function AssuranceRow({
     <li className="border rounded p-2">
       <div className="flex items-center justify-between">
         <span>
-          {assurance.compagnie.nom} — {assurance.numero_adherent} ({assurance.taux_couverture}%)
+          {assurance.compagnie.nom} - {assurance.numero_adherent} ({assurance.taux_couverture}%)
         </span>
         <span
           className={

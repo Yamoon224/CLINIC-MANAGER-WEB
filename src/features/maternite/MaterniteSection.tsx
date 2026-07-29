@@ -38,9 +38,9 @@ export function MaterniteSection({ patientId }: { patientId: number }) {
           <li key={g.id}>
             <Link href={`/grossesses/${g.id}`} className="text-blue-600 underline">
               Grossesse {g.statut === "suivie" ? "en cours" : g.statut}
-              {g.a_risque && <span className="text-red-600"> — à risque</span>}
+              {g.a_risque && <span className="text-red-600"> - à risque</span>}
             </Link>
-            {g.terme && <span className="text-gray-500"> — terme prévu {g.terme}</span>}
+            {g.terme && <span className="text-gray-500"> - terme prévu {g.terme}</span>}
           </li>
         ))}
         {grossesses.length === 0 && (

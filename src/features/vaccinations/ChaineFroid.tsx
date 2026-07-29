@@ -66,7 +66,7 @@ export function ChaineFroid() {
             className={`border rounded p-2 flex justify-between ${r.anomalie ? "border-red-300 bg-red-50" : ""}`}
           >
             <span>
-              {r.releve_at && new Date(r.releve_at).toLocaleString("fr-FR")} — {r.temperature}°C
+              {r.releve_at && new Date(r.releve_at).toLocaleString("fr-FR")} - {r.temperature}°C
               {r.anomalie && <span className="text-red-700 font-medium"> ⚠ hors plage</span>}
             </span>
           </li>

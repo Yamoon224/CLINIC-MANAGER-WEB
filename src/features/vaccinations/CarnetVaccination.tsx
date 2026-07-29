@@ -56,7 +56,7 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
         {carnet.data.map((v) => (
           <li key={v.id} className="border rounded p-2">
             <span className="font-medium">
-              {v.vaccin.nom} — dose {v.dose_numero}/{v.vaccin.nombre_doses}
+              {v.vaccin.nom} - dose {v.dose_numero}/{v.vaccin.nombre_doses}
             </span>{" "}
             <span className="text-gray-500">{v.date_administration}</span>
             {v.mapi_survenue && (
@@ -75,7 +75,7 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
           {carnet.echeances
             .map(
               (e) =>
-                `${e.vaccin.nom} (dose ${e.prochaine_dose})${e.date_prevue ? ` — ${e.date_prevue}` : ""}`,
+                `${e.vaccin.nom} (dose ${e.prochaine_dose})${e.date_prevue ? ` - ${e.date_prevue}` : ""}`,
             )
             .join(" · ")}
         </div>

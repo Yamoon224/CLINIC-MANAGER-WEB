@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/auth-context";
+import { Button } from "@/components/ui";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Tableau de bord" },
@@ -24,6 +26,7 @@ const NAV_LINKS = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading && !user) router.replace("/login");
@@ -33,23 +36,44 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex-1 flex flex-col">
-      <header className="border-b px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <span className="font-semibold">Clinic Manager</span>
-          <nav className="flex items-center gap-4 text-sm">
-            {NAV_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="hover:underline">
+      <header className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur">
+        <div className="flex items-center justify-between px-6 py-3">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/images/logo.png"
+              alt="Clinic Manager"
+              width={32}
+              height={32}
+              className="rounded-md"
+            />
+            <span className="font-semibold tracking-tight">Clinic Manager</span>
+          </div>
+          <div className="flex items-center gap-4 text-sm">
+            <span className="hidden text-muted sm:inline">{user.name}</span>
+            <Button variant="outline" size="sm" onClick={() => logout()}>
+              Déconnexion
+            </Button>
+          </div>
+        </div>
+        <nav className="flex items-center gap-1 overflow-x-auto px-4 pb-2 text-sm">
+          {NAV_LINKS.map((link) => {
+            const active =
+              pathname === link.href || pathname?.startsWith(`${link.href}/`);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`whitespace-nowrap rounded-full px-3 py-1.5 transition-colors ${
+                  active
+                    ? "bg-primary text-white"
+                    : "text-muted hover:bg-primary-light hover:text-primary"
+                }`}
+              >
                 {link.label}
               </Link>
-            ))}
-          </nav>
-        </div>
-        <div className="flex items-center gap-4 text-sm">
-          <span>{user.name}</span>
-          <button onClick={() => logout()} className="underline">
-            Déconnexion
-          </button>
-        </div>
+            );
+          })}
+        </nav>
       </header>
       <main className="flex-1 p-6">{children}</main>
     </div>

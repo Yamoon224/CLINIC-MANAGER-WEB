@@ -101,14 +101,14 @@ export function DispensationForm({
         <option value="">Médicament...</option>
         {medicaments.map((m) => (
           <option key={m.id} value={m.id} disabled={m.stock_disponible === 0}>
-            {m.dci} {m.dosage} — {m.stock_disponible} en stock
+            {m.dci} {m.dosage} - {m.stock_disponible} en stock
           </option>
         ))}
       </select>
 
       {substitutions.length > 0 && (
         <div className="text-sm border border-orange-300 bg-orange-50 rounded p-2">
-          <p className="font-medium">Rupture — substituts disponibles :</p>
+          <p className="font-medium">Rupture - substituts disponibles :</p>
           <div className="flex flex-wrap gap-2 mt-1">
             {substitutions.map((s) => (
               <button
@@ -133,7 +133,7 @@ export function DispensationForm({
           <option value="">Lot...</option>
           {lots.map((l) => (
             <option key={l.id} value={l.id}>
-              {l.numero_lot} — exp. {l.date_peremption} ({l.quantite_restante} dispo.)
+              {l.numero_lot} - exp. {l.date_peremption} ({l.quantite_restante} dispo.)
             </option>
           ))}
         </select>

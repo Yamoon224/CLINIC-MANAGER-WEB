@@ -143,7 +143,7 @@ export function RendezVousForm() {
             }
             className="border rounded px-3 py-2"
           >
-            <option value="">—</option>
+            <option value="">-</option>
             {praticiens.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}

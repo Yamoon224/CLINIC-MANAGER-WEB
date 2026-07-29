@@ -60,7 +60,7 @@ export function PatientList() {
               </td>
               <td className="py-2 pr-4">{patient.nom}</td>
               <td className="py-2 pr-4">{patient.prenom}</td>
-              <td className="py-2 pr-4">{patient.telephone ?? "—"}</td>
+              <td className="py-2 pr-4">{patient.telephone ?? "-"}</td>
             </tr>
           ))}
         </tbody>

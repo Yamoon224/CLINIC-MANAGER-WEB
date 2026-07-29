@@ -132,9 +132,9 @@ export function Audit() {
             >
               <span>
                 <span className="text-gray-500">{entry.created_at?.replace("T", " ").slice(0, 16)}</span>
-                {" — "}
+                {" - "}
                 <span className="font-medium">{entry.causer?.name ?? "Système"}</span>
-                {" — "}
+                {" - "}
                 {entry.event ? AUDIT_EVENT_LABELS[entry.event] : entry.event}
                 {" "}
                 {entry.subject_type}
@@ -150,13 +150,13 @@ export function Audit() {
                 <div>
                   <div className="font-semibold mb-1">Avant</div>
                   <pre className="bg-gray-50 rounded p-2 overflow-x-auto">
-                    {entry.avant ? JSON.stringify(entry.avant, null, 2) : "—"}
+                    {entry.avant ? JSON.stringify(entry.avant, null, 2) : "-"}
                   </pre>
                 </div>
                 <div>
                   <div className="font-semibold mb-1">Après</div>
                   <pre className="bg-gray-50 rounded p-2 overflow-x-auto">
-                    {entry.apres ? JSON.stringify(entry.apres, null, 2) : "—"}
+                    {entry.apres ? JSON.stringify(entry.apres, null, 2) : "-"}
                   </pre>
                 </div>
               </div>

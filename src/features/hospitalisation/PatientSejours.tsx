@@ -24,7 +24,7 @@ export function PatientSejours({ patientId }: { patientId: number }) {
         {sejours.map((s) => (
           <li key={s.id} className="border rounded p-2">
             <Link href={`/sejours/${s.id}`} className="font-medium text-blue-600 underline">
-              Chambre {s.lit.chambre} — {s.lit.numero}
+              Chambre {s.lit.chambre} - {s.lit.numero}
             </Link>{" "}
             <span className="text-gray-500">
               {s.statut === "en_cours" ? "en cours" : `${s.nombre_jours} jour(s)`}

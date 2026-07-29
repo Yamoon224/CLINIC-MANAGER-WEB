@@ -105,8 +105,8 @@ export function Planning() {
         {entries.map((p) => (
           <li key={p.id} className="border rounded p-2 flex items-center justify-between">
             <span>
-              {p.date} — {CRENEAU_LABELS[p.creneau]}
-              {p.employe && ` — ${p.employe.prenom} ${p.employe.nom}`}
+              {p.date} - {CRENEAU_LABELS[p.creneau]}
+              {p.employe && ` - ${p.employe.prenom} ${p.employe.nom}`}
               {p.service && ` (${p.service})`}
             </span>
             <button

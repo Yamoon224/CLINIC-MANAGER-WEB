@@ -32,7 +32,7 @@ export function PatientFactures({ patientId }: { patientId: number }) {
               Facture #{f.id}
             </Link>{" "}
             <span className="text-gray-500">
-              {f.montant_total} F CFA — {STATUT_LABELS[f.statut]}
+              {f.montant_total} F CFA - {STATUT_LABELS[f.statut]}
             </span>
           </li>
         ))}

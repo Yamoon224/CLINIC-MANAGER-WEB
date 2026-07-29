@@ -74,7 +74,7 @@ export function CompagniesAssurance() {
           <li key={c.id} className="border rounded p-2 flex justify-between">
             <span>
               {c.nom}
-              {c.contact_telephone && ` — ${c.contact_telephone}`}
+              {c.contact_telephone && ` - ${c.contact_telephone}`}
             </span>
             <span className="font-medium">{c.taux_couverture_defaut}%</span>
           </li>
