@@ -3,8 +3,10 @@
 import { useState } from "react";
 import * as authApi from "./auth-api";
 import { Button, Card, Field, PasswordInput } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function ChangePasswordForm() {
+  const { t } = useTranslation();
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -28,43 +30,43 @@ export function ChangePasswordForm() {
       setPassword("");
       setPasswordConfirmation("");
     } catch {
-      setError(
-        "Impossible de changer le mot de passe. Vérifiez le mot de passe actuel et que les deux nouveaux mots de passe correspondent.",
-      );
+      setError(t("parametres.security.error"));
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <Card className="max-w-lg">
+    <Card>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Field label="Mot de passe actuel">
-          <PasswordInput
-            required
-            autoComplete="current-password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-          />
-        </Field>
-        <Field label="Nouveau mot de passe">
-          <PasswordInput
-            required
-            autoComplete="new-password"
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </Field>
-        <Field label="Confirmer le nouveau mot de passe">
-          <PasswordInput
-            required
-            autoComplete="new-password"
-            minLength={8}
-            value={passwordConfirmation}
-            onChange={(e) => setPasswordConfirmation(e.target.value)}
-          />
-        </Field>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Field label={t("parametres.security.currentPassword")}>
+            <PasswordInput
+              required
+              autoComplete="current-password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+            />
+          </Field>
+          <Field label={t("parametres.security.newPassword")}>
+            <PasswordInput
+              required
+              autoComplete="new-password"
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Field>
+          <Field label={t("parametres.security.confirmPassword")}>
+            <PasswordInput
+              required
+              autoComplete="new-password"
+              minLength={8}
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+            />
+          </Field>
+        </div>
         {error && (
           <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">
             {error}
@@ -72,11 +74,11 @@ export function ChangePasswordForm() {
         )}
         {success && (
           <p className="rounded-lg bg-success-light px-3 py-2 text-sm text-success">
-            Mot de passe changé avec succès.
+            {t("parametres.security.success")}
           </p>
         )}
         <Button type="submit" disabled={isSubmitting} className="self-start">
-          {isSubmitting ? "Enregistrement..." : "Changer le mot de passe"}
+          {isSubmitting ? t("parametres.security.submitting") : t("parametres.security.submit")}
         </Button>
       </form>
     </Card>

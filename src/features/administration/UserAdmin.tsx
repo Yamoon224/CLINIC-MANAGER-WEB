@@ -9,26 +9,33 @@ import {
   Card,
   Field,
   Input,
+  Pagination,
   PasswordInput,
   Select,
 } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function UserAdmin() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<AdminUser[] | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    load();
-  }, []);
+    load(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
-  async function load() {
-    const [{ data: usersData }, { data: rolesData }] = await Promise.all([
-      api.fetchUsers(),
+  async function load(targetPage: number) {
+    const [usersRes, { data: rolesData }] = await Promise.all([
+      api.fetchUsers(targetPage),
       api.fetchRoles(),
     ]);
-    setUsers(usersData);
+    setUsers(usersRes.data);
+    setTotalPages(usersRes.meta.last_page);
     setRoles(rolesData);
   }
 
@@ -40,7 +47,7 @@ export function UserAdmin() {
         (current) => current?.map((u) => (u.id === user.id ? data : u)) ?? null,
       );
     } catch {
-      setError("Impossible de changer le rôle de cet utilisateur.");
+      setError(t("parametres.admin.roleChangeError"));
     }
   }
 
@@ -52,20 +59,20 @@ export function UserAdmin() {
         (current) => current?.map((u) => (u.id === user.id ? data : u)) ?? null,
       );
     } catch {
-      setError("Impossible de changer le statut de cet utilisateur.");
+      setError(t("parametres.admin.statusChangeError"));
     }
   }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Utilisateurs</h3>
+        <h3 className="text-sm font-semibold">{t("parametres.admin.users")}</h3>
         <Button
           variant={showCreateForm ? "outline" : "primary"}
           size="sm"
           onClick={() => setShowCreateForm((v) => !v)}
         >
-          {showCreateForm ? "Annuler" : "+ Nouvel utilisateur"}
+          {showCreateForm ? t("common.cancel") : `+ ${t("parametres.admin.newUser")}`}
         </Button>
       </div>
 
@@ -78,30 +85,30 @@ export function UserAdmin() {
       {showCreateForm && (
         <CreateUserForm
           roles={roles}
-          onCreated={(user) => {
-            setUsers((current) => (current ? [...current, user] : [user]));
+          onCreated={() => {
             setShowCreateForm(false);
+            load(page);
           }}
         />
       )}
 
       <Card className="overflow-x-auto p-0">
-        <table className="w-full text-sm">
+        <table className="table">
           <thead>
-            <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-              <th className="px-4 py-3">Nom</th>
-              <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">Rôle</th>
-              <th className="px-4 py-3">Statut</th>
-              <th className="px-4 py-3" />
+            <tr>
+              <th>{t("parametres.admin.name")}</th>
+              <th>{t("parametres.admin.email")}</th>
+              <th>{t("parametres.admin.role")}</th>
+              <th>{t("parametres.admin.status")}</th>
+              <th />
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody>
             {users?.map((user) => (
               <tr key={user.id}>
-                <td className="px-4 py-3 font-medium">{user.name}</td>
-                <td className="px-4 py-3 text-muted">{user.email}</td>
-                <td className="px-4 py-3">
+                <td className="font-medium">{user.name}</td>
+                <td className="text-muted">{user.email}</td>
+                <td>
                   <Select
                     value={user.roles[0] ?? ""}
                     onChange={(e) => handleChangeRole(user, e.target.value)}
@@ -114,18 +121,20 @@ export function UserAdmin() {
                     ))}
                   </Select>
                 </td>
-                <td className="px-4 py-3">
+                <td>
                   <Badge tone={user.is_active ? "success" : "neutral"}>
-                    {user.is_active ? "Actif" : "Désactivé"}
+                    {user.is_active ? t("common.active") : t("common.inactive")}
                   </Badge>
                 </td>
-                <td className="px-4 py-3">
+                <td>
                   <Button
                     variant={user.is_active ? "danger" : "outline"}
                     size="sm"
                     onClick={() => handleToggleStatus(user)}
                   >
-                    {user.is_active ? "Désactiver" : "Activer"}
+                    {user.is_active
+                      ? t("parametres.admin.deactivate")
+                      : t("parametres.admin.activate")}
                   </Button>
                 </td>
               </tr>
@@ -134,10 +143,11 @@ export function UserAdmin() {
         </table>
         {users?.length === 0 && (
           <p className="px-4 py-6 text-center text-sm text-muted">
-            Aucun utilisateur.
+            {t("parametres.admin.noUsers")}
           </p>
         )}
       </Card>
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
@@ -149,6 +159,7 @@ function CreateUserForm({
   roles: string[];
   onCreated: (user: AdminUser) => void;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -164,7 +175,7 @@ function CreateUserForm({
       const { data } = await api.createUser({ name, email, password, role });
       onCreated(data);
     } catch {
-      setError("Impossible de créer l'utilisateur. Vérifiez les champs.");
+      setError(t("parametres.admin.createError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -173,15 +184,15 @@ function CreateUserForm({
   return (
     <Card>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Nom complet">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <Field label={t("profil.fullName")}>
             <Input
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </Field>
-          <Field label="Email">
+          <Field label={t("profil.email")}>
             <Input
               type="email"
               required
@@ -189,7 +200,7 @@ function CreateUserForm({
               onChange={(e) => setEmail(e.target.value)}
             />
           </Field>
-          <Field label="Mot de passe">
+          <Field label={t("parametres.security.newPassword")}>
             <PasswordInput
               required
               minLength={8}
@@ -197,7 +208,7 @@ function CreateUserForm({
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field>
-          <Field label="Rôle">
+          <Field label={t("parametres.admin.role")}>
             <Select value={role} onChange={(e) => setRole(e.target.value)}>
               {roles.map((r) => (
                 <option key={r} value={r}>
@@ -213,7 +224,7 @@ function CreateUserForm({
           </p>
         )}
         <Button type="submit" disabled={isSubmitting} className="self-start">
-          {isSubmitting ? "Création..." : "Créer l'utilisateur"}
+          {isSubmitting ? t("parametres.admin.creating") : t("parametres.admin.createUser")}
         </Button>
       </form>
     </Card>

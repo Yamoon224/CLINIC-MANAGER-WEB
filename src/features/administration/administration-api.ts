@@ -32,8 +32,8 @@ export function fetchCausers(): Promise<{ data: AuditCauser[] }> {
   return apiFetch<{ data: AuditCauser[] }>("/audit/causers");
 }
 
-export function fetchUsers(): Promise<{ data: AdminUser[] }> {
-  return apiFetch<{ data: AdminUser[] }>("/utilisateurs");
+export function fetchUsers(page = 1): Promise<PaginatedResponse<AdminUser>> {
+  return apiFetch<PaginatedResponse<AdminUser>>(`/utilisateurs?page=${page}`);
 }
 
 export function fetchRoles(): Promise<{ data: string[] }> {

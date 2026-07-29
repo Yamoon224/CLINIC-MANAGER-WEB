@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useAuth } from "./auth-context";
 import { Button, Card, Field, Input } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function ProfilForm() {
   const { user, updateProfile } = useAuth();
+  const { t } = useTranslation();
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -21,30 +23,32 @@ export function ProfilForm() {
       await updateProfile({ name, email });
       setSuccess(true);
     } catch {
-      setError("Impossible de mettre à jour le profil. Vérifiez les champs.");
+      setError(t("profil.updateError"));
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <Card className="max-w-lg">
+    <Card>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Field label="Nom complet">
-          <Input
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </Field>
-        <Field label="Email">
-          <Input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Field>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Field label={t("profil.fullName")}>
+            <Input
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </Field>
+          <Field label={t("profil.email")}>
+            <Input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
+        </div>
         {error && (
           <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">
             {error}
@@ -52,11 +56,11 @@ export function ProfilForm() {
         )}
         {success && (
           <p className="rounded-lg bg-success-light px-3 py-2 text-sm text-success">
-            Profil mis à jour avec succès.
+            {t("profil.updateSuccess")}
           </p>
         )}
         <Button type="submit" disabled={isSubmitting} className="self-start">
-          {isSubmitting ? "Enregistrement..." : "Enregistrer"}
+          {isSubmitting ? t("parametres.security.submitting") : t("common.save")}
         </Button>
       </form>
     </Card>

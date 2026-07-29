@@ -5,6 +5,7 @@ import * as api from "./notifications-api";
 import { emitNotificationsChanged } from "./events";
 import type { Notification } from "./types";
 import { Badge, Button, Card } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const TONE_BY_TYPE: Record<Notification["type"], "primary" | "success" | "warning" | "danger"> = {
   info: "primary",
@@ -14,6 +15,7 @@ const TONE_BY_TYPE: Record<Notification["type"], "primary" | "success" | "warnin
 };
 
 export function NotificationsList() {
+  const { t, locale } = useTranslation();
   const [notifications, setNotifications] = useState<Notification[] | null>(
     null,
   );
@@ -50,18 +52,18 @@ export function NotificationsList() {
           disabled={!hasUnread}
           onClick={handleMarkAllAsRead}
         >
-          Tout marquer comme lu
+          {t("notifications.markAllRead")}
         </Button>
       </div>
 
       <div className="flex flex-col gap-2">
         {notifications === null && (
-          <p className="text-sm text-muted">Chargement...</p>
+          <p className="text-sm text-muted">{t("common.loading")}</p>
         )}
         {notifications?.length === 0 && (
           <Card>
             <p className="text-center text-sm text-muted">
-              Aucune notification pour le moment.
+              {t("notifications.empty")}
             </p>
           </Card>
         )}
@@ -77,7 +79,9 @@ export function NotificationsList() {
               </div>
               <p className="text-sm text-muted">{n.message}</p>
               <span className="text-xs text-muted">
-                {new Date(n.created_at).toLocaleString("fr-FR")}
+                {new Date(n.created_at).toLocaleString(
+                  locale === "en" ? "en-US" : "fr-FR",
+                )}
               </span>
             </div>
             {!n.lue && (
@@ -86,7 +90,7 @@ export function NotificationsList() {
                 size="sm"
                 onClick={() => handleMarkAsRead(n.id)}
               >
-                Marquer comme lu
+                {t("notifications.markRead")}
               </Button>
             )}
           </Card>
