@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/features/auth/auth-context";
+import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+import { ThemeProvider } from "@/lib/theme/ThemeContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,10 +35,14 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var d=localStorage.getItem('density');if(d==='compact')document.documentElement.setAttribute('data-density','compact');}catch(e){}",
+              "try{var d=localStorage.getItem('density');if(d==='compact')document.documentElement.setAttribute('data-density','compact');var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');var l=localStorage.getItem('locale');if(l==='en')document.documentElement.setAttribute('lang','en');}catch(e){}",
           }}
         />
-        <AuthProvider>{children}</AuthProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

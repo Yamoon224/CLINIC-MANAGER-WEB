@@ -10,9 +10,11 @@ import {
 } from "@/features/notifications/notifications-api";
 import { emitNotificationsChanged, onNotificationsChanged } from "@/features/notifications/events";
 import type { Notification } from "@/features/notifications/types";
-import { useClickOutside } from "./useClickOutside";
+import { useClickOutside } from "@/lib/useClickOutside";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function NotificationBell() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[] | null>(
@@ -66,7 +68,7 @@ export function NotificationBell() {
     <div className="relative" ref={ref}>
       <button
         onClick={handleOpen}
-        aria-label="Notifications"
+        aria-label={t("nav.notifications")}
         className="relative rounded-full p-2 text-muted hover:bg-primary-light hover:text-primary"
       >
         <Bell size={20} />
@@ -79,24 +81,26 @@ export function NotificationBell() {
       {open && (
         <div className="absolute right-0 z-40 mt-2 w-80 rounded-xl border border-border bg-surface shadow-lg">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <span className="text-sm font-semibold">Notifications</span>
+            <span className="text-sm font-semibold">
+              {t("nav.notifications")}
+            </span>
             <Link
               href="/notifications"
               onClick={() => setOpen(false)}
               className="text-xs font-medium text-primary hover:underline"
             >
-              Tout voir
+              {t("notifications.seeAll")}
             </Link>
           </div>
           <div className="max-h-80 overflow-y-auto">
             {notifications === null && (
               <p className="px-4 py-6 text-center text-sm text-muted">
-                Chargement...
+                {t("common.loading")}
               </p>
             )}
             {notifications?.length === 0 && (
               <p className="px-4 py-6 text-center text-sm text-muted">
-                Aucune notification.
+                {t("notifications.emptyShort")}
               </p>
             )}
             {notifications?.slice(0, 6).map((n) => (

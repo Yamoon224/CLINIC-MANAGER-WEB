@@ -17,22 +17,22 @@ import type { LucideIcon } from "lucide-react";
 
 export interface NavLink {
   href: string;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
 }
 
 export const NAV_LINKS: NavLink[] = [
-  { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-  { href: "/patients", label: "Patients", icon: Users },
-  { href: "/rendez-vous", label: "Rendez-vous", icon: CalendarDays },
-  { href: "/queue", label: "File d'attente", icon: ListOrdered },
-  { href: "/urgences", label: "Urgences", icon: Siren },
-  { href: "/vaccinations", label: "Vaccinations", icon: Syringe },
-  { href: "/laboratoire", label: "Laboratoire", icon: FlaskConical },
-  { href: "/pharmacie", label: "Pharmacie", icon: Pill },
-  { href: "/hospitalisation", label: "Hospitalisation", icon: BedDouble },
-  { href: "/caisse", label: "Caisse", icon: Wallet },
-  { href: "/assurances", label: "Assurances", icon: ShieldCheck },
-  { href: "/personnel", label: "Personnel", icon: UserCog },
-  { href: "/audit", label: "Audit", icon: FileClock },
+  { href: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
+  { href: "/patients", labelKey: "nav.patients", icon: Users },
+  { href: "/rendez-vous", labelKey: "nav.rendezVous", icon: CalendarDays },
+  { href: "/queue", labelKey: "nav.queue", icon: ListOrdered },
+  { href: "/urgences", labelKey: "nav.urgences", icon: Siren },
+  { href: "/vaccinations", labelKey: "nav.vaccinations", icon: Syringe },
+  { href: "/laboratoire", labelKey: "nav.laboratoire", icon: FlaskConical },
+  { href: "/pharmacie", labelKey: "nav.pharmacie", icon: Pill },
+  { href: "/hospitalisation", labelKey: "nav.hospitalisation", icon: BedDouble },
+  { href: "/caisse", labelKey: "nav.caisse", icon: Wallet },
+  { href: "/assurances", labelKey: "nav.assurances", icon: ShieldCheck },
+  { href: "/personnel", labelKey: "nav.personnel", icon: UserCog },
+  { href: "/audit", labelKey: "nav.audit", icon: FileClock },
 ];

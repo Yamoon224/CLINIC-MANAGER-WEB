@@ -107,15 +107,7 @@ export interface AuditFilters {
   date_fin?: string;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: {
-    current_page: number;
-    last_page: number;
-    total: number;
-    per_page: number;
-  };
-}
+export type { PaginatedResponse } from "@/lib/pagination";
 
 export interface AdminUser {
   id: number;

@@ -5,9 +5,11 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/auth-context";
 import { LoginForm } from "@/features/auth/LoginForm";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export default function RootPage() {
   const { user, isLoading } = useAuth();
+  const { t } = useTranslation();
   const router = useRouter();
 
   useEffect(() => {
@@ -32,9 +34,7 @@ export default function RootPage() {
             Clinic Manager
           </h2>
           <p className="mt-2 max-w-md text-sm text-white/85">
-            Le système intégré de gestion de votre clinique : patients,
-            consultations, pharmacie, caisse et bien plus, réunis en un seul
-            endroit.
+            {t("auth.tagline")}
           </p>
         </div>
       </div>
@@ -51,10 +51,10 @@ export default function RootPage() {
             />
             <div>
               <h1 className="text-xl font-semibold tracking-tight">
-                Bon retour
+                {t("auth.welcomeBack")}
               </h1>
               <p className="mt-1 text-sm text-muted">
-                Connectez-vous pour accéder à votre espace clinique.
+                {t("auth.loginSubtitle")}
               </p>
             </div>
           </div>

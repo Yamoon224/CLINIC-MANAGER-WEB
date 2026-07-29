@@ -7,3 +7,4 @@ export { Field } from "./Field";
 export { Card } from "./Card";
 export { PageHeader } from "./PageHeader";
 export { Badge } from "./Badge";
+export { Pagination } from "./Pagination";

@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useAuth } from "./auth-context";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { Button, Field, Input, PasswordInput } from "@/components/ui";
 
 export function LoginForm() {
   const { login } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +20,7 @@ export function LoginForm() {
     try {
       await login({ email, password });
     } catch {
-      setError("Identifiants invalides.");
+      setError(t("auth.invalidCredentials"));
     } finally {
       setIsSubmitting(false);
     }
@@ -26,18 +28,18 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <Field label="Email">
+      <Field label={t("auth.email")}>
         <Input
           id="email"
           type="email"
           required
           autoComplete="email"
-          placeholder="vous@clinique.com"
+          placeholder={t("auth.emailPlaceholder")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
       </Field>
-      <Field label="Mot de passe">
+      <Field label={t("auth.password")}>
         <PasswordInput
           id="password"
           required
@@ -53,7 +55,7 @@ export function LoginForm() {
         </p>
       )}
       <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? "Connexion..." : "Se connecter"}
+        {isSubmitting ? t("auth.loggingIn") : t("auth.login")}
       </Button>
     </form>
   );
