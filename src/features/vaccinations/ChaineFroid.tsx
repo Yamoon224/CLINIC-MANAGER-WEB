@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { addReleveTemperature, fetchChaineFroid } from "./vaccinations-api";
 import type { ReleveTemperature } from "./types";
+import { Badge, Button, Card, Input } from "@/components/ui";
 
 export function ChaineFroid() {
   const [releves, setReleves] = useState<ReleveTemperature[]>([]);
@@ -37,42 +38,43 @@ export function ChaineFroid() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="border rounded p-3 flex items-center gap-2 max-w-lg">
-        <input
+      <Card className="flex items-center gap-2 max-w-lg p-3">
+        <Input
           placeholder="Température (°C)"
           value={temperature}
           onChange={(e) => setTemperature(e.target.value)}
-          className="border rounded px-3 py-2 w-40"
+          className="w-40"
         />
-        <input
+        <Input
           placeholder="Notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="border rounded px-3 py-2 flex-1"
+          className="flex-1"
         />
-        <button
+        <Button
+          variant="outline"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="border rounded px-3 py-2 whitespace-nowrap disabled:opacity-50"
+          className="whitespace-nowrap"
         >
           Enregistrer le relevé
-        </button>
-      </div>
+        </Button>
+      </Card>
 
-      <ul className="flex flex-col gap-1 text-sm max-w-lg">
+      <ul className="flex flex-col gap-2 text-sm max-w-lg">
         {releves.map((r) => (
           <li
             key={r.id}
-            className={`border rounded p-2 flex justify-between ${r.anomalie ? "border-red-300 bg-red-50" : ""}`}
+            className={`rounded-lg border p-2 flex items-center justify-between ${r.anomalie ? "border-danger/30 bg-danger-light" : "border-border"}`}
           >
             <span>
               {r.releve_at && new Date(r.releve_at).toLocaleString("fr-FR")} - {r.temperature}°C
-              {r.anomalie && <span className="text-red-700 font-medium"> ⚠ hors plage</span>}
             </span>
+            {r.anomalie && <Badge tone="danger">⚠ hors plage</Badge>}
           </li>
         ))}
         {releves.length === 0 && (
-          <li className="text-gray-500">Aucun relevé enregistré.</li>
+          <li className="text-muted">Aucun relevé enregistré.</li>
         )}
       </ul>
     </div>

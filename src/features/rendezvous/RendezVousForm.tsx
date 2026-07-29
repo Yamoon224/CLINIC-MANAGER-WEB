@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { searchPatients } from "@/features/patients/patients-api";
 import type { Patient } from "@/features/patients/types";
+import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
 import {
   createRendezVous,
   fetchCreneauxDisponibles,
@@ -86,148 +87,144 @@ export function RendezVousForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-xl">
-      <div className="flex flex-col gap-1">
-        <label className="text-sm">Patient</label>
-        {patient ? (
-          <div className="flex items-center justify-between border rounded px-3 py-2">
-            <span>
-              {patient.prenom} {patient.nom} ({patient.numero_dossier})
-            </span>
-            <button
-              type="button"
-              onClick={() => setPatient(null)}
-              className="text-sm underline"
-            >
-              Changer
-            </button>
-          </div>
-        ) : (
-          <>
-            <input
-              placeholder="Rechercher un patient..."
-              value={patientQuery}
-              onChange={(e) => setPatientQuery(e.target.value)}
-              className="border rounded px-3 py-2"
-            />
-            {patientResults.length > 0 && (
-              <ul className="border rounded divide-y">
-                {patientResults.map((p) => (
-                  <li key={p.id}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPatient(p);
-                        setPatientResults([]);
-                        setPatientQuery("");
-                      }}
-                      className="w-full text-left px-3 py-2 hover:bg-gray-50"
-                    >
-                      {p.prenom} {p.nom} ({p.numero_dossier})
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1">
-          <label className="text-sm">Praticien</label>
-          <select
-            value={praticienId}
-            onChange={(e) =>
-              setPraticienId(e.target.value ? Number(e.target.value) : "")
-            }
-            className="border rounded px-3 py-2"
-          >
-            <option value="">-</option>
-            {praticiens.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm">Type</label>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as RendezVousType)}
-            className="border rounded px-3 py-2"
-          >
-            {RENDEZ_VOUS_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {RENDEZ_VOUS_TYPE_LABELS[t]}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm">Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="border rounded px-3 py-2"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label className="text-sm">Créneau disponible</label>
-        {praticienId ? (
-          creneaux.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {creneaux.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setStartsAt(c)}
-                  className={`border rounded px-3 py-1 text-sm ${startsAt === c ? "bg-blue-600 text-white" : ""}`}
-                >
-                  {new Date(c).toLocaleTimeString("fr-FR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </button>
-              ))}
+    <Card className="max-w-xl">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <Field label="Patient">
+          {patient ? (
+            <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm">
+              <span>
+                {patient.prenom} {patient.nom} ({patient.numero_dossier})
+              </span>
+              <button
+                type="button"
+                onClick={() => setPatient(null)}
+                className="text-sm text-primary hover:underline"
+              >
+                Changer
+              </button>
             </div>
           ) : (
-            <p className="text-sm text-gray-500">
-              Aucun créneau disponible ce jour-là.
+            <div className="flex flex-col gap-1.5">
+              <Input
+                placeholder="Rechercher un patient..."
+                value={patientQuery}
+                onChange={(e) => setPatientQuery(e.target.value)}
+              />
+              {patientResults.length > 0 && (
+                <ul className="rounded-lg border border-border divide-y divide-border overflow-hidden">
+                  {patientResults.map((p) => (
+                    <li key={p.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPatient(p);
+                          setPatientResults([]);
+                          setPatientQuery("");
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-primary-light/60"
+                      >
+                        {p.prenom} {p.nom} ({p.numero_dossier})
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Praticien">
+            <Select
+              value={praticienId}
+              onChange={(e) =>
+                setPraticienId(e.target.value ? Number(e.target.value) : "")
+              }
+            >
+              <option value="">-</option>
+              {praticiens.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <Field label="Type">
+            <Select
+              value={type}
+              onChange={(e) => setType(e.target.value as RendezVousType)}
+            >
+              {RENDEZ_VOUS_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {RENDEZ_VOUS_TYPE_LABELS[t]}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <Field label="Date">
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </Field>
+        </div>
+
+        <Field label="Créneau disponible">
+          {praticienId ? (
+            creneaux.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {creneaux.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setStartsAt(c)}
+                    className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                      startsAt === c
+                        ? "border-primary bg-primary text-white"
+                        : "border-border bg-surface hover:bg-primary-light/60"
+                    }`}
+                  >
+                    {new Date(c).toLocaleTimeString("fr-FR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted">
+                Aucun créneau disponible ce jour-là.
+              </p>
+            )
+          ) : (
+            <p className="text-sm text-muted">
+              Choisissez un praticien pour voir les créneaux.
             </p>
-          )
-        ) : (
-          <p className="text-sm text-gray-500">
-            Choisissez un praticien pour voir les créneaux.
+          )}
+        </Field>
+
+        <Field label="Motif">
+          <Textarea
+            placeholder="Motif du rendez-vous"
+            value={motif}
+            onChange={(e) => setMotif(e.target.value)}
+            rows={2}
+          />
+        </Field>
+
+        {error && (
+          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">
+            {error}
           </p>
         )}
-      </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-sm">Motif</label>
-        <textarea
-          value={motif}
-          onChange={(e) => setMotif(e.target.value)}
-          className="border rounded px-3 py-2"
-          rows={2}
-        />
-      </div>
-
-      {error && <p className="text-red-600 text-sm">{error}</p>}
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="bg-blue-600 text-white rounded px-3 py-2 self-start disabled:opacity-50"
-      >
-        {isSubmitting ? "Enregistrement..." : "Prendre le rendez-vous"}
-      </button>
-    </form>
+        <Button type="submit" disabled={isSubmitting} className="self-start">
+          {isSubmitting ? "Enregistrement..." : "Prendre le rendez-vous"}
+        </Button>
+      </form>
+    </Card>
   );
 }

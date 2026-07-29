@@ -9,6 +9,7 @@ import {
   transferer,
 } from "./hospitalisation-api";
 import type { Lit, Sejour } from "./types";
+import { Button, Card, Field, Input, PageHeader, Select, Textarea } from "@/components/ui";
 
 export function SejourDetail({ id }: { id: number }) {
   const [sejour, setSejour] = useState<Sejour | null>(null);
@@ -72,34 +73,30 @@ export function SejourDetail({ id }: { id: number }) {
     }
   }
 
-  if (!sejour) return <p className="text-gray-500">Chargement...</p>;
+  if (!sejour) return <p className="text-muted">Chargement...</p>;
 
   const readOnly = sejour.statut === "termine";
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <div>
-        <h1 className="text-lg font-semibold">
-          Hospitalisation - {sejour.patient.prenom} {sejour.patient.nom}
-        </h1>
-        <p className="text-sm text-gray-500">
-          Chambre {sejour.lit.chambre} - {sejour.lit.numero} · {sejour.motif}
-        </p>
-      </div>
+      <PageHeader
+        title={`Hospitalisation - ${sejour.patient.prenom} ${sejour.patient.nom}`}
+        description={`Chambre ${sejour.lit.chambre} - ${sejour.lit.numero} · ${sejour.motif}`}
+      />
 
       {readOnly && (
-        <div className="border border-green-300 bg-green-50 rounded p-3 text-sm text-green-800">
+        <div className="rounded-xl border border-success/30 bg-success-light p-3 text-sm text-success">
           Sortie enregistrée - {sejour.nombre_jours} jour(s), frais de séjour :{" "}
           {sejour.frais_sejour} F CFA
         </div>
       )}
 
       <div>
-        <h2 className="font-semibold mb-2">Feuille de température</h2>
-        <ul className="flex flex-col gap-1 mb-2 text-sm">
+        <h2 className="font-semibold mb-2 text-foreground">Feuille de température</h2>
+        <ul className="flex flex-col gap-2 mb-3 text-sm">
           {sejour.suivis.map((s) => (
-            <li key={s.id} className="border rounded p-2">
-              <span className="text-gray-500">
+            <li key={s.id} className="rounded-xl border border-border bg-surface p-3">
+              <span className="text-muted">
                 {s.releve_at && new Date(s.releve_at).toLocaleString("fr-FR")}
               </span>{" "}
               {s.temperature && `${s.temperature}°C `}
@@ -108,56 +105,54 @@ export function SejourDetail({ id }: { id: number }) {
             </li>
           ))}
           {sejour.suivis.length === 0 && (
-            <li className="text-gray-500">Aucun relevé enregistré.</li>
+            <li className="text-muted">Aucun relevé enregistré.</li>
           )}
         </ul>
 
         {!readOnly && (
-          <div className="border rounded p-3 flex flex-col gap-2">
+          <Card className="flex flex-col gap-3">
             <div className="grid grid-cols-3 gap-2">
-              <input
-                placeholder="Température"
-                value={temperature}
-                onChange={(e) => setTemperature(e.target.value)}
-                className="border rounded px-3 py-2"
-              />
-              <input
-                placeholder="Tension"
-                value={tension}
-                onChange={(e) => setTension(e.target.value)}
-                className="border rounded px-3 py-2"
-              />
-              <input
-                placeholder="Pouls"
-                value={pouls}
-                onChange={(e) => setPouls(e.target.value)}
-                className="border rounded px-3 py-2"
-              />
+              <Field label="Température">
+                <Input
+                  placeholder="°C"
+                  value={temperature}
+                  onChange={(e) => setTemperature(e.target.value)}
+                />
+              </Field>
+              <Field label="Tension">
+                <Input
+                  placeholder="ex. 12/8"
+                  value={tension}
+                  onChange={(e) => setTension(e.target.value)}
+                />
+              </Field>
+              <Field label="Pouls">
+                <Input
+                  placeholder="bpm"
+                  value={pouls}
+                  onChange={(e) => setPouls(e.target.value)}
+                />
+              </Field>
             </div>
-            <textarea
+            <Textarea
               placeholder="Soins administrés, observations..."
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
-              className="border rounded px-3 py-2"
               rows={2}
             />
-            <button
-              onClick={handleAjouterSuivi}
-              disabled={busy}
-              className="border rounded px-3 py-2 self-start disabled:opacity-50"
-            >
+            <Button onClick={handleAjouterSuivi} disabled={busy} className="self-start">
               Ajouter le relevé
-            </button>
-          </div>
+            </Button>
+          </Card>
         )}
       </div>
 
       {!readOnly && (
-        <div className="flex items-center gap-4 border-t pt-4">
-          <select
+        <div className="flex items-center gap-3 border-t border-border pt-4">
+          <Select
             value={nouveauLitId}
             onChange={(e) => setNouveauLitId(e.target.value ? Number(e.target.value) : "")}
-            className="border rounded px-3 py-2"
+            className="max-w-xs"
           >
             <option value="">Transférer vers...</option>
             {litsLibres.map((l) => (
@@ -165,22 +160,14 @@ export function SejourDetail({ id }: { id: number }) {
                 Chambre {l.chambre} - {l.numero}
               </option>
             ))}
-          </select>
-          <button
-            onClick={handleTransferer}
-            disabled={busy || !nouveauLitId}
-            className="border rounded px-3 py-2 disabled:opacity-50"
-          >
+          </Select>
+          <Button variant="outline" onClick={handleTransferer} disabled={busy || !nouveauLitId}>
             Transférer
-          </button>
+          </Button>
 
-          <button
-            onClick={handleSortir}
-            disabled={busy}
-            className="bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-50 ml-auto"
-          >
+          <Button onClick={handleSortir} disabled={busy} className="ml-auto">
             Enregistrer la sortie
-          </button>
+          </Button>
         </div>
       )}
     </div>

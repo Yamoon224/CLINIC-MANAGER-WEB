@@ -15,8 +15,8 @@ export function PatientDetailPage({ id }: { id: number }) {
       .catch(() => setError(true));
   }, [id]);
 
-  if (error) return <p className="text-red-600">Patient introuvable.</p>;
-  if (!patient) return <p className="text-gray-500">Chargement...</p>;
+  if (error) return <p className="text-danger">Patient introuvable.</p>;
+  if (!patient) return <p className="text-muted">Chargement...</p>;
 
   return <PatientDetail patient={patient} />;
 }

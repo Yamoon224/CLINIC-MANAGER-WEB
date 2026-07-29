@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { admettre, fetchLits } from "./hospitalisation-api";
 import type { Lit } from "./types";
+import { Button, Card, Field, Input, Select } from "@/components/ui";
 
 export function AdmissionAction({ patientId }: { patientId: number }) {
   const router = useRouter();
@@ -35,37 +36,37 @@ export function AdmissionAction({ patientId }: { patientId: number }) {
   }
 
   return (
-    <div className="border rounded p-4 flex flex-col gap-2 max-w-md">
+    <Card className="flex flex-col gap-3 max-w-md">
       <span className="font-semibold text-sm">Admettre en hospitalisation</span>
-      <select
-        value={litId}
-        onChange={(e) => setLitId(e.target.value ? Number(e.target.value) : "")}
-        className="border rounded px-3 py-2"
-      >
-        <option value="">Lit disponible...</option>
-        {lits.map((l) => (
-          <option key={l.id} value={l.id}>
-            Chambre {l.chambre} - {l.numero}
-          </option>
-        ))}
-      </select>
-      <input
-        placeholder="Motif d'hospitalisation"
-        value={motif}
-        onChange={(e) => setMotif(e.target.value)}
-        className="border rounded px-3 py-2"
-      />
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <button
-        onClick={handleSubmit}
-        disabled={isSubmitting || lits.length === 0}
-        className="bg-blue-600 text-white rounded px-3 py-2 self-start disabled:opacity-50"
-      >
-        Admettre
-      </button>
-      {lits.length === 0 && (
-        <p className="text-sm text-gray-500">Aucun lit disponible actuellement.</p>
+      <Field label="Lit">
+        <Select
+          value={litId}
+          onChange={(e) => setLitId(e.target.value ? Number(e.target.value) : "")}
+        >
+          <option value="">Lit disponible...</option>
+          {lits.map((l) => (
+            <option key={l.id} value={l.id}>
+              Chambre {l.chambre} - {l.numero}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <Field label="Motif">
+        <Input
+          placeholder="Motif d'hospitalisation"
+          value={motif}
+          onChange={(e) => setMotif(e.target.value)}
+        />
+      </Field>
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
-    </div>
+      <Button onClick={handleSubmit} disabled={isSubmitting || lits.length === 0} className="self-start">
+        Admettre
+      </Button>
+      {lits.length === 0 && (
+        <p className="text-sm text-muted">Aucun lit disponible actuellement.</p>
+      )}
+    </Card>
   );
 }

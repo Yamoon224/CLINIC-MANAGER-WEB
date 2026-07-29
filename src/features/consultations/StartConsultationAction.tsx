@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { startConsultation } from "./consultations-api";
+import { Button, Card, Input } from "@/components/ui";
 
 export function StartConsultationAction({ patientId }: { patientId: number }) {
   const router = useRouter();
@@ -28,24 +29,20 @@ export function StartConsultationAction({ patientId }: { patientId: number }) {
   }
 
   return (
-    <div className="border rounded p-4 flex flex-col gap-2 max-w-md">
-      <span className="font-semibold text-sm">Démarrer une consultation</span>
+    <Card className="flex flex-col gap-2 max-w-md p-4">
+      <span className="font-semibold text-sm text-foreground">Démarrer une consultation</span>
       <div className="flex items-center gap-2">
-        <input
+        <Input
           placeholder="Motif de la consultation"
           value={motif}
           onChange={(e) => setMotif(e.target.value)}
-          className="border rounded px-3 py-2 flex-1"
+          className="flex-1"
         />
-        <button
-          onClick={handleStart}
-          disabled={isSubmitting}
-          className="bg-blue-600 text-white rounded px-3 py-2 whitespace-nowrap disabled:opacity-50"
-        >
+        <Button onClick={handleStart} disabled={isSubmitting} className="whitespace-nowrap">
           {isSubmitting ? "..." : "Démarrer"}
-        </button>
+        </Button>
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-    </div>
+      {error && <p className="text-sm text-danger">{error}</p>}
+    </Card>
   );
 }

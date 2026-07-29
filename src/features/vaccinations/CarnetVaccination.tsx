@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { administrerVaccin, fetchCarnet, fetchVaccins } from "./vaccinations-api";
 import type { Carnet, Vaccin } from "./types";
+import { Badge, Button, Card, Input, Select, Textarea } from "@/components/ui";
 
 export function CarnetVaccination({ patientId }: { patientId: number }) {
   const [carnet, setCarnet] = useState<Carnet | null>(null);
@@ -50,43 +51,47 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold mb-2">Vaccinations</h2>
+      <h2 className="font-semibold text-foreground mb-2">Vaccinations</h2>
 
-      <ul className="flex flex-col gap-1 mb-2 text-sm">
+      <ul className="flex flex-col gap-2 mb-3 text-sm">
         {carnet.data.map((v) => (
-          <li key={v.id} className="border rounded p-2">
-            <span className="font-medium">
+          <li key={v.id} className="rounded-lg border border-border p-2">
+            <span className="font-medium text-foreground">
               {v.vaccin.nom} - dose {v.dose_numero}/{v.vaccin.nombre_doses}
             </span>{" "}
-            <span className="text-gray-500">{v.date_administration}</span>
+            <span className="text-muted">{v.date_administration}</span>
             {v.mapi_survenue && (
-              <p className="text-red-700">⚠ MAPI : {v.mapi_details}</p>
+              <p className="mt-1">
+                <Badge tone="danger">⚠ MAPI : {v.mapi_details}</Badge>
+              </p>
             )}
           </li>
         ))}
         {carnet.data.length === 0 && (
-          <li className="text-gray-500">Aucune vaccination enregistrée.</li>
+          <li className="text-muted">Aucune vaccination enregistrée.</li>
         )}
       </ul>
 
       {carnet.echeances.length > 0 && (
         <div className="mb-3 text-sm">
-          <span className="font-medium">Prochaines échéances : </span>
-          {carnet.echeances
-            .map(
-              (e) =>
-                `${e.vaccin.nom} (dose ${e.prochaine_dose})${e.date_prevue ? ` - ${e.date_prevue}` : ""}`,
-            )
-            .join(" · ")}
+          <span className="font-medium text-foreground">Prochaines échéances : </span>
+          <span className="text-muted">
+            {carnet.echeances
+              .map(
+                (e) =>
+                  `${e.vaccin.nom} (dose ${e.prochaine_dose})${e.date_prevue ? ` - ${e.date_prevue}` : ""}`,
+              )
+              .join(" · ")}
+          </span>
         </div>
       )}
 
-      <div className="border rounded p-3 flex flex-col gap-2 max-w-md">
+      <Card className="flex flex-col gap-2 max-w-md p-3">
         <div className="flex gap-2">
-          <select
+          <Select
             value={vaccinId}
             onChange={(e) => setVaccinId(e.target.value ? Number(e.target.value) : "")}
-            className="border rounded px-3 py-2 flex-1"
+            className="flex-1"
           >
             <option value="">Vaccin...</option>
             {vaccins.map((v) => (
@@ -94,15 +99,15 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
                 {v.nom}
               </option>
             ))}
-          </select>
-          <input
+          </Select>
+          <Input
             type="date"
             value={dateAdministration}
             onChange={(e) => setDateAdministration(e.target.value)}
-            className="border rounded px-3 py-2"
+            className="w-auto"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-sm text-foreground">
           <input
             type="checkbox"
             checked={mapiSurvenue}
@@ -111,23 +116,18 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
           MAPI (manifestation adverse post-vaccinale) constatée
         </label>
         {mapiSurvenue && (
-          <textarea
+          <Textarea
             placeholder="Détails de la MAPI"
             value={mapiDetails}
             onChange={(e) => setMapiDetails(e.target.value)}
-            className="border rounded px-3 py-2"
             rows={2}
           />
         )}
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          onClick={handleAdminister}
-          disabled={isSubmitting || !vaccinId}
-          className="bg-blue-600 text-white rounded px-3 py-2 self-start disabled:opacity-50"
-        >
+        {error && <p className="text-sm text-danger">{error}</p>}
+        <Button onClick={handleAdminister} disabled={isSubmitting || !vaccinId} className="self-start">
           Administrer
-        </button>
-      </div>
+        </Button>
+      </Card>
     </div>
   );
 }

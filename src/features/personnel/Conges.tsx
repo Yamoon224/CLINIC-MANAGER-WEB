@@ -10,6 +10,13 @@ import {
   type CongeType,
   type Employe,
 } from "./types";
+import { Badge, Button, Card, Field, Input, Select } from "@/components/ui";
+
+const CONGE_STATUT_TONE: Record<CongeStatut, "warning" | "success" | "danger"> = {
+  en_attente: "warning",
+  approuve: "success",
+  refuse: "danger",
+};
 
 export function Conges() {
   const [statut, setStatut] = useState<CongeStatut | "">("en_attente");
@@ -59,102 +66,100 @@ export function Conges() {
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <div className="border rounded p-3 flex flex-col gap-2">
-        <div className="flex gap-2">
-          <select
-            value={employeId}
-            onChange={(e) => setEmployeId(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
-          >
-            <option value="">Employé…</option>
-            {employes.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.prenom} {e.nom}
-              </option>
-            ))}
-          </select>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as CongeType)}
-            className="border rounded px-3 py-2"
-          >
-            {Object.entries(CONGE_TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+      <Card className="flex flex-col gap-3">
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Employé">
+            <Select value={employeId} onChange={(e) => setEmployeId(e.target.value)}>
+              <option value="">Employé…</option>
+              {employes.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.prenom} {e.nom}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Type de congé">
+            <Select value={type} onChange={(e) => setType(e.target.value as CongeType)}>
+              {Object.entries(CONGE_TYPE_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </Field>
         </div>
-        <div className="flex gap-2">
-          <input
-            type="date"
-            value={dateDebut}
-            onChange={(e) => setDateDebut(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
-          />
-          <input
-            type="date"
-            value={dateFin}
-            onChange={(e) => setDateFin(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
-          />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Date de début">
+            <Input
+              type="date"
+              value={dateDebut}
+              onChange={(e) => setDateDebut(e.target.value)}
+            />
+          </Field>
+          <Field label="Date de fin">
+            <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
+          </Field>
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          onClick={handleDemander}
-          className="border rounded px-3 py-2 self-start"
-        >
+        {error && (
+          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        )}
+        <Button onClick={handleDemander} className="self-start">
           Demander un congé
-        </button>
-      </div>
+        </Button>
+      </Card>
 
-      <select
-        value={statut}
-        onChange={(e) => setStatut(e.target.value as CongeStatut | "")}
-        className="border rounded px-3 py-2 w-56"
-      >
-        <option value="">Tous statuts</option>
-        {Object.entries(CONGE_STATUT_LABELS).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
+      <Field label="Filtrer par statut">
+        <Select
+          value={statut}
+          onChange={(e) => setStatut(e.target.value as CongeStatut | "")}
+          className="w-56"
+        >
+          <option value="">Tous statuts</option>
+          {Object.entries(CONGE_STATUT_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </Select>
+      </Field>
 
-      <ul className="flex flex-col gap-2 text-sm">
+      <div className="flex flex-col gap-2">
         {conges.map((c) => (
-          <li key={c.id} className="border rounded p-2">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">
+          <Card key={c.id} className="p-3">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-medium">
                 {c.employe && `${c.employe.prenom} ${c.employe.nom}`} - {CONGE_TYPE_LABELS[c.type]}
               </span>
-              <span className="text-xs text-gray-500">{CONGE_STATUT_LABELS[c.statut]}</span>
+              <Badge tone={CONGE_STATUT_TONE[c.statut]}>{CONGE_STATUT_LABELS[c.statut]}</Badge>
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="mt-1 text-xs text-muted">
               Du {c.date_debut} au {c.date_fin} ({c.duree_jours} j.)
             </div>
             {c.statut === "en_attente" && (
-              <div className="flex gap-2 mt-2">
-                <button
+              <div className="mt-3 flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={() => handleTraiter(c.id, "approuve")}
                   disabled={busyId === c.id}
-                  className="border rounded px-2 py-1 text-xs text-green-700 disabled:opacity-50"
+                  className="border-success/30 text-success hover:bg-success-light"
                 >
                   Approuver
-                </button>
-                <button
+                </Button>
+                <Button
+                  size="sm"
+                  variant="danger"
                   onClick={() => handleTraiter(c.id, "refuse")}
                   disabled={busyId === c.id}
-                  className="border rounded px-2 py-1 text-xs text-red-700 disabled:opacity-50"
                 >
                   Refuser
-                </button>
+                </Button>
               </div>
             )}
-          </li>
+          </Card>
         ))}
-        {conges.length === 0 && <li className="text-gray-500">Aucun congé.</li>}
-      </ul>
+        {conges.length === 0 && <p className="text-sm text-muted">Aucun congé.</p>}
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
 import { registerPatient } from "./patients-api";
 import type { RegisterPatientPayload } from "./types";
 
@@ -45,118 +46,98 @@ export function PatientForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-2xl">
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Nom" required>
-          <input
-            required
-            value={form.nom}
-            onChange={(e) => update("nom", e.target.value)}
-            className="border rounded px-3 py-2 w-full"
-          />
-        </Field>
-        <Field label="Prénom" required>
-          <input
-            required
-            value={form.prenom}
-            onChange={(e) => update("prenom", e.target.value)}
-            className="border rounded px-3 py-2 w-full"
-          />
-        </Field>
-        <Field label="Date de naissance">
-          <input
-            type="date"
-            value={form.date_naissance ?? ""}
-            onChange={(e) => update("date_naissance", e.target.value)}
-            className="border rounded px-3 py-2 w-full"
-          />
-        </Field>
-        <Field label="Sexe">
-          <select
-            value={form.sexe ?? ""}
-            onChange={(e) =>
-              update(
-                "sexe",
-                e.target.value === "" ? undefined : (e.target.value as "M" | "F"),
-              )
-            }
-            className="border rounded px-3 py-2 w-full"
-          >
-            <option value="">-</option>
-            <option value="F">Féminin</option>
-            <option value="M">Masculin</option>
-          </select>
-        </Field>
-        <Field label="Téléphone">
-          <input
-            value={form.telephone ?? ""}
-            onChange={(e) => update("telephone", e.target.value)}
-            className="border rounded px-3 py-2 w-full"
-          />
-        </Field>
-        <Field label="Adresse">
-          <input
-            value={form.adresse ?? ""}
-            onChange={(e) => update("adresse", e.target.value)}
-            className="border rounded px-3 py-2 w-full"
-          />
-        </Field>
-        <Field label="Personne à prévenir">
-          <input
-            value={form.personne_a_prevenir_nom ?? ""}
-            onChange={(e) => update("personne_a_prevenir_nom", e.target.value)}
-            className="border rounded px-3 py-2 w-full"
-          />
-        </Field>
-        <Field label="Téléphone personne à prévenir">
-          <input
-            value={form.personne_a_prevenir_telephone ?? ""}
-            onChange={(e) =>
-              update("personne_a_prevenir_telephone", e.target.value)
-            }
-            className="border rounded px-3 py-2 w-full"
-          />
-        </Field>
-      </div>
+    <Card className="max-w-2xl">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Nom" required>
+            <Input
+              required
+              placeholder="Ex: Dupont"
+              value={form.nom}
+              onChange={(e) => update("nom", e.target.value)}
+            />
+          </Field>
+          <Field label="Prénom" required>
+            <Input
+              required
+              placeholder="Ex: Awa"
+              value={form.prenom}
+              onChange={(e) => update("prenom", e.target.value)}
+            />
+          </Field>
+          <Field label="Date de naissance">
+            <Input
+              type="date"
+              value={form.date_naissance ?? ""}
+              onChange={(e) => update("date_naissance", e.target.value)}
+            />
+          </Field>
+          <Field label="Sexe">
+            <Select
+              value={form.sexe ?? ""}
+              onChange={(e) =>
+                update(
+                  "sexe",
+                  e.target.value === "" ? undefined : (e.target.value as "M" | "F"),
+                )
+              }
+            >
+              <option value="">-</option>
+              <option value="F">Féminin</option>
+              <option value="M">Masculin</option>
+            </Select>
+          </Field>
+          <Field label="Téléphone">
+            <Input
+              placeholder="+225 07 00 00 00 00"
+              value={form.telephone ?? ""}
+              onChange={(e) => update("telephone", e.target.value)}
+            />
+          </Field>
+          <Field label="Adresse">
+            <Input
+              placeholder="Quartier, ville..."
+              value={form.adresse ?? ""}
+              onChange={(e) => update("adresse", e.target.value)}
+            />
+          </Field>
+          <Field label="Personne à prévenir">
+            <Input
+              placeholder="Nom du contact"
+              value={form.personne_a_prevenir_nom ?? ""}
+              onChange={(e) => update("personne_a_prevenir_nom", e.target.value)}
+            />
+          </Field>
+          <Field label="Téléphone personne à prévenir">
+            <Input
+              placeholder="Téléphone du contact"
+              value={form.personne_a_prevenir_telephone ?? ""}
+              onChange={(e) =>
+                update("personne_a_prevenir_telephone", e.target.value)
+              }
+            />
+          </Field>
+        </div>
 
-      <Field label="Allergies connues">
-        <textarea
-          value={form.allergies ?? ""}
-          onChange={(e) => update("allergies", e.target.value)}
-          className="border rounded px-3 py-2 w-full"
-          rows={2}
-        />
-      </Field>
+        <Field label="Allergies connues">
+          <Textarea
+            placeholder="Allergies connues, le cas échéant..."
+            value={form.allergies ?? ""}
+            onChange={(e) => update("allergies", e.target.value)}
+            rows={2}
+          />
+        </Field>
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && (
+          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">
+            {error}
+          </p>
+        )}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="bg-blue-600 text-white rounded px-3 py-2 self-start disabled:opacity-50"
-      >
-        {isSubmitting ? "Enregistrement..." : "Enregistrer le patient"}
-      </button>
-    </form>
-  );
-}
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="flex flex-col gap-1 text-sm">
-      <span>
-        {label}
-        {required && <span className="text-red-600"> *</span>}
-      </span>
-      {children}
-    </label>
+        <Button type="submit" disabled={isSubmitting} className="self-start">
+          {isSubmitting ? "Enregistrement..." : "Enregistrer le patient"}
+        </Button>
+      </form>
+    </Card>
   );
 }

@@ -13,16 +13,19 @@ export function Creances() {
   }, []);
 
   return (
-    <ul className="flex flex-col gap-1 text-sm max-w-lg">
+    <ul className="flex flex-col gap-2 text-sm max-w-lg">
       {creances.map((f) => (
-        <li key={f.id} className="border rounded p-2 flex justify-between">
-          <Link href={`/factures/${f.id}`} className="text-blue-600 underline">
+        <li
+          key={f.id}
+          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3"
+        >
+          <Link href={`/factures/${f.id}`} className="text-primary hover:underline">
             {f.patient.prenom} {f.patient.nom} - Facture #{f.id}
           </Link>
-          <span className="font-medium">{f.solde} F CFA dû</span>
+          <span className="font-semibold text-danger">{f.solde} F CFA dû</span>
         </li>
       ))}
-      {creances.length === 0 && <li className="text-gray-500">Aucun impayé.</li>}
+      {creances.length === 0 && <li className="text-muted">Aucun impayé.</li>}
     </ul>
   );
 }

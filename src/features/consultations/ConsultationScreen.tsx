@@ -13,6 +13,7 @@ import {
   type PrescriptionType,
   type UpdateConsultationPayload,
 } from "./types";
+import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
 
 export function ConsultationScreen({ id }: { id: number }) {
   const [consultation, setConsultation] = useState<Consultation | null>(null);
@@ -85,202 +86,182 @@ export function ConsultationScreen({ id }: { id: number }) {
     }
   }
 
-  if (!consultation) return <p className="text-gray-500">Chargement...</p>;
+  if (!consultation) return <p className="text-sm text-muted">Chargement...</p>;
 
   const readOnly = consultation.statut === "terminee";
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
       <div>
-        <h1 className="text-lg font-semibold">
+        <h1 className="text-lg font-semibold text-foreground">
           Consultation - {consultation.patient.prenom} {consultation.patient.nom}
         </h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           Dossier n° {consultation.patient.numero_dossier} · Motif : {consultation.motif}
         </p>
       </div>
 
       {consultation.patient.allergies && (
-        <div className="border border-red-300 bg-red-50 rounded p-3 text-sm">
-          <span className="font-semibold text-red-700">⚠ Allergies : </span>
+        <div className="rounded-xl border border-danger/30 bg-danger-light p-3 text-sm">
+          <span className="font-semibold text-danger">⚠ Allergies : </span>
           {consultation.patient.allergies}
         </div>
       )}
 
       {readOnly && (
-        <div className="border border-green-300 bg-green-50 rounded p-3 text-sm text-green-800">
+        <div className="rounded-xl border border-success/30 bg-success-light p-3 text-sm text-success">
           Consultation terminée.
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-4">
         <Field label="Température (°C)">
-          <input
+          <Input
             type="number"
             step="0.1"
             disabled={readOnly}
+            placeholder="37.0"
             value={form.temperature ?? ""}
             onChange={(e) =>
               setForm((f) => ({ ...f, temperature: e.target.value ? Number(e.target.value) : undefined }))
             }
-            className="border rounded px-3 py-2 w-full disabled:bg-gray-100"
           />
         </Field>
         <Field label="Tension">
-          <input
+          <Input
             disabled={readOnly}
             placeholder="120/80"
             value={form.tension ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, tension: e.target.value }))}
-            className="border rounded px-3 py-2 w-full disabled:bg-gray-100"
           />
         </Field>
         <Field label="Poids (kg)">
-          <input
+          <Input
             type="number"
             step="0.1"
             disabled={readOnly}
+            placeholder="Poids en kg"
             value={form.poids ?? ""}
             onChange={(e) =>
               setForm((f) => ({ ...f, poids: e.target.value ? Number(e.target.value) : undefined }))
             }
-            className="border rounded px-3 py-2 w-full disabled:bg-gray-100"
           />
         </Field>
         <Field label="Pouls (bpm)">
-          <input
+          <Input
             type="number"
             disabled={readOnly}
+            placeholder="Pouls/min"
             value={form.pouls ?? ""}
             onChange={(e) =>
               setForm((f) => ({ ...f, pouls: e.target.value ? Number(e.target.value) : undefined }))
             }
-            className="border rounded px-3 py-2 w-full disabled:bg-gray-100"
           />
         </Field>
       </div>
 
       <Field label="Examen clinique">
-        <textarea
+        <Textarea
           disabled={readOnly}
           rows={3}
+          placeholder="Résultats de l'examen clinique..."
           value={form.examen_clinique ?? ""}
           onChange={(e) => setForm((f) => ({ ...f, examen_clinique: e.target.value }))}
-          className="border rounded px-3 py-2 w-full disabled:bg-gray-100"
         />
       </Field>
 
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2">
           <Field label="Diagnostic">
-            <input
+            <Input
               disabled={readOnly}
+              placeholder="Diagnostic"
               value={form.diagnostic ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, diagnostic: e.target.value }))}
-              className="border rounded px-3 py-2 w-full disabled:bg-gray-100"
             />
           </Field>
         </div>
         <Field label="Code CIM-10">
-          <input
+          <Input
             disabled={readOnly}
+            placeholder="Code CIM-10"
             value={form.cim10_code ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, cim10_code: e.target.value }))}
-            className="border rounded px-3 py-2 w-full disabled:bg-gray-100"
           />
         </Field>
       </div>
 
       <Field label="Conduite à tenir">
-        <textarea
+        <Textarea
           disabled={readOnly}
           rows={2}
+          placeholder="Conduite à tenir, traitement, recommandations..."
           value={form.conduite_a_tenir ?? ""}
           onChange={(e) => setForm((f) => ({ ...f, conduite_a_tenir: e.target.value }))}
-          className="border rounded px-3 py-2 w-full disabled:bg-gray-100"
         />
       </Field>
 
       {!readOnly && (
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="border rounded px-3 py-2 self-start disabled:opacity-50"
-        >
+        <Button variant="outline" onClick={handleSave} disabled={isSaving} className="self-start">
           {isSaving ? "Enregistrement..." : "Enregistrer"}
-        </button>
+        </Button>
       )}
 
-      <div className="border-t pt-4">
-        <h2 className="font-semibold mb-2">Prescriptions</h2>
-        <ul className="flex flex-col gap-1 mb-3 text-sm">
+      <Card className="p-4">
+        <h2 className="font-semibold text-foreground mb-3">Prescriptions</h2>
+        <ul className="flex flex-col gap-2 mb-3 text-sm">
           {consultation.prescriptions.map((p) => (
-            <li key={p.id} className="border rounded p-2">
-              <span className="font-medium">{PRESCRIPTION_TYPE_LABELS[p.type]}</span> - {p.designation}
-              {p.instructions && <p className="text-gray-500">{p.instructions}</p>}
+            <li key={p.id} className="rounded-lg border border-border p-2">
+              <span className="font-medium text-foreground">{PRESCRIPTION_TYPE_LABELS[p.type]}</span> - {p.designation}
+              {p.instructions && <p className="text-muted">{p.instructions}</p>}
             </li>
           ))}
           {consultation.prescriptions.length === 0 && (
-            <li className="text-gray-500">Aucune prescription.</li>
+            <li className="text-muted">Aucune prescription.</li>
           )}
         </ul>
 
         {!readOnly && (
-          <div className="flex flex-col gap-2 border rounded p-3">
+          <div className="flex flex-col gap-2 rounded-xl border border-border p-3">
             <div className="flex gap-2">
-              <select
+              <Select
                 value={prescriptionType}
                 onChange={(e) => setPrescriptionType(e.target.value as PrescriptionType)}
-                className="border rounded px-3 py-2"
               >
                 {Object.entries(PRESCRIPTION_TYPE_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
                   </option>
                 ))}
-              </select>
-              <input
+              </Select>
+              <Input
                 placeholder="Désignation (médicament, analyse...)"
                 value={designation}
                 onChange={(e) => setDesignation(e.target.value)}
-                className="border rounded px-3 py-2 flex-1"
+                className="flex-1"
               />
             </div>
-            <input
+            <Input
               placeholder="Instructions (posologie...)"
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              className="border rounded px-3 py-2"
             />
-            <button
+            <Button
               onClick={handleAddPrescription}
               disabled={isAddingPrescription}
-              className="border rounded px-3 py-2 self-start disabled:opacity-50"
+              className="self-start"
             >
               Ajouter
-            </button>
+            </Button>
           </div>
         )}
-      </div>
+      </Card>
 
       {!readOnly && (
-        <button
-          onClick={handleFinish}
-          disabled={isFinishing}
-          className="bg-blue-600 text-white rounded px-3 py-2 self-start disabled:opacity-50"
-        >
+        <Button onClick={handleFinish} disabled={isFinishing} className="self-start">
           {isFinishing ? "..." : "Terminer la consultation"}
-        </button>
+        </Button>
       )}
     </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1 text-sm">
-      <span>{label}</span>
-      {children}
-    </label>
   );
 }

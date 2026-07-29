@@ -19,20 +19,20 @@ export function PatientSejours({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold mb-2">Hospitalisation</h2>
-      <ul className="flex flex-col gap-1 mb-3 text-sm">
+      <h2 className="font-semibold mb-2 text-foreground">Hospitalisation</h2>
+      <ul className="flex flex-col gap-2 mb-3 text-sm">
         {sejours.map((s) => (
-          <li key={s.id} className="border rounded p-2">
-            <Link href={`/sejours/${s.id}`} className="font-medium text-blue-600 underline">
+          <li key={s.id} className="rounded-xl border border-border bg-surface p-3">
+            <Link href={`/sejours/${s.id}`} className="font-medium text-primary hover:underline">
               Chambre {s.lit.chambre} - {s.lit.numero}
             </Link>{" "}
-            <span className="text-gray-500">
+            <span className="text-muted">
               {s.statut === "en_cours" ? "en cours" : `${s.nombre_jours} jour(s)`}
             </span>
           </li>
         ))}
         {sejours.length === 0 && (
-          <li className="text-gray-500">Aucune hospitalisation.</li>
+          <li className="text-muted">Aucune hospitalisation.</li>
         )}
       </ul>
       {!enCours && <AdmissionAction patientId={patientId} />}

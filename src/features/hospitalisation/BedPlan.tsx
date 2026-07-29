@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { fetchLits, libererLit } from "./hospitalisation-api";
 import type { Lit, LitStatut } from "./types";
+import { Badge, Button, Card } from "@/components/ui";
 
 const STATUT_LABELS: Record<LitStatut, string> = {
   libre: "Libre",
@@ -12,11 +13,11 @@ const STATUT_LABELS: Record<LitStatut, string> = {
   nettoyage: "En nettoyage",
 };
 
-const STATUT_COLORS: Record<LitStatut, string> = {
-  libre: "bg-green-100 border-green-300",
-  occupe: "bg-red-100 border-red-300",
-  reserve: "bg-yellow-100 border-yellow-300",
-  nettoyage: "bg-gray-100 border-gray-300",
+const STATUT_TONES: Record<LitStatut, "success" | "danger" | "warning" | "neutral"> = {
+  libre: "success",
+  occupe: "danger",
+  reserve: "warning",
+  nettoyage: "neutral",
 };
 
 export function BedPlan() {
@@ -52,40 +53,39 @@ export function BedPlan() {
     <div className="flex flex-col gap-6">
       {Object.entries(parChambre).map(([chambre, litsChambre]) => (
         <div key={chambre}>
-          <h2 className="font-medium mb-2">Chambre {chambre}</h2>
+          <h2 className="font-medium mb-2 text-foreground">Chambre {chambre}</h2>
           <div className="flex flex-wrap gap-3">
             {litsChambre.map((lit) => (
-              <div
-                key={lit.id}
-                className={`border rounded p-3 w-56 text-sm ${STATUT_COLORS[lit.statut]}`}
-              >
+              <Card key={lit.id} className="w-56 p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">{lit.numero}</span>
-                  <span>{STATUT_LABELS[lit.statut]}</span>
+                  <Badge tone={STATUT_TONES[lit.statut]}>{STATUT_LABELS[lit.statut]}</Badge>
                 </div>
                 {lit.patient_actuel && (
                   <Link
                     href={`/sejours/${lit.patient_actuel.sejour_id}`}
-                    className="text-blue-600 underline block mt-1"
+                    className="text-primary hover:underline block mt-2 text-sm"
                   >
                     {lit.patient_actuel.prenom} {lit.patient_actuel.nom}
                   </Link>
                 )}
                 {lit.statut === "nettoyage" && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleLiberer(lit.id)}
                     disabled={busyId === lit.id}
-                    className="underline mt-1 disabled:opacity-50"
+                    className="mt-2 px-0"
                   >
                     Marquer libre
-                  </button>
+                  </Button>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
         </div>
       ))}
-      {lits.length === 0 && <p className="text-gray-500">Aucun lit configuré.</p>}
+      {lits.length === 0 && <p className="text-muted">Aucun lit configuré.</p>}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createDepense, fetchDepenses } from "./caisse-api";
 import type { Depense } from "./types";
+import { Button, Card, Field, Input } from "@/components/ui";
 
 export function Depenses() {
   const [depenses, setDepenses] = useState<Depense[]>([]);
@@ -39,47 +40,53 @@ export function Depenses() {
 
   return (
     <div className="flex flex-col gap-4 max-w-lg">
-      <div className="border rounded p-3 flex flex-col gap-2">
+      <Card className="flex flex-col gap-3">
         <div className="flex gap-2">
-          <input
-            placeholder="Catégorie"
-            value={categorie}
-            onChange={(e) => setCategorie(e.target.value)}
-            className="border rounded px-3 py-2 flex-1"
-          />
-          <input
-            placeholder="Montant"
-            value={montant}
-            onChange={(e) => setMontant(e.target.value)}
-            className="border rounded px-3 py-2 w-32"
-          />
+          <div className="flex-1">
+            <Field label="Catégorie">
+              <Input
+                placeholder="Catégorie"
+                value={categorie}
+                onChange={(e) => setCategorie(e.target.value)}
+              />
+            </Field>
+          </div>
+          <div className="w-32">
+            <Field label="Montant">
+              <Input
+                placeholder="Montant"
+                value={montant}
+                onChange={(e) => setMontant(e.target.value)}
+              />
+            </Field>
+          </div>
         </div>
-        <input
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="border rounded px-3 py-2"
-        />
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="border rounded px-3 py-2 self-start disabled:opacity-50"
-        >
+        <Field label="Description">
+          <Input
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </Field>
+        <Button onClick={handleSubmit} disabled={isSubmitting} className="self-start">
           Enregistrer la dépense
-        </button>
-      </div>
+        </Button>
+      </Card>
 
-      <ul className="flex flex-col gap-1 text-sm">
+      <ul className="flex flex-col gap-2 text-sm">
         {depenses.map((d) => (
-          <li key={d.id} className="border rounded p-2 flex justify-between">
+          <li
+            key={d.id}
+            className="flex items-center justify-between rounded-xl border border-border bg-surface p-3"
+          >
             <span>
               {d.categorie}
               {d.description && ` - ${d.description}`}
             </span>
-            <span className="font-medium">{d.montant} F CFA</span>
+            <span className="font-semibold">{d.montant} F CFA</span>
           </li>
         ))}
-        {depenses.length === 0 && <li className="text-gray-500">Aucune dépense.</li>}
+        {depenses.length === 0 && <li className="text-muted">Aucune dépense.</li>}
       </ul>
     </div>
   );
