@@ -29,7 +29,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !user) router.replace("/login");
+    if (!isLoading && !user) router.replace("/");
   }, [isLoading, user, router]);
 
   if (isLoading || !user) return null;
