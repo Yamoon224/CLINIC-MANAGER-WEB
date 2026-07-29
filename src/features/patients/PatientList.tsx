@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Card, Input, PageHeader, Pagination } from "@/components/ui";
+import { Button, Card, Input, Modal, PageHeader, Pagination } from "@/components/ui";
 import { searchPatients } from "./patients-api";
+import { PatientForm } from "./PatientForm";
 import type { Patient } from "./types";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
@@ -14,6 +15,7 @@ export function PatientList() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     setPage(1);
@@ -37,12 +39,9 @@ export function PatientList() {
       <PageHeader
         title={t("patients.title")}
         actions={
-          <Link
-            href="/patients/new"
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm shadow-primary/20 transition-colors hover:bg-primary-hover"
-          >
+          <Button onClick={() => setShowForm(true)}>
             + {t("patients.newPatient")}
-          </Link>
+          </Button>
         }
       />
 
@@ -90,6 +89,15 @@ export function PatientList() {
         )}
       </Card>
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={t("patients.newPatient")}
+        size="lg"
+      >
+        <PatientForm onCancel={() => setShowForm(false)} />
+      </Modal>
     </div>
   );
 }
