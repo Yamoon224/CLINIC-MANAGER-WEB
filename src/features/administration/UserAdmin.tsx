@@ -9,6 +9,7 @@ import {
   Card,
   Field,
   Input,
+  Modal,
   Pagination,
   PasswordInput,
   Select,
@@ -67,12 +68,8 @@ export function UserAdmin() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">{t("parametres.admin.users")}</h3>
-        <Button
-          variant={showCreateForm ? "outline" : "primary"}
-          size="sm"
-          onClick={() => setShowCreateForm((v) => !v)}
-        >
-          {showCreateForm ? t("common.cancel") : `+ ${t("parametres.admin.newUser")}`}
+        <Button size="sm" onClick={() => setShowCreateForm(true)}>
+          + {t("parametres.admin.newUser")}
         </Button>
       </div>
 
@@ -82,15 +79,21 @@ export function UserAdmin() {
         </p>
       )}
 
-      {showCreateForm && (
+      <Modal
+        open={showCreateForm}
+        onClose={() => setShowCreateForm(false)}
+        title={t("parametres.admin.newUser")}
+        size="lg"
+      >
         <CreateUserForm
           roles={roles}
+          onCancel={() => setShowCreateForm(false)}
           onCreated={() => {
             setShowCreateForm(false);
             load(page);
           }}
         />
-      )}
+      </Modal>
 
       <Card className="overflow-x-auto p-0">
         <table className="table">
@@ -155,9 +158,11 @@ export function UserAdmin() {
 function CreateUserForm({
   roles,
   onCreated,
+  onCancel,
 }: {
   roles: string[];
   onCreated: (user: AdminUser) => void;
+  onCancel: () => void;
 }) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
@@ -182,7 +187,6 @@ function CreateUserForm({
   }
 
   return (
-    <Card>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <Field label={t("profil.fullName")}>
@@ -223,10 +227,14 @@ function CreateUserForm({
             {error}
           </p>
         )}
-        <Button type="submit" disabled={isSubmitting} className="self-start">
-          {isSubmitting ? t("parametres.admin.creating") : t("parametres.admin.createUser")}
-        </Button>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? t("parametres.admin.creating") : t("parametres.admin.createUser")}
+          </Button>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        </div>
       </form>
-    </Card>
   );
 }
