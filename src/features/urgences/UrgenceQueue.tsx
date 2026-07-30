@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Badge, Card, Pagination } from "@/components/ui";
+import { Badge, Button, Card, Modal, PageHeader, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { AdmissionForm } from "./AdmissionForm";
 import { fetchFileAttente } from "./urgences-api";
 import { type AdmissionUrgence, type NiveauTriage } from "./types";
 
@@ -20,6 +21,7 @@ export function UrgenceQueue() {
   const [admissions, setAdmissions] = useState<AdmissionUrgence[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showForm, setShowForm] = useState(false);
 
   const reload = useCallback(() => {
     fetchFileAttente(page).then((res) => {
@@ -36,6 +38,15 @@ export function UrgenceQueue() {
 
   return (
     <div className="flex flex-col gap-3">
+      <PageHeader
+        title={t("urgences.title")}
+        actions={
+          <Button onClick={() => setShowForm(true)}>
+            + {t("urgences.newAdmission")}
+          </Button>
+        }
+      />
+
       {admissions.map((a) => (
         <Link key={a.id} href={`/urgences/${a.id}`}>
           <Card className="flex items-center justify-between hover:bg-primary-light/40 transition-colors">
@@ -68,6 +79,15 @@ export function UrgenceQueue() {
       )}
 
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={t("urgences.newAdmission")}
+        size="lg"
+      >
+        <AdmissionForm onCancel={() => setShowForm(false)} />
+      </Modal>
     </div>
   );
 }

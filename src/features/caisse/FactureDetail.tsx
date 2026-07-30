@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { annulerFacture, encaisser, fetchFacture } from "./caisse-api";
 import { MODE_PAIEMENT_LABELS, type Facture, type ModePaiement } from "./types";
-import { Badge, Button, Card, Input, PageHeader, Select } from "@/components/ui";
+import { Badge, Button, Card, Input, Modal, PageHeader, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const STATUT_TONES: Record<Facture["statut"], "primary" | "warning" | "success" | "neutral"> = {
@@ -16,11 +16,8 @@ const STATUT_TONES: Record<Facture["statut"], "primary" | "warning" | "success" 
 export function FactureDetail({ id }: { id: number }) {
   const { t } = useTranslation();
   const [facture, setFacture] = useState<Facture | null>(null);
-  const [montant, setMontant] = useState("");
-  const [modePaiement, setModePaiement] = useState<ModePaiement>("especes");
-  const [reference, setReference] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [showEncaissement, setShowEncaissement] = useState(false);
 
   const load = useCallback(() => {
     fetchFacture(id).then((res) => setFacture(res.data));
@@ -29,26 +26,6 @@ export function FactureDetail({ id }: { id: number }) {
   useEffect(() => {
     load();
   }, [load]);
-
-  async function handleEncaisser() {
-    if (!montant) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await encaisser(id, {
-        montant: Number(montant),
-        mode_paiement: modePaiement,
-        reference: reference || undefined,
-      });
-      setMontant("");
-      setReference("");
-      load();
-    } catch {
-      setError(t("caisse.factureDetail.encaisserError"));
-    } finally {
-      setBusy(false);
-    }
-  }
 
   async function handleAnnuler() {
     setBusy(true);
@@ -133,9 +110,16 @@ export function FactureDetail({ id }: { id: number }) {
       </Card>
 
       <div>
-        <h2 className="font-semibold mb-2 text-foreground">
-          {t("caisse.factureDetail.encaissementsTitle")}
-        </h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-semibold text-foreground">
+            {t("caisse.factureDetail.encaissementsTitle")}
+          </h2>
+          {active && (
+            <Button size="sm" onClick={() => setShowEncaissement(true)}>
+              + {t("caisse.factureDetail.encaisser")}
+            </Button>
+          )}
+        </div>
         <ul className="text-sm flex flex-col gap-2 mb-3">
           {facture.encaissements.map((e) => (
             <li key={e.id} className="rounded-xl border border-border bg-surface p-3">
@@ -147,41 +131,24 @@ export function FactureDetail({ id }: { id: number }) {
             <li className="text-muted">{t("caisse.factureDetail.noEncaissements")}</li>
           )}
         </ul>
-
-        {active && (
-          <Card className="flex items-center gap-2">
-            <Input
-              placeholder={t("caisse.factureDetail.montantPlaceholder")}
-              value={montant}
-              onChange={(e) => setMontant(e.target.value)}
-              className="w-32"
-            />
-            <Select
-              value={modePaiement}
-              onChange={(e) => setModePaiement(e.target.value as ModePaiement)}
-              className="max-w-[10rem]"
-            >
-              {Object.keys(MODE_PAIEMENT_LABELS).map((value) => (
-                <option key={value} value={value}>
-                  {t(`caisse.modePaiement.${value}`)}
-                </option>
-              ))}
-            </Select>
-            <Input
-              placeholder={t("caisse.factureDetail.referencePlaceholder")}
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleEncaisser} disabled={busy}>
-              {t("caisse.factureDetail.encaisser")}
-            </Button>
-          </Card>
-        )}
-        {error && (
-          <p className="mt-2 rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
-        )}
       </div>
+
+      {active && (
+        <Modal
+          open={showEncaissement}
+          onClose={() => setShowEncaissement(false)}
+          title={t("caisse.factureDetail.encaisser")}
+        >
+          <EncaissementForm
+            factureId={id}
+            onCancel={() => setShowEncaissement(false)}
+            onCreated={() => {
+              setShowEncaissement(false);
+              load();
+            }}
+          />
+        </Modal>
+      )}
 
       {facture.statut === "ouverte" && (
         <Button variant="ghost" onClick={handleAnnuler} disabled={busy} className="self-start text-danger hover:bg-danger-light">
@@ -189,5 +156,81 @@ export function FactureDetail({ id }: { id: number }) {
         </Button>
       )}
     </div>
+  );
+}
+
+function EncaissementForm({
+  factureId,
+  onCancel,
+  onCreated,
+}: {
+  factureId: number;
+  onCancel?: () => void;
+  onCreated: () => void;
+}) {
+  const { t } = useTranslation();
+  const [montant, setMontant] = useState("");
+  const [modePaiement, setModePaiement] = useState<ModePaiement>("especes");
+  const [reference, setReference] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!montant) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await encaisser(factureId, {
+        montant: Number(montant),
+        mode_paiement: modePaiement,
+        reference: reference || undefined,
+      });
+      setMontant("");
+      setReference("");
+      onCreated();
+    } catch {
+      setError(t("caisse.factureDetail.encaisserError"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <Input
+        placeholder={t("caisse.factureDetail.montantPlaceholder")}
+        value={montant}
+        onChange={(e) => setMontant(e.target.value)}
+      />
+      <Select
+        value={modePaiement}
+        onChange={(e) => setModePaiement(e.target.value as ModePaiement)}
+      >
+        {Object.keys(MODE_PAIEMENT_LABELS).map((value) => (
+          <option key={value} value={value}>
+            {t(`caisse.modePaiement.${value}`)}
+          </option>
+        ))}
+      </Select>
+      <Input
+        placeholder={t("caisse.factureDetail.referencePlaceholder")}
+        value={reference}
+        onChange={(e) => setReference(e.target.value)}
+      />
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+      )}
+      <div className="flex gap-2">
+        <Button type="submit" disabled={busy}>
+          {t("caisse.factureDetail.encaisser")}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
+    </form>
   );
 }

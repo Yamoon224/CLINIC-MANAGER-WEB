@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { demanderConge, fetchConges, fetchEmployes, traiterConge } from "./personnel-api";
 import type { Conge, CongeStatut, CongeType, Employe } from "./types";
-import { Badge, Button, Card, Field, Input, Pagination, Select } from "@/components/ui";
+import { Badge, Button, Card, Field, Input, Modal, Pagination, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const CONGE_STATUT_TONE: Record<CongeStatut, "warning" | "success" | "danger"> = {
@@ -16,15 +16,10 @@ export function Conges() {
   const { t } = useTranslation();
   const [statut, setStatut] = useState<CongeStatut | "">("en_attente");
   const [conges, setConges] = useState<Conge[]>([]);
-  const [employes, setEmployes] = useState<Employe[]>([]);
-  const [employeId, setEmployeId] = useState("");
-  const [type, setType] = useState<CongeType>("annuel");
-  const [dateDebut, setDateDebut] = useState("");
-  const [dateFin, setDateFin] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showForm, setShowForm] = useState(false);
 
   const CONGE_TYPE_LABELS: Record<CongeType, string> = {
     annuel: t("personnel.congeType.annuel"),
@@ -56,23 +51,6 @@ export function Conges() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statut, page]);
 
-  useEffect(() => {
-    fetchEmployes().then((res) => setEmployes(res.data));
-  }, []);
-
-  async function handleDemander() {
-    if (!employeId || !dateDebut || !dateFin) return;
-    setError(null);
-    try {
-      await demanderConge(Number(employeId), { type, date_debut: dateDebut, date_fin: dateFin });
-      setDateDebut("");
-      setDateFin("");
-      load();
-    } catch {
-      setError(t("personnel.conges.error"));
-    }
-  }
-
   async function handleTraiter(id: number, decision: "approuve" | "refuse") {
     setBusyId(id);
     try {
@@ -85,47 +63,26 @@ export function Conges() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card className="flex flex-col gap-3">
-        <div className="grid grid-cols-2 gap-3">
-          <Field label={t("personnel.conges.employeLabel")}>
-            <Select value={employeId} onChange={(e) => setEmployeId(e.target.value)}>
-              <option value="">{t("personnel.conges.employePlaceholder")}</option>
-              {employes.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.prenom} {e.nom}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label={t("personnel.conges.typeLabel")}>
-            <Select value={type} onChange={(e) => setType(e.target.value as CongeType)}>
-              {Object.entries(CONGE_TYPE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label={t("personnel.conges.dateDebut")}>
-            <Input
-              type="date"
-              value={dateDebut}
-              onChange={(e) => setDateDebut(e.target.value)}
-            />
-          </Field>
-          <Field label={t("personnel.conges.dateFin")}>
-            <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
-          </Field>
-        </div>
-        {error && (
-          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
-        )}
-        <Button onClick={handleDemander} className="self-start">
-          {t("personnel.conges.submit")}
+      <div className="flex justify-end">
+        <Button onClick={() => setShowForm(true)}>
+          + {t("personnel.conges.newDemande")}
         </Button>
-      </Card>
+      </div>
+
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={t("personnel.conges.newDemande")}
+        size="lg"
+      >
+        <CreateCongeForm
+          onCancel={() => setShowForm(false)}
+          onCreated={() => {
+            setShowForm(false);
+            load();
+          }}
+        />
+      </Modal>
 
       <Field label={t("personnel.conges.filtreStatut")}>
         <Select
@@ -199,5 +156,100 @@ export function Conges() {
       </Card>
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
+  );
+}
+
+function CreateCongeForm({
+  onCancel,
+  onCreated,
+}: {
+  onCancel?: () => void;
+  onCreated: () => void;
+}) {
+  const { t } = useTranslation();
+  const [employes, setEmployes] = useState<Employe[]>([]);
+  const [employeId, setEmployeId] = useState("");
+  const [type, setType] = useState<CongeType>("annuel");
+  const [dateDebut, setDateDebut] = useState("");
+  const [dateFin, setDateFin] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const CONGE_TYPE_LABELS: Record<CongeType, string> = {
+    annuel: t("personnel.congeType.annuel"),
+    maladie: t("personnel.congeType.maladie"),
+    maternite: t("personnel.congeType.maternite"),
+    sans_solde: t("personnel.congeType.sans_solde"),
+    autre: t("personnel.congeType.autre"),
+  };
+
+  useEffect(() => {
+    fetchEmployes().then((res) => setEmployes(res.data));
+  }, []);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!employeId || !dateDebut || !dateFin) return;
+    setError(null);
+    setBusy(true);
+    try {
+      await demanderConge(Number(employeId), { type, date_debut: dateDebut, date_fin: dateFin });
+      onCreated();
+    } catch {
+      setError(t("personnel.conges.error"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("personnel.conges.employeLabel")}>
+          <Select value={employeId} onChange={(e) => setEmployeId(e.target.value)}>
+            <option value="">{t("personnel.conges.employePlaceholder")}</option>
+            {employes.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.prenom} {e.nom}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label={t("personnel.conges.typeLabel")}>
+          <Select value={type} onChange={(e) => setType(e.target.value as CongeType)}>
+            {Object.entries(CONGE_TYPE_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("personnel.conges.dateDebut")}>
+          <Input
+            type="date"
+            value={dateDebut}
+            onChange={(e) => setDateDebut(e.target.value)}
+          />
+        </Field>
+        <Field label={t("personnel.conges.dateFin")}>
+          <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
+        </Field>
+      </div>
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+      )}
+      <div className="flex gap-2">
+        <Button type="submit" disabled={busy}>
+          {t("personnel.conges.submit")}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
+    </form>
   );
 }

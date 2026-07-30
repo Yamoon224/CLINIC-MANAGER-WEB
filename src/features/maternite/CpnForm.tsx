@@ -8,9 +8,11 @@ import { useTranslation } from "@/lib/i18n/LanguageContext";
 export function CpnForm({
   grossesseId,
   onAdded,
+  onCancel,
 }: {
   grossesseId: number;
   onAdded: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [dateCpn, setDateCpn] = useState(new Date().toISOString().slice(0, 10));
@@ -48,10 +50,7 @@ export function CpnForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="grid grid-cols-4 gap-3">
         <Field label={t("maternite.cpnForm.date")}>
           <Input type="date" value={dateCpn} onChange={(e) => setDateCpn(e.target.value)} />
@@ -104,9 +103,16 @@ export function CpnForm({
           />
         </Field>
       )}
-      <Button type="submit" disabled={isSubmitting} className="self-start">
-        {t("maternite.cpnForm.submit")}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {t("maternite.cpnForm.submit")}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
     </form>
   );
 }

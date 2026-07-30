@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { FacturationAction } from "./FacturationAction";
 import { fetchPatientFactures } from "./caisse-api";
 import type { Facture } from "./types";
-import { Badge, Pagination } from "@/components/ui";
+import { Badge, Button, Modal, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const STATUT_TONES: Record<Facture["statut"], "primary" | "warning" | "success" | "neutral"> = {
@@ -20,6 +20,7 @@ export function PatientFactures({ patientId }: { patientId: number }) {
   const [factures, setFactures] = useState<Facture[] | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showFacturation, setShowFacturation] = useState(false);
 
   useEffect(() => {
     fetchPatientFactures(patientId, page).then((res) => {
@@ -62,7 +63,20 @@ export function PatientFactures({ patientId }: { patientId: number }) {
       </table>
       {factures.length === 0 && <p className="text-muted text-sm mb-3">{t("caisse.factures.empty")}</p>}
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
-      <FacturationAction patientId={patientId} />
+      <Button onClick={() => setShowFacturation(true)}>
+        + {t("caisse.facturation.title")}
+      </Button>
+      <Modal
+        open={showFacturation}
+        onClose={() => setShowFacturation(false)}
+        title={t("caisse.facturation.title")}
+        size="lg"
+      >
+        <FacturationAction
+          patientId={patientId}
+          onCancel={() => setShowFacturation(false)}
+        />
+      </Modal>
     </div>
   );
 }

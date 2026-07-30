@@ -1,12 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Card, Select } from "@/components/ui";
+import { Button, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { orientPatient } from "./queue-api";
 import { SERVICES, type Service } from "./types";
 
-export function OrientPatientAction({ patientId }: { patientId: number }) {
+export function OrientPatientAction({
+  patientId,
+  onCancel,
+}: {
+  patientId: number;
+  onCancel?: () => void;
+}) {
   const { t } = useTranslation();
   const [service, setService] = useState<Service>(SERVICES[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,8 +33,7 @@ export function OrientPatientAction({ patientId }: { patientId: number }) {
   }
 
   return (
-    <Card className="flex flex-col gap-2 max-w-md">
-      <span className="font-semibold text-sm text-foreground">{t("queue.orient.title")}</span>
+    <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <Select
           value={service}
@@ -52,6 +57,13 @@ export function OrientPatientAction({ patientId }: { patientId: number }) {
         </p>
       )}
       {error && <p className="text-sm text-danger">{error}</p>}
-    </Card>
+      {onCancel && (
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }

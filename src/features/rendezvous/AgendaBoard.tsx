@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Badge, Card, Input, PageHeader, Pagination } from "@/components/ui";
+import { Badge, Button, Card, Input, Modal, PageHeader, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { changerStatutRendezVous, fetchAgenda } from "./rendezvous-api";
+import { RendezVousForm } from "./RendezVousForm";
 import type { RendezVous, RendezVousStatut } from "./types";
 
 const NEXT_STATUS: Partial<Record<RendezVous["statut"], RendezVous["statut"]>> = {
@@ -32,6 +32,7 @@ export function AgendaBoard() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   const reload = useCallback(() => {
     fetchAgenda(date, page).then((res) => {
@@ -75,12 +76,9 @@ export function AgendaBoard() {
       <PageHeader
         title={t("rendezvous.title")}
         actions={
-          <Link
-            href="/rendez-vous/new"
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm shadow-primary/20 transition-colors hover:bg-primary-hover"
-          >
+          <Button onClick={() => setShowForm(true)}>
             + {t("rendezvous.newRendezVous")}
-          </Link>
+          </Button>
         }
       />
 
@@ -154,6 +152,15 @@ export function AgendaBoard() {
         )}
       </Card>
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={t("rendezvous.newRendezVous")}
+        size="lg"
+      >
+        <RendezVousForm onCancel={() => setShowForm(false)} />
+      </Modal>
     </div>
   );
 }

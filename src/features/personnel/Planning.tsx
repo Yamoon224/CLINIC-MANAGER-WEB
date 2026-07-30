@@ -3,21 +3,16 @@
 import { useEffect, useState } from "react";
 import { assignerPlanning, fetchEmployes, fetchPlanning, retirerPlanning } from "./personnel-api";
 import { type Creneau, type Employe, type Planning as PlanningEntry } from "./types";
-import { Badge, Button, Card, Field, Input, Pagination, Select } from "@/components/ui";
+import { Badge, Button, Card, Field, Input, Modal, Pagination, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function Planning() {
   const { t } = useTranslation();
   const [entries, setEntries] = useState<PlanningEntry[]>([]);
-  const [employes, setEmployes] = useState<Employe[]>([]);
-  const [employeId, setEmployeId] = useState("");
-  const [date, setDate] = useState("");
-  const [creneau, setCreneau] = useState<Creneau>("matin");
-  const [service, setService] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showForm, setShowForm] = useState(false);
 
   const CRENEAU_LABELS: Record<Creneau, string> = {
     matin: t("personnel.creneau.matin"),
@@ -38,26 +33,6 @@ export function Planning() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  useEffect(() => {
-    fetchEmployes().then((res) => setEmployes(res.data));
-  }, []);
-
-  async function handleAssigner() {
-    if (!employeId || !date) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await assignerPlanning(Number(employeId), { date, creneau, service: service || undefined });
-      setDate("");
-      setService("");
-      load();
-    } catch {
-      setError(t("personnel.planning.error"));
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function handleRetirer(id: number) {
     setBusy(true);
     try {
@@ -70,47 +45,26 @@ export function Planning() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card className="flex flex-col gap-3">
-        <div className="grid grid-cols-2 gap-3">
-          <Field label={t("personnel.planning.employeLabel")}>
-            <Select value={employeId} onChange={(e) => setEmployeId(e.target.value)}>
-              <option value="">{t("personnel.planning.employePlaceholder")}</option>
-              {employes.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.prenom} {e.nom}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label={t("personnel.planning.creneauLabel")}>
-            <Select value={creneau} onChange={(e) => setCreneau(e.target.value as Creneau)}>
-              {Object.entries(CRENEAU_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label={t("personnel.planning.dateLabel")}>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </Field>
-          <Field label={t("personnel.planning.serviceLabel")}>
-            <Input
-              placeholder={t("personnel.planning.serviceLabel")}
-              value={service}
-              onChange={(e) => setService(e.target.value)}
-            />
-          </Field>
-        </div>
-        {error && (
-          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
-        )}
-        <Button onClick={handleAssigner} disabled={busy} className="self-start">
-          {t("personnel.planning.submit")}
+      <div className="flex justify-end">
+        <Button onClick={() => setShowForm(true)}>
+          + {t("personnel.planning.newCreneau")}
         </Button>
-      </Card>
+      </div>
+
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={t("personnel.planning.newCreneau")}
+        size="lg"
+      >
+        <CreateCreneauForm
+          onCancel={() => setShowForm(false)}
+          onCreated={() => {
+            setShowForm(false);
+            load();
+          }}
+        />
+      </Modal>
 
       <Card className="p-0 overflow-hidden">
         <table className="table">
@@ -153,5 +107,99 @@ export function Planning() {
       </Card>
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
+  );
+}
+
+function CreateCreneauForm({
+  onCancel,
+  onCreated,
+}: {
+  onCancel?: () => void;
+  onCreated: () => void;
+}) {
+  const { t } = useTranslation();
+  const [employes, setEmployes] = useState<Employe[]>([]);
+  const [employeId, setEmployeId] = useState("");
+  const [date, setDate] = useState("");
+  const [creneau, setCreneau] = useState<Creneau>("matin");
+  const [service, setService] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const CRENEAU_LABELS: Record<Creneau, string> = {
+    matin: t("personnel.creneau.matin"),
+    apres_midi: t("personnel.creneau.apres_midi"),
+    nuit: t("personnel.creneau.nuit"),
+    garde: t("personnel.creneau.garde"),
+  };
+
+  useEffect(() => {
+    fetchEmployes().then((res) => setEmployes(res.data));
+  }, []);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!employeId || !date) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await assignerPlanning(Number(employeId), { date, creneau, service: service || undefined });
+      onCreated();
+    } catch {
+      setError(t("personnel.planning.error"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("personnel.planning.employeLabel")}>
+          <Select value={employeId} onChange={(e) => setEmployeId(e.target.value)}>
+            <option value="">{t("personnel.planning.employePlaceholder")}</option>
+            {employes.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.prenom} {e.nom}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label={t("personnel.planning.creneauLabel")}>
+          <Select value={creneau} onChange={(e) => setCreneau(e.target.value as Creneau)}>
+            {Object.entries(CRENEAU_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("personnel.planning.dateLabel")}>
+          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </Field>
+        <Field label={t("personnel.planning.serviceLabel")}>
+          <Input
+            placeholder={t("personnel.planning.serviceLabel")}
+            value={service}
+            onChange={(e) => setService(e.target.value)}
+          />
+        </Field>
+      </div>
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+      )}
+      <div className="flex gap-2">
+        <Button type="submit" disabled={busy}>
+          {t("personnel.planning.submit")}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
+    </form>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createDepense, fetchDepenses } from "./caisse-api";
 import type { Depense } from "./types";
-import { Button, Card, Field, Input, Pagination } from "@/components/ui";
+import { Button, Card, Field, Input, Modal, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function Depenses() {
@@ -11,10 +11,7 @@ export function Depenses() {
   const [depenses, setDepenses] = useState<Depense[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [categorie, setCategorie] = useState("");
-  const [montant, setMontant] = useState("");
-  const [description, setDescription] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   function load() {
     fetchDepenses(page).then((res) => {
@@ -27,58 +24,27 @@ export function Depenses() {
     load();
   }, [page]);
 
-  async function handleSubmit() {
-    if (!categorie || !montant) return;
-    setIsSubmitting(true);
-    try {
-      await createDepense({
-        categorie,
-        montant: Number(montant),
-        description: description || undefined,
-      });
-      setCategorie("");
-      setMontant("");
-      setDescription("");
-      load();
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
   return (
     <div className="flex flex-col gap-4">
-      <Card className="flex flex-col gap-3">
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Field label={t("caisse.depenses.categorie")}>
-              <Input
-                placeholder={t("caisse.depenses.categoriePlaceholder")}
-                value={categorie}
-                onChange={(e) => setCategorie(e.target.value)}
-              />
-            </Field>
-          </div>
-          <div className="w-32">
-            <Field label={t("caisse.depenses.montant")}>
-              <Input
-                placeholder={t("caisse.depenses.montantPlaceholder")}
-                value={montant}
-                onChange={(e) => setMontant(e.target.value)}
-              />
-            </Field>
-          </div>
-        </div>
-        <Field label={t("caisse.depenses.description")}>
-          <Input
-            placeholder={t("caisse.depenses.descriptionPlaceholder")}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </Field>
-        <Button onClick={handleSubmit} disabled={isSubmitting} className="self-start">
-          {t("caisse.depenses.submit")}
+      <div className="flex justify-end">
+        <Button onClick={() => setShowForm(true)}>
+          + {t("caisse.depenses.nouvelle")}
         </Button>
-      </Card>
+      </div>
+
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={t("caisse.depenses.nouvelle")}
+      >
+        <DepenseForm
+          onCancel={() => setShowForm(false)}
+          onCreated={() => {
+            setShowForm(false);
+            load();
+          }}
+        />
+      </Modal>
 
       <Card className="p-0 overflow-hidden">
         <table className="table">
@@ -105,5 +71,80 @@ export function Depenses() {
       </Card>
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
+  );
+}
+
+function DepenseForm({
+  onCancel,
+  onCreated,
+}: {
+  onCancel?: () => void;
+  onCreated: () => void;
+}) {
+  const { t } = useTranslation();
+  const [categorie, setCategorie] = useState("");
+  const [montant, setMontant] = useState("");
+  const [description, setDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!categorie || !montant) return;
+    setIsSubmitting(true);
+    try {
+      await createDepense({
+        categorie,
+        montant: Number(montant),
+        description: description || undefined,
+      });
+      setCategorie("");
+      setMontant("");
+      setDescription("");
+      onCreated();
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <Field label={t("caisse.depenses.categorie")}>
+            <Input
+              placeholder={t("caisse.depenses.categoriePlaceholder")}
+              value={categorie}
+              onChange={(e) => setCategorie(e.target.value)}
+            />
+          </Field>
+        </div>
+        <div className="w-32">
+          <Field label={t("caisse.depenses.montant")}>
+            <Input
+              placeholder={t("caisse.depenses.montantPlaceholder")}
+              value={montant}
+              onChange={(e) => setMontant(e.target.value)}
+            />
+          </Field>
+        </div>
+      </div>
+      <Field label={t("caisse.depenses.description")}>
+        <Input
+          placeholder={t("caisse.depenses.descriptionPlaceholder")}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </Field>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {t("caisse.depenses.submit")}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
+    </form>
   );
 }

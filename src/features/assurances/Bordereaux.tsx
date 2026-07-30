@@ -9,7 +9,7 @@ import {
   reglerBordereau,
 } from "./assurances-api";
 import type { BordereauAssurance, CompagnieAssurance } from "./types";
-import { Badge, Button, Card, Input, Pagination, Select } from "@/components/ui";
+import { Badge, Button, Card, Input, Modal, Pagination, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const STATUT_TONES: Record<BordereauAssurance["statut"], "neutral" | "primary" | "warning" | "success"> = {
@@ -25,10 +25,9 @@ export function Bordereaux() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [compagnies, setCompagnies] = useState<CompagnieAssurance[]>([]);
-  const [compagnieId, setCompagnieId] = useState("");
   const [montantRegle, setMontantRegle] = useState<Record<number, string>>({});
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   function load() {
     fetchBordereaux(page).then((res) => {
@@ -44,20 +43,6 @@ export function Bordereaux() {
   useEffect(() => {
     fetchCompagnies().then((res) => setCompagnies(res.data));
   }, []);
-
-  async function handleCreer() {
-    if (!compagnieId) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await creerBordereau(Number(compagnieId));
-      load();
-    } catch {
-      setError(t("assurances.bordereaux.error"));
-    } finally {
-      setBusy(false);
-    }
-  }
 
   async function handleEnvoyer(id: number) {
     setBusy(true);
@@ -84,22 +69,24 @@ export function Bordereaux() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card className="flex items-center gap-2">
-        <Select value={compagnieId} onChange={(e) => setCompagnieId(e.target.value)} className="flex-1">
-          <option value="">{t("assurances.bordereaux.compagniePlaceholder")}</option>
-          {compagnies.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nom}
-            </option>
-          ))}
-        </Select>
-        <Button variant="outline" onClick={handleCreer} disabled={busy}>
-          {t("assurances.bordereaux.generer")}
-        </Button>
-      </Card>
-      {error && (
-        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
-      )}
+      <Button onClick={() => setShowForm(true)} className="self-start">
+        + {t("assurances.bordereaux.newBordereau")}
+      </Button>
+
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={t("assurances.bordereaux.newBordereau")}
+      >
+        <CreateBordereauForm
+          compagnies={compagnies}
+          onCancel={() => setShowForm(false)}
+          onCreated={() => {
+            setShowForm(false);
+            load();
+          }}
+        />
+      </Modal>
 
       <Card className="p-0 overflow-hidden">
         <table className="table">
@@ -161,6 +148,62 @@ export function Bordereaux() {
         )}
       </Card>
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+    </div>
+  );
+}
+
+function CreateBordereauForm({
+  compagnies,
+  onCancel,
+  onCreated,
+}: {
+  compagnies: CompagnieAssurance[];
+  onCancel?: () => void;
+  onCreated: () => void;
+}) {
+  const { t } = useTranslation();
+  const [compagnieId, setCompagnieId] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function handleCreer() {
+    if (!compagnieId) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await creerBordereau(Number(compagnieId));
+      setCompagnieId("");
+      onCreated();
+    } catch {
+      setError(t("assurances.bordereaux.error"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <Select value={compagnieId} onChange={(e) => setCompagnieId(e.target.value)}>
+        <option value="">{t("assurances.bordereaux.compagniePlaceholder")}</option>
+        {compagnies.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.nom}
+          </option>
+        ))}
+      </Select>
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+      )}
+      <div className="flex gap-2">
+        <Button onClick={handleCreer} disabled={busy}>
+          {t("assurances.bordereaux.generer")}
+        </Button>
+        {onCancel && (
+          <Button variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

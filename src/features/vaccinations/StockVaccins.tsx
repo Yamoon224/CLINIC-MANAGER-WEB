@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createLot, fetchLots, fetchVaccins } from "./vaccinations-api";
 import type { LotVaccin, Vaccin } from "./types";
-import { Badge, Button, Card, Input, Select } from "@/components/ui";
+import { Badge, Button, Card, Input, Modal, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function StockVaccins() {
@@ -11,11 +11,7 @@ export function StockVaccins() {
   const [vaccins, setVaccins] = useState<Vaccin[]>([]);
   const [selected, setSelected] = useState<number | "">("");
   const [lots, setLots] = useState<LotVaccin[]>([]);
-
-  const [numeroLot, setNumeroLot] = useState("");
-  const [datePeremption, setDatePeremption] = useState("");
-  const [quantite, setQuantite] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     fetchVaccins().then((res) => setVaccins(res.data));
@@ -25,24 +21,11 @@ export function StockVaccins() {
     (async () => {
       setLots(selected ? (await fetchLots(selected)).data : []);
     })();
+    setShowForm(false);
   }, [selected]);
 
-  async function handleCreateLot() {
-    if (!selected || !numeroLot || !datePeremption || !quantite) return;
-    setIsSubmitting(true);
-    try {
-      await createLot(selected, {
-        numero_lot: numeroLot,
-        date_peremption: datePeremption,
-        quantite_initiale: Number(quantite),
-      });
-      setNumeroLot("");
-      setDatePeremption("");
-      setQuantite("");
-      fetchLots(selected).then((res) => setLots(res.data));
-    } finally {
-      setIsSubmitting(false);
-    }
+  function reloadLots() {
+    if (selected) fetchLots(selected).then((res) => setLots(res.data));
   }
 
   return (
@@ -96,36 +79,95 @@ export function StockVaccins() {
             </table>
           </Card>
 
-          <Card className="flex items-center gap-2 max-w-2xl p-3">
-            <Input
-              placeholder={t("vaccinations.numeroLotPlaceholder")}
-              value={numeroLot}
-              onChange={(e) => setNumeroLot(e.target.value)}
-              className="flex-1"
+          <Button onClick={() => setShowForm(true)} className="self-start">
+            + {t("vaccinations.addLot")}
+          </Button>
+
+          <Modal
+            open={showForm}
+            onClose={() => setShowForm(false)}
+            title={t("vaccinations.addLot")}
+          >
+            <AddLotForm
+              vaccinId={selected}
+              onCancel={() => setShowForm(false)}
+              onCreated={() => {
+                setShowForm(false);
+                reloadLots();
+              }}
             />
-            <Input
-              type="date"
-              value={datePeremption}
-              onChange={(e) => setDatePeremption(e.target.value)}
-              className="w-auto"
-            />
-            <Input
-              placeholder={t("vaccinations.quantitePlaceholder")}
-              value={quantite}
-              onChange={(e) => setQuantite(e.target.value)}
-              className="w-28"
-            />
-            <Button
-              variant="outline"
-              onClick={handleCreateLot}
-              disabled={isSubmitting}
-              className="whitespace-nowrap"
-            >
-              {t("vaccinations.receive")}
-            </Button>
-          </Card>
+          </Modal>
         </>
       )}
+    </div>
+  );
+}
+
+function AddLotForm({
+  vaccinId,
+  onCancel,
+  onCreated,
+}: {
+  vaccinId: number;
+  onCancel?: () => void;
+  onCreated: () => void;
+}) {
+  const { t } = useTranslation();
+  const [numeroLot, setNumeroLot] = useState("");
+  const [datePeremption, setDatePeremption] = useState("");
+  const [quantite, setQuantite] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleCreateLot() {
+    if (!numeroLot || !datePeremption || !quantite) return;
+    setIsSubmitting(true);
+    try {
+      await createLot(vaccinId, {
+        numero_lot: numeroLot,
+        date_peremption: datePeremption,
+        quantite_initiale: Number(quantite),
+      });
+      setNumeroLot("");
+      setDatePeremption("");
+      setQuantite("");
+      onCreated();
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder={t("vaccinations.numeroLotPlaceholder")}
+          value={numeroLot}
+          onChange={(e) => setNumeroLot(e.target.value)}
+          className="flex-1"
+        />
+        <Input
+          type="date"
+          value={datePeremption}
+          onChange={(e) => setDatePeremption(e.target.value)}
+          className="w-auto"
+        />
+        <Input
+          placeholder={t("vaccinations.quantitePlaceholder")}
+          value={quantite}
+          onChange={(e) => setQuantite(e.target.value)}
+          className="w-28"
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button onClick={handleCreateLot} disabled={isSubmitting}>
+          {t("vaccinations.receive")}
+        </Button>
+        {onCancel && (
+          <Button variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

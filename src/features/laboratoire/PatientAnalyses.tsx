@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DemandeAnalysesAction } from "./DemandeAnalysesAction";
 import { fetchPatientDemandes } from "./laboratoire-api";
 import type { DemandeAnalyse } from "./types";
-import { Badge, Pagination } from "@/components/ui";
+import { Badge, Button, Modal, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function PatientAnalyses({ patientId }: { patientId: number }) {
@@ -12,6 +12,7 @@ export function PatientAnalyses({ patientId }: { patientId: number }) {
   const [demandes, setDemandes] = useState<DemandeAnalyse[] | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showForm, setShowForm] = useState(false);
 
   const STATUT_LABELS: Record<DemandeAnalyse["statut"], string> = {
     demandee: t("laboratoire.statutDemandee"),
@@ -36,7 +37,12 @@ export function PatientAnalyses({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold text-foreground mb-2">{t("laboratoire.title")}</h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="font-semibold text-foreground">{t("laboratoire.title")}</h2>
+        <Button size="sm" onClick={() => setShowForm(true)}>
+          + {t("laboratoire.requestTitle")}
+        </Button>
+      </div>
       <ul className="flex flex-col gap-2 mb-3 text-sm">
         {demandes.map((d) => (
           <li key={d.id} className="rounded-lg border border-border p-2">
@@ -65,7 +71,21 @@ export function PatientAnalyses({ patientId }: { patientId: number }) {
         )}
       </ul>
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
-      <DemandeAnalysesAction patientId={patientId} onCreated={load} />
+
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={t("laboratoire.requestTitle")}
+      >
+        <DemandeAnalysesAction
+          patientId={patientId}
+          onCancel={() => setShowForm(false)}
+          onCreated={() => {
+            setShowForm(false);
+            load();
+          }}
+        />
+      </Modal>
     </div>
   );
 }

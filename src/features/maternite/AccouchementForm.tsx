@@ -9,9 +9,11 @@ import { useTranslation } from "@/lib/i18n/LanguageContext";
 export function AccouchementForm({
   grossesseId,
   onSaved,
+  onCancel,
 }: {
   grossesseId: number;
   onSaved: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<ModeAccouchement>("voie_basse");
@@ -37,10 +39,7 @@ export function AccouchementForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3">
         <Field label={t("maternite.accouchementForm.mode")}>
           <Select value={mode} onChange={(e) => setMode(e.target.value as ModeAccouchement)}>
@@ -71,9 +70,16 @@ export function AccouchementForm({
           rows={2}
         />
       </Field>
-      <Button type="submit" disabled={isSubmitting} className="self-start">
-        {t("maternite.accouchementForm.submit")}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {t("maternite.accouchementForm.submit")}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
     </form>
   );
 }

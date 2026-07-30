@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { PatientAssurances } from "@/features/assurances/PatientAssurances";
 import { PatientFactures } from "@/features/caisse/PatientFactures";
 import { PatientHistory } from "@/features/consultations/PatientHistory";
@@ -8,12 +9,14 @@ import { MaterniteSection } from "@/features/maternite/MaterniteSection";
 import { PatientDispensations } from "@/features/pharmacie/PatientDispensations";
 import { OrientPatientAction } from "@/features/queue/OrientPatientAction";
 import { CarnetVaccination } from "@/features/vaccinations/CarnetVaccination";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Button, Card, Modal } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import type { Patient } from "./types";
 
 export function PatientDetail({ patient }: { patient: Patient }) {
   const { t } = useTranslation();
+  const [showOrient, setShowOrient] = useState(false);
+  const [showConsultation, setShowConsultation] = useState(false);
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
@@ -59,10 +62,31 @@ export function PatientDetail({ patient }: { patient: Patient }) {
         )}
       </Card>
 
-      <div className="flex gap-4 flex-wrap">
-        <OrientPatientAction patientId={patient.id} />
-        <StartConsultationAction patientId={patient.id} />
+      <div className="flex gap-2 flex-wrap">
+        <Button onClick={() => setShowOrient(true)}>{t("queue.orient.title")}</Button>
+        <Button onClick={() => setShowConsultation(true)}>{t("consultations.startTitle")}</Button>
       </div>
+
+      <Modal
+        open={showOrient}
+        onClose={() => setShowOrient(false)}
+        title={t("queue.orient.title")}
+        size="md"
+      >
+        <OrientPatientAction patientId={patient.id} onCancel={() => setShowOrient(false)} />
+      </Modal>
+
+      <Modal
+        open={showConsultation}
+        onClose={() => setShowConsultation(false)}
+        title={t("consultations.startTitle")}
+        size="md"
+      >
+        <StartConsultationAction
+          patientId={patient.id}
+          onCancel={() => setShowConsultation(false)}
+        />
+      </Modal>
 
       <div>
         <h2 className="font-semibold text-foreground mb-2">

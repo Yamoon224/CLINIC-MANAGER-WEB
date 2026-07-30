@@ -3,14 +3,36 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ajouterSuivi,
+  annulerOperation,
   fetchLits,
+  fetchOperations,
   fetchSejour,
+  planifierOperation,
   sortir,
+  terminerOperation,
   transferer,
 } from "./hospitalisation-api";
-import type { Lit, Sejour } from "./types";
-import { Button, Card, Field, Input, PageHeader, Select, Textarea } from "@/components/ui";
+import { fetchPraticiens } from "@/features/rendezvous/rendezvous-api";
+import type { Praticien } from "@/features/rendezvous/types";
+import type { Lit, Operation, Sejour } from "./types";
+import {
+  Badge,
+  Button,
+  Card,
+  Field,
+  Input,
+  Modal,
+  PageHeader,
+  Select,
+  Textarea,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+const OPERATION_STATUT_TONE = {
+  planifiee: "warning",
+  realisee: "success",
+  annulee: "neutral",
+} as const;
 
 export function SejourDetail({ id }: { id: number }) {
   const { t } = useTranslation();
@@ -24,13 +46,20 @@ export function SejourDetail({ id }: { id: number }) {
   const [observations, setObservations] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const [operations, setOperations] = useState<Operation[]>([]);
+  const [praticiens, setPraticiens] = useState<Praticien[]>([]);
+  const [showPlanifierModal, setShowPlanifierModal] = useState(false);
+  const [operationATerminer, setOperationATerminer] = useState<Operation | null>(null);
+
   const load = useCallback(() => {
     fetchSejour(id).then((res) => setSejour(res.data));
     fetchLits().then((res) => setLitsLibres(res.data.filter((l) => l.statut === "libre")));
+    fetchOperations(id).then((res) => setOperations(res.data));
   }, [id]);
 
   useEffect(() => {
     load();
+    fetchPraticiens().then((res) => setPraticiens(res.data));
   }, [load]);
 
   async function handleAjouterSuivi() {
@@ -73,6 +102,11 @@ export function SejourDetail({ id }: { id: number }) {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function handleAnnulerOperation(operation: Operation) {
+    await annulerOperation(operation.id);
+    load();
   }
 
   if (!sejour) return <p className="text-muted">{t("common.loading")}</p>;
@@ -160,6 +194,75 @@ export function SejourDetail({ id }: { id: number }) {
         )}
       </div>
 
+      <div className="border-t border-border pt-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="font-semibold text-foreground">
+            {t("hospitalisation.operations.title")}
+          </h2>
+          {!readOnly && (
+            <Button size="sm" onClick={() => setShowPlanifierModal(true)}>
+              + {t("hospitalisation.operations.newOperation")}
+            </Button>
+          )}
+        </div>
+
+        {operations.length === 0 && (
+          <p className="text-sm text-muted">{t("hospitalisation.operations.empty")}</p>
+        )}
+
+        {operations.length > 0 && (
+          <Card className="overflow-x-auto p-0">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>{t("hospitalisation.operations.type")}</th>
+                  <th>{t("hospitalisation.operations.datePrevue")}</th>
+                  <th>{t("hospitalisation.operations.praticien")}</th>
+                  <th>{t("hospitalisation.operations.statut")}</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {operations.map((operation) => (
+                  <tr key={operation.id}>
+                    <td className="font-medium">{operation.type_operation}</td>
+                    <td>
+                      {operation.date_prevue &&
+                        new Date(operation.date_prevue).toLocaleString("fr-FR")}
+                    </td>
+                    <td>{operation.praticien?.name ?? "-"}</td>
+                    <td>
+                      <Badge tone={OPERATION_STATUT_TONE[operation.statut]}>
+                        {t(`hospitalisation.operations.statut${operation.statut.charAt(0).toUpperCase()}${operation.statut.slice(1)}`)}
+                      </Badge>
+                    </td>
+                    <td>
+                      {operation.statut === "planifiee" && (
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => setOperationATerminer(operation)}>
+                            {t("hospitalisation.operations.terminer")}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAnnulerOperation(operation)}
+                          >
+                            {t("hospitalisation.operations.annuler")}
+                          </Button>
+                        </div>
+                      )}
+                      {operation.statut === "realisee" && operation.compte_rendu && (
+                        <span className="text-xs text-muted">{operation.compte_rendu}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        )}
+      </div>
+
       {!readOnly && (
         <div className="flex items-center gap-3 border-t border-border pt-4">
           <Select
@@ -183,6 +286,179 @@ export function SejourDetail({ id }: { id: number }) {
           </Button>
         </div>
       )}
+
+      <Modal
+        open={showPlanifierModal}
+        onClose={() => setShowPlanifierModal(false)}
+        title={t("hospitalisation.operations.newOperation")}
+      >
+        <PlanifierOperationForm
+          sejourId={id}
+          praticiens={praticiens}
+          onCancel={() => setShowPlanifierModal(false)}
+          onCreated={() => {
+            setShowPlanifierModal(false);
+            load();
+          }}
+        />
+      </Modal>
+
+      <Modal
+        open={operationATerminer !== null}
+        onClose={() => setOperationATerminer(null)}
+        title={t("hospitalisation.operations.confirmTerminer")}
+      >
+        {operationATerminer && (
+          <TerminerOperationForm
+            operation={operationATerminer}
+            onCancel={() => setOperationATerminer(null)}
+            onDone={() => {
+              setOperationATerminer(null);
+              load();
+            }}
+          />
+        )}
+      </Modal>
     </div>
+  );
+}
+
+function PlanifierOperationForm({
+  sejourId,
+  praticiens,
+  onCancel,
+  onCreated,
+}: {
+  sejourId: number;
+  praticiens: Praticien[];
+  onCancel: () => void;
+  onCreated: () => void;
+}) {
+  const { t } = useTranslation();
+  const [typeOperation, setTypeOperation] = useState("");
+  const [datePrevue, setDatePrevue] = useState("");
+  const [praticienId, setPraticienId] = useState<number | "">("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      await planifierOperation(sejourId, {
+        type_operation: typeOperation,
+        date_prevue: new Date(datePrevue).toISOString(),
+        praticien_id: praticienId || undefined,
+      });
+      onCreated();
+    } catch {
+      setError(t("hospitalisation.operations.errorSubmit"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <Field label={t("hospitalisation.operations.type")} required>
+        <Input
+          required
+          placeholder={t("hospitalisation.operations.typePlaceholder")}
+          value={typeOperation}
+          onChange={(e) => setTypeOperation(e.target.value)}
+        />
+      </Field>
+      <Field label={t("hospitalisation.operations.datePrevue")} required>
+        <Input
+          type="datetime-local"
+          required
+          value={datePrevue}
+          onChange={(e) => setDatePrevue(e.target.value)}
+        />
+      </Field>
+      <Field label={t("hospitalisation.operations.praticien")}>
+        <Select
+          value={praticienId}
+          onChange={(e) => setPraticienId(e.target.value ? Number(e.target.value) : "")}
+        >
+          <option value="">{t("hospitalisation.operations.praticienPlaceholder")}</option>
+          {praticiens.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+      )}
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting
+            ? t("hospitalisation.operations.submitting")
+            : t("hospitalisation.operations.submit")}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          {t("common.cancel")}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function TerminerOperationForm({
+  operation,
+  onCancel,
+  onDone,
+}: {
+  operation: Operation;
+  onCancel: () => void;
+  onDone: () => void;
+}) {
+  const { t } = useTranslation();
+  const [compteRendu, setCompteRendu] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      await terminerOperation(operation.id, compteRendu);
+      onDone();
+    } catch {
+      setError(t("hospitalisation.operations.errorTerminer"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <Field label={t("hospitalisation.operations.compteRendu")} required>
+        <Textarea
+          required
+          placeholder={t("hospitalisation.operations.compteRenduPlaceholder")}
+          value={compteRendu}
+          onChange={(e) => setCompteRendu(e.target.value)}
+          rows={4}
+        />
+      </Field>
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+      )}
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting
+            ? t("hospitalisation.operations.submitting")
+            : t("hospitalisation.operations.submitTerminer")}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          {t("common.cancel")}
+        </Button>
+      </div>
+    </form>
   );
 }

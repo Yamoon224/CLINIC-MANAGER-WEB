@@ -6,12 +6,15 @@ import { AccouchementForm } from "./AccouchementForm";
 import { CpnForm } from "./CpnForm";
 import { NouveauNeForm } from "./NouveauNeForm";
 import type { Grossesse } from "./types";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Button, Card, Modal } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function GrossesseDetail({ id }: { id: number }) {
   const { t } = useTranslation();
   const [grossesse, setGrossesse] = useState<Grossesse | null>(null);
+  const [showCpnForm, setShowCpnForm] = useState(false);
+  const [showNouveauNeForm, setShowNouveauNeForm] = useState(false);
+  const [showAccouchementForm, setShowAccouchementForm] = useState(false);
 
   const STATUT_LABELS: Record<Grossesse["statut"], string> = {
     suivie: t("maternite.detail.statutSuivie"),
@@ -121,7 +124,28 @@ export function GrossesseDetail({ id }: { id: number }) {
             </Card>
           ))}
         </div>
-        {grossesse.statut === "suivie" && <CpnForm grossesseId={grossesse.id} onAdded={load} />}
+        {grossesse.statut === "suivie" && (
+          <>
+            <Button size="sm" onClick={() => setShowCpnForm(true)}>
+              + {t("maternite.cpnForm.newCpn")}
+            </Button>
+            <Modal
+              open={showCpnForm}
+              onClose={() => setShowCpnForm(false)}
+              title={t("maternite.cpnForm.newCpn")}
+              size="lg"
+            >
+              <CpnForm
+                grossesseId={grossesse.id}
+                onCancel={() => setShowCpnForm(false)}
+                onAdded={() => {
+                  setShowCpnForm(false);
+                  load();
+                }}
+              />
+            </Modal>
+          </>
+        )}
       </div>
 
       <div>
@@ -174,10 +198,46 @@ export function GrossesseDetail({ id }: { id: number }) {
               )}
             </div>
 
-            <NouveauNeForm accouchementId={grossesse.accouchement.id} onAdded={load} />
+            <Button size="sm" onClick={() => setShowNouveauNeForm(true)} className="self-start">
+              + {t("maternite.nouveauNeForm.newNouveauNe")}
+            </Button>
+            <Modal
+              open={showNouveauNeForm}
+              onClose={() => setShowNouveauNeForm(false)}
+              title={t("maternite.nouveauNeForm.newNouveauNe")}
+              size="lg"
+            >
+              <NouveauNeForm
+                accouchementId={grossesse.accouchement.id}
+                onCancel={() => setShowNouveauNeForm(false)}
+                onAdded={() => {
+                  setShowNouveauNeForm(false);
+                  load();
+                }}
+              />
+            </Modal>
           </Card>
         ) : grossesse.statut === "suivie" ? (
-          <AccouchementForm grossesseId={grossesse.id} onSaved={load} />
+          <>
+            <Button size="sm" onClick={() => setShowAccouchementForm(true)}>
+              + {t("maternite.accouchementForm.submit")}
+            </Button>
+            <Modal
+              open={showAccouchementForm}
+              onClose={() => setShowAccouchementForm(false)}
+              title={t("maternite.accouchementForm.submit")}
+              size="lg"
+            >
+              <AccouchementForm
+                grossesseId={grossesse.id}
+                onCancel={() => setShowAccouchementForm(false)}
+                onSaved={() => {
+                  setShowAccouchementForm(false);
+                  load();
+                }}
+              />
+            </Modal>
+          </>
         ) : (
           <p className="text-sm text-muted">{t("maternite.detail.noAccouchement")}</p>
         )}

@@ -3,15 +3,17 @@
 import { useEffect, useState } from "react";
 import { createDemandes, fetchAnalyseTypes } from "./laboratoire-api";
 import type { AnalyseType } from "./types";
-import { Button, Card } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function DemandeAnalysesAction({
   patientId,
   onCreated,
+  onCancel,
 }: {
   patientId: number;
   onCreated?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [analyseTypes, setAnalyseTypes] = useState<AnalyseType[]>([]);
@@ -43,8 +45,7 @@ export function DemandeAnalysesAction({
   }
 
   return (
-    <Card className="flex flex-col gap-2 max-w-md p-4">
-      <span className="font-semibold text-sm text-foreground">{t("laboratoire.requestTitle")}</span>
+    <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-1 max-h-40 overflow-y-auto text-sm">
         {analyseTypes.map((a) => (
           <label key={a.id} className="flex items-center gap-2">
@@ -61,14 +62,20 @@ export function DemandeAnalysesAction({
         <input type="checkbox" checked={urgente} onChange={(e) => setUrgente(e.target.checked)} />
         {t("laboratoire.urgentLabel")}
       </label>
-      <Button
-        onClick={handleSubmit}
-        disabled={isSubmitting || selected.length === 0}
-        className="self-start"
-      >
-        {t("laboratoire.send")}
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          onClick={handleSubmit}
+          disabled={isSubmitting || selected.length === 0}
+        >
+          {t("laboratoire.send")}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
       {confirmation && <p className="text-sm text-success">{confirmation}</p>}
-    </Card>
+    </div>
   );
 }

@@ -3,10 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { startConsultation } from "./consultations-api";
-import { Button, Card, Input } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
-export function StartConsultationAction({ patientId }: { patientId: number }) {
+export function StartConsultationAction({
+  patientId,
+  onCancel,
+}: {
+  patientId: number;
+  onCancel?: () => void;
+}) {
   const { t } = useTranslation();
   const router = useRouter();
   const [motif, setMotif] = useState("");
@@ -31,8 +37,7 @@ export function StartConsultationAction({ patientId }: { patientId: number }) {
   }
 
   return (
-    <Card className="flex flex-col gap-2 max-w-md p-4">
-      <span className="font-semibold text-sm text-foreground">{t("consultations.startTitle")}</span>
+    <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <Input
           placeholder={t("consultations.motifPlaceholder")}
@@ -45,6 +50,13 @@ export function StartConsultationAction({ patientId }: { patientId: number }) {
         </Button>
       </div>
       {error && <p className="text-sm text-danger">{error}</p>}
-    </Card>
+      {onCancel && (
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }

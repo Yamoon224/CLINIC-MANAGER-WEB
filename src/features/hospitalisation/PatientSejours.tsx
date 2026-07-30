@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Pagination } from "@/components/ui";
+import { Button, Modal, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { AdmissionAction } from "./AdmissionAction";
 import { fetchPatientSejours } from "./hospitalisation-api";
@@ -13,6 +13,7 @@ export function PatientSejours({ patientId }: { patientId: number }) {
   const [sejours, setSejours] = useState<Sejour[] | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showAdmission, setShowAdmission] = useState(false);
 
   useEffect(() => {
     fetchPatientSejours(patientId, page).then((res) => {
@@ -46,7 +47,24 @@ export function PatientSejours({ patientId }: { patientId: number }) {
         )}
       </ul>
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
-      {!enCours && <AdmissionAction patientId={patientId} />}
+      {!enCours && (
+        <>
+          <Button onClick={() => setShowAdmission(true)}>
+            + {t("hospitalisation.admission.submit")}
+          </Button>
+          <Modal
+            open={showAdmission}
+            onClose={() => setShowAdmission(false)}
+            title={t("hospitalisation.admission.title")}
+            size="md"
+          >
+            <AdmissionAction
+              patientId={patientId}
+              onCancel={() => setShowAdmission(false)}
+            />
+          </Modal>
+        </>
+      )}
     </div>
   );
 }

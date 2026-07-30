@@ -319,6 +319,8 @@ const en: Dictionary = {
     },
   },
   urgences: {
+    title: "Emergencies",
+    newAdmission: "Emergency admission",
     aTrier: "To triage",
     empty: "No patients currently in the emergency room.",
     niveau: {
@@ -442,6 +444,8 @@ const en: Dictionary = {
     numeroLotPlaceholder: "Batch number",
     quantitePlaceholder: "Quantity",
     receive: "Receive stock",
+    addLot: "Add a batch",
+    administerTitle: "Administer a vaccine",
   },
   laboratoire: {
     statutDemandee: "Requested",
@@ -555,9 +559,36 @@ const en: Dictionary = {
       errorRequired: "Bed and reason are required.",
       errorSubmit: "Could not admit the patient.",
     },
+    operations: {
+      title: "Operations",
+      newOperation: "Plan an operation",
+      type: "Operation type",
+      typePlaceholder: "E.g. Appendectomy",
+      datePrevue: "Planned date",
+      dateRealisee: "Completed date",
+      praticien: "Practitioner",
+      praticienPlaceholder: "Practitioner (optional)",
+      statut: "Status",
+      statutPlanifiee: "Planned",
+      statutRealisee: "Completed",
+      statutAnnulee: "Cancelled",
+      compteRendu: "Operative report",
+      compteRenduPlaceholder: "Operative report...",
+      terminer: "Complete",
+      annuler: "Cancel",
+      submit: "Plan",
+      submitting: "Saving...",
+      confirmTerminer: "Operative report",
+      submitTerminer: "Save report",
+      empty: "No operations planned.",
+      errorSubmit: "Could not plan the operation.",
+      errorTerminer: "Could not save the report.",
+      errorAnnuler: "Could not cancel the operation.",
+    },
   },
   caisse: {
     depenses: {
+      nouvelle: "New expense",
       categorie: "Category",
       categoriePlaceholder: "Category",
       montant: "Amount",
@@ -679,6 +710,7 @@ const en: Dictionary = {
       montantReglePlaceholder: "Amount settled",
       enregistrerReglement: "Record a settlement",
       empty: "No claim batches.",
+      newBordereau: "New claim batch",
     },
     bordereauStatut: {
       brouillon: "Draft",
@@ -707,10 +739,12 @@ const en: Dictionary = {
       telephonePlaceholder: "Contact phone",
       submit: "Add company",
       empty: "No companies.",
+      newCompagnie: "New company",
     },
   },
   personnel: {
     employes: {
+      newEmploye: "New employee",
       formNom: "Last name",
       formPrenom: "First name",
       formFonction: "Position",
@@ -751,6 +785,7 @@ const en: Dictionary = {
       garde: "On call",
     },
     conges: {
+      newDemande: "New leave request",
       employeLabel: "Employee",
       employePlaceholder: "Employee…",
       typeLabel: "Leave type",
@@ -773,6 +808,7 @@ const en: Dictionary = {
       noConges: "No leave requests.",
     },
     planning: {
+      newCreneau: "New shift",
       employeLabel: "Employee",
       employePlaceholder: "Employee…",
       creneauLabel: "Shift",
@@ -801,6 +837,7 @@ const en: Dictionary = {
       submit: "Save delivery",
     },
     cpnForm: {
+      newCpn: "New prenatal visit",
       date: "Date",
       poids: "Weight",
       tension: "Blood pressure",
@@ -811,6 +848,7 @@ const en: Dictionary = {
       submit: "Add prenatal visit",
     },
     nouveauNeForm: {
+      newNouveauNe: "Add a newborn",
       sexe: "Sex",
       sexeFeminin: "Female",
       sexeMasculin: "Male",

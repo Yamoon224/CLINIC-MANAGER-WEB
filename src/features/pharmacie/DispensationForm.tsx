@@ -8,15 +8,17 @@ import {
   fetchSubstitutions,
 } from "./pharmacie-api";
 import type { LotMedicament, Medicament } from "./types";
-import { Badge, Button, Card, Input, Select } from "@/components/ui";
+import { Badge, Button, Input, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function DispensationForm({
   patientId,
   onDispensed,
+  onCancel,
 }: {
   patientId: number;
   onDispensed?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [medicaments, setMedicaments] = useState<Medicament[]>([]);
@@ -93,9 +95,7 @@ export function DispensationForm({
   }
 
   return (
-    <Card className="flex flex-col gap-3 p-4">
-      <span className="font-semibold text-sm text-foreground">{t("pharmacie.dispenseTitle")}</span>
-
+    <div className="flex flex-col gap-3">
       <Select
         value={medicamentId}
         onChange={(e) => chooseMedicament(e.target.value ? Number(e.target.value) : "")}
@@ -164,13 +164,19 @@ export function DispensationForm({
       {error && <p className="text-sm text-danger">{error}</p>}
       {confirmation && <p className="text-sm text-success">{confirmation}</p>}
 
-      <Button
-        onClick={handleSubmit}
-        disabled={isSubmitting || !medicamentId || !lotId}
-        className="self-start"
-      >
-        {t("pharmacie.dispense")}
-      </Button>
-    </Card>
+      <div className="flex gap-2">
+        <Button
+          onClick={handleSubmit}
+          disabled={isSubmitting || !medicamentId || !lotId}
+        >
+          {t("pharmacie.dispense")}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }

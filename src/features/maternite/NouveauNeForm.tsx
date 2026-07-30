@@ -8,9 +8,11 @@ import { useTranslation } from "@/lib/i18n/LanguageContext";
 export function NouveauNeForm({
   accouchementId,
   onAdded,
+  onCancel,
 }: {
   accouchementId: number;
   onAdded: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [sexe, setSexe] = useState<"M" | "F" | "">("");
@@ -40,10 +42,7 @@ export function NouveauNeForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="grid grid-cols-3 gap-3">
         <Field label={t("maternite.nouveauNeForm.sexe")}>
           <Select value={sexe} onChange={(e) => setSexe(e.target.value as "M" | "F" | "")}>
@@ -90,9 +89,16 @@ export function NouveauNeForm({
           onChange={(e) => setVaccinations(e.target.value)}
         />
       </Field>
-      <Button type="submit" disabled={isSubmitting} className="self-start">
-        {t("maternite.nouveauNeForm.submit")}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {t("maternite.nouveauNeForm.submit")}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
     </form>
   );
 }

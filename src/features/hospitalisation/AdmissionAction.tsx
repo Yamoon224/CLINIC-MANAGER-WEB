@@ -4,10 +4,16 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { admettre, fetchLits } from "./hospitalisation-api";
 import type { Lit } from "./types";
-import { Button, Card, Field, Input, Select } from "@/components/ui";
+import { Button, Field, Input, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
-export function AdmissionAction({ patientId }: { patientId: number }) {
+export function AdmissionAction({
+  patientId,
+  onCancel,
+}: {
+  patientId: number;
+  onCancel?: () => void;
+}) {
   const { t } = useTranslation();
   const router = useRouter();
   const [lits, setLits] = useState<Lit[]>([]);
@@ -38,8 +44,7 @@ export function AdmissionAction({ patientId }: { patientId: number }) {
   }
 
   return (
-    <Card className="flex flex-col gap-3">
-      <span className="font-semibold text-sm">{t("hospitalisation.admission.title")}</span>
+    <div className="flex flex-col gap-3">
       <Field label={t("hospitalisation.admission.lit")}>
         <Select
           value={litId}
@@ -63,12 +68,19 @@ export function AdmissionAction({ patientId }: { patientId: number }) {
       {error && (
         <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
-      <Button onClick={handleSubmit} disabled={isSubmitting || lits.length === 0} className="self-start">
-        {t("hospitalisation.admission.submit")}
-      </Button>
+      <div className="flex gap-2">
+        <Button onClick={handleSubmit} disabled={isSubmitting || lits.length === 0}>
+          {t("hospitalisation.admission.submit")}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        )}
+      </div>
       {lits.length === 0 && (
         <p className="text-sm text-muted">{t("hospitalisation.admission.noLitsAvailable")}</p>
       )}
-    </Card>
+    </div>
   );
 }

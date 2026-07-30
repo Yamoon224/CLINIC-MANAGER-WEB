@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { searchPatients } from "@/features/patients/patients-api";
 import type { Patient } from "@/features/patients/types";
-import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
+import { Button, Field, Input, Select, Textarea } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import {
   createRendezVous,
@@ -17,7 +17,7 @@ import {
   type RendezVousType,
 } from "./types";
 
-export function RendezVousForm() {
+export function RendezVousForm({ onCancel }: { onCancel?: () => void }) {
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -88,8 +88,7 @@ export function RendezVousForm() {
   }
 
   return (
-    <Card>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Field label={t("rendezvous.form.patient")}>
           {patient ? (
             <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm">
@@ -218,10 +217,16 @@ export function RendezVousForm() {
           </p>
         )}
 
-        <Button type="submit" disabled={isSubmitting} className="self-start">
-          {isSubmitting ? t("rendezvous.form.submitting") : t("rendezvous.form.submit")}
-        </Button>
-      </form>
-    </Card>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? t("rendezvous.form.submitting") : t("rendezvous.form.submit")}
+          </Button>
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              {t("common.cancel")}
+            </Button>
+          )}
+        </div>
+    </form>
   );
 }

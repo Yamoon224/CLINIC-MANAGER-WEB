@@ -317,6 +317,8 @@ const fr = {
     },
   },
   urgences: {
+    title: "Urgences",
+    newAdmission: "Admission d'urgence",
     aTrier: "À trier",
     empty: "Aucun patient aux urgences actuellement.",
     niveau: {
@@ -440,6 +442,8 @@ const fr = {
     numeroLotPlaceholder: "N° de lot",
     quantitePlaceholder: "Quantité",
     receive: "Réceptionner",
+    addLot: "Ajouter un lot",
+    administerTitle: "Administrer un vaccin",
   },
   laboratoire: {
     statutDemandee: "Demandée",
@@ -553,9 +557,36 @@ const fr = {
       errorRequired: "Lit et motif sont requis.",
       errorSubmit: "Impossible d'admettre le patient.",
     },
+    operations: {
+      title: "Opérations",
+      newOperation: "Planifier une opération",
+      type: "Type d'opération",
+      typePlaceholder: "Ex: Appendicectomie",
+      datePrevue: "Date prévue",
+      dateRealisee: "Date réalisée",
+      praticien: "Praticien",
+      praticienPlaceholder: "Praticien (optionnel)",
+      statut: "Statut",
+      statutPlanifiee: "Planifiée",
+      statutRealisee: "Réalisée",
+      statutAnnulee: "Annulée",
+      compteRendu: "Compte-rendu",
+      compteRenduPlaceholder: "Compte-rendu opératoire...",
+      terminer: "Terminer",
+      annuler: "Annuler",
+      submit: "Planifier",
+      submitting: "Enregistrement...",
+      confirmTerminer: "Compte-rendu",
+      submitTerminer: "Enregistrer le compte-rendu",
+      empty: "Aucune opération planifiée.",
+      errorSubmit: "Impossible de planifier l'opération.",
+      errorTerminer: "Impossible d'enregistrer le compte-rendu.",
+      errorAnnuler: "Impossible d'annuler l'opération.",
+    },
   },
   caisse: {
     depenses: {
+      nouvelle: "Nouvelle dépense",
       categorie: "Catégorie",
       categoriePlaceholder: "Catégorie",
       montant: "Montant",
@@ -677,6 +708,7 @@ const fr = {
       montantReglePlaceholder: "Montant réglé",
       enregistrerReglement: "Enregistrer un règlement",
       empty: "Aucun bordereau.",
+      newBordereau: "Nouveau bordereau",
     },
     bordereauStatut: {
       brouillon: "Brouillon",
@@ -705,10 +737,12 @@ const fr = {
       telephonePlaceholder: "Téléphone contact",
       submit: "Ajouter la compagnie",
       empty: "Aucune compagnie.",
+      newCompagnie: "Nouvelle compagnie",
     },
   },
   personnel: {
     employes: {
+      newEmploye: "Nouvel employé",
       formNom: "Nom",
       formPrenom: "Prénom",
       formFonction: "Fonction",
@@ -749,6 +783,7 @@ const fr = {
       garde: "Garde",
     },
     conges: {
+      newDemande: "Nouvelle demande",
       employeLabel: "Employé",
       employePlaceholder: "Employé…",
       typeLabel: "Type de congé",
@@ -771,6 +806,7 @@ const fr = {
       noConges: "Aucun congé.",
     },
     planning: {
+      newCreneau: "Nouveau créneau",
       employeLabel: "Employé",
       employePlaceholder: "Employé…",
       creneauLabel: "Créneau",
@@ -799,6 +835,7 @@ const fr = {
       submit: "Enregistrer l'accouchement",
     },
     cpnForm: {
+      newCpn: "Nouvelle CPN",
       date: "Date",
       poids: "Poids",
       tension: "Tension",
@@ -809,6 +846,7 @@ const fr = {
       submit: "Ajouter la CPN",
     },
     nouveauNeForm: {
+      newNouveauNe: "Ajouter un nouveau-né",
       sexe: "Sexe",
       sexeFeminin: "Féminin",
       sexeMasculin: "Masculin",

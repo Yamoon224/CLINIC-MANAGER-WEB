@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { searchPatients } from "@/features/patients/patients-api";
 import type { Patient } from "@/features/patients/types";
-import { Button, Card, Field, Input, Textarea } from "@/components/ui";
+import { Button, Field, Input, Textarea } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { admettre } from "./urgences-api";
 
-export function AdmissionForm() {
+export function AdmissionForm({ onCancel }: { onCancel?: () => void }) {
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -53,8 +53,7 @@ export function AdmissionForm() {
   }
 
   return (
-    <Card>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <p className="text-sm text-muted">{t("urgences.form.unknownPatientHint")}</p>
 
         <Field label={t("urgences.form.patientConnu")}>
@@ -135,10 +134,16 @@ export function AdmissionForm() {
           </p>
         )}
 
-        <Button type="submit" variant="danger" disabled={isSubmitting} className="self-start">
-          {isSubmitting ? t("urgences.form.submitting") : t("urgences.form.submit")}
-        </Button>
-      </form>
-    </Card>
+        <div className="flex gap-2">
+          <Button type="submit" variant="danger" disabled={isSubmitting}>
+            {isSubmitting ? t("urgences.form.submitting") : t("urgences.form.submit")}
+          </Button>
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              {t("common.cancel")}
+            </Button>
+          )}
+        </div>
+    </form>
   );
 }
