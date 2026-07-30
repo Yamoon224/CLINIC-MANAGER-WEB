@@ -54,12 +54,12 @@ export function Modal({
         className={`relative w-full ${maxWidth} border border-border bg-surface shadow-lg my-8`}
       >
         {title && (
-          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <div className="flex items-center justify-between bg-sidebar px-5 py-4 text-sidebar-foreground">
             <h2 className="text-sm font-semibold">{title}</h2>
             <button
               onClick={onClose}
               aria-label="Fermer"
-              className="text-muted hover:text-foreground"
+              className="text-sidebar-muted hover:text-sidebar-foreground"
             >
               <X size={18} />
             </button>

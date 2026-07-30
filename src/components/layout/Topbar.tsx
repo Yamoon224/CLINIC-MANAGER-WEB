@@ -2,6 +2,8 @@
 
 import { Menu } from "lucide-react";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { LanguageToggle } from "./LanguageToggle";
+import { ThemeToggle } from "./ThemeToggle";
 import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
 
@@ -18,7 +20,9 @@ export function Topbar({ onOpenSidebar }: { onOpenSidebar: () => void }) {
         <Menu size={20} />
       </button>
       <div className="hidden lg:block" />
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
+        <LanguageToggle />
+        <ThemeToggle />
         <NotificationBell />
         <UserMenu />
       </div>
