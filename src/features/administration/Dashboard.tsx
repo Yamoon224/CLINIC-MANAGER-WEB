@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchDashboard } from "./administration-api";
 import type { DashboardStats } from "./types";
-import { Card } from "@/components/ui";
+import { Card, Tabs } from "@/components/ui";
 import { BarChart } from "@/components/charts/BarChart";
 import type { BarChartDatum } from "@/components/charts/BarChart";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
@@ -109,23 +109,11 @@ export function Dashboard() {
   }
   if (!stats) return <p className="text-sm text-muted">{t("common.loading")}</p>;
 
+  const tabs = TABS.map((key) => ({ key, label: t(`dashboard.tabs.${key}`) }));
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap gap-1 border-b border-border">
-        {TABS.map((key) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${
-              tab === key
-                ? "border-b-2 border-primary text-primary"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            {t(`dashboard.tabs.${key}`)}
-          </button>
-        ))}
-      </div>
+      <Tabs tabs={tabs} active={tab} onChange={(key) => setTab(key as TabKey)} />
 
       {tab === "reception" && (
         <>

@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { fetchLits, libererLit } from "./hospitalisation-api";
 import type { Lit, LitStatut } from "./types";
-import { Badge, Button, Card } from "@/components/ui";
+import { AdmissionAction } from "./AdmissionAction";
+import { Badge, Button, Card, Modal } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const STATUT_TONES: Record<LitStatut, "success" | "danger" | "warning" | "neutral"> = {
@@ -16,8 +17,10 @@ const STATUT_TONES: Record<LitStatut, "success" | "danger" | "warning" | "neutra
 
 export function BedPlan() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [lits, setLits] = useState<Lit[]>([]);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [admitLit, setAdmitLit] = useState<Lit | null>(null);
 
   const STATUT_LABELS: Record<LitStatut, string> = {
     libre: t("hospitalisation.bedPlan.statutLibre"),
@@ -66,20 +69,37 @@ export function BedPlan() {
                   <Badge tone={STATUT_TONES[lit.statut]}>{STATUT_LABELS[lit.statut]}</Badge>
                 </div>
                 {lit.patient_actuel && (
-                  <Link
-                    href={`/sejours/${lit.patient_actuel.sejour_id}`}
-                    className="text-primary hover:underline block mt-2 text-sm"
-                  >
+                  <p className="mt-2 text-sm">
                     {lit.patient_actuel.prenom} {lit.patient_actuel.nom}
-                  </Link>
+                  </p>
+                )}
+                {lit.statut === "libre" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAdmitLit(lit)}
+                    className="mt-2 w-full"
+                  >
+                    {t("hospitalisation.bedPlan.admit")}
+                  </Button>
+                )}
+                {lit.patient_actuel && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push(`/sejours/${lit.patient_actuel!.sejour_id}`)}
+                    className="mt-2 w-full"
+                  >
+                    {t("hospitalisation.bedPlan.viewSejour")}
+                  </Button>
                 )}
                 {lit.statut === "nettoyage" && (
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => handleLiberer(lit.id)}
                     disabled={busyId === lit.id}
-                    className="mt-2 px-0"
+                    className="mt-2 w-full"
                   >
                     {t("hospitalisation.bedPlan.markFree")}
                   </Button>
@@ -90,6 +110,24 @@ export function BedPlan() {
         </div>
       ))}
       {lits.length === 0 && <p className="text-muted">{t("hospitalisation.bedPlan.empty")}</p>}
+
+      <Modal
+        open={admitLit !== null}
+        onClose={() => setAdmitLit(null)}
+        title={t("hospitalisation.admission.title")}
+        size="md"
+      >
+        {admitLit && (
+          <AdmissionAction
+            litId={admitLit.id}
+            onCancel={() => setAdmitLit(null)}
+            onAdmitted={(sejourId) => {
+              setAdmitLit(null);
+              router.push(`/sejours/${sejourId}`);
+            }}
+          />
+        )}
+      </Modal>
     </div>
   );
 }

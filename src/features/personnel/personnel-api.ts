@@ -57,8 +57,9 @@ export function fetchPlanning(
   dateDebut?: string,
   dateFin?: string,
   page = 1,
+  perPage = 20,
 ): Promise<PaginatedResponse<Planning>> {
-  const params = new URLSearchParams({ page: String(page) });
+  const params = new URLSearchParams({ page: String(page), per_page: String(perPage) });
   if (dateDebut) params.set("date_debut", dateDebut);
   if (dateFin) params.set("date_fin", dateFin);
   return apiFetch<PaginatedResponse<Planning>>(`/planning?${params}`);

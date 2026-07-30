@@ -475,6 +475,10 @@ const en: Dictionary = {
   },
   pharmacie: {
     title: "Pharmacy",
+    tabs: {
+      stock: "Stock",
+      alertes: "Alerts",
+    },
     itemLabel: "{{dci}} × {{quantite}}",
     substitutedBadge: "Substituted for {{dci}} (stock-out)",
     noDispensations: "No dispensations.",
@@ -525,6 +529,8 @@ const en: Dictionary = {
       statutReserve: "Reserved",
       statutNettoyage: "Being cleaned",
       markFree: "Mark free",
+      admit: "Admit",
+      viewSejour: "View stay",
       empty: "No beds configured.",
     },
     detail: {
@@ -549,6 +555,9 @@ const en: Dictionary = {
     },
     admission: {
       title: "Admit for inpatient care",
+      patient: "Patient",
+      changePatient: "Change",
+      searchPatientPlaceholder: "Search a patient...",
       lit: "Bed",
       litPlaceholder: "Available bed...",
       room: "Room {{chambre}} - {{numero}}",
@@ -556,7 +565,7 @@ const en: Dictionary = {
       motifPlaceholder: "Reason for admission",
       submit: "Admit",
       noLitsAvailable: "No bed available at the moment.",
-      errorRequired: "Bed and reason are required.",
+      errorRequired: "Patient, bed and reason are required.",
       errorSubmit: "Could not admit the patient.",
     },
     operations: {
@@ -587,6 +596,11 @@ const en: Dictionary = {
     },
   },
   caisse: {
+    tabs: {
+      session: "Session",
+      creances: "Receivables",
+      depenses: "Expenses",
+    },
     depenses: {
       nouvelle: "New expense",
       categorie: "Category",
@@ -743,6 +757,11 @@ const en: Dictionary = {
     },
   },
   personnel: {
+    tabs: {
+      employes: "Employees",
+      conges: "Leave",
+      planning: "Schedule",
+    },
     employes: {
       newEmploye: "New employee",
       formNom: "Last name",
@@ -808,6 +827,7 @@ const en: Dictionary = {
       noConges: "No leave requests.",
     },
     planning: {
+      today: "Today",
       newCreneau: "New shift",
       employeLabel: "Employee",
       employePlaceholder: "Employee…",

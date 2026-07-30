@@ -473,6 +473,10 @@ const fr = {
   },
   pharmacie: {
     title: "Pharmacie",
+    tabs: {
+      stock: "Stock",
+      alertes: "Alertes",
+    },
     itemLabel: "{{dci}} × {{quantite}}",
     substitutedBadge: "Substitué à {{dci}} (rupture)",
     noDispensations: "Aucune dispensation.",
@@ -523,6 +527,8 @@ const fr = {
       statutReserve: "Réservé",
       statutNettoyage: "En nettoyage",
       markFree: "Marquer libre",
+      admit: "Admettre",
+      viewSejour: "Voir le séjour",
       empty: "Aucun lit configuré.",
     },
     detail: {
@@ -547,6 +553,9 @@ const fr = {
     },
     admission: {
       title: "Admettre en hospitalisation",
+      patient: "Patient",
+      changePatient: "Changer",
+      searchPatientPlaceholder: "Rechercher un patient...",
       lit: "Lit",
       litPlaceholder: "Lit disponible...",
       room: "Chambre {{chambre}} - {{numero}}",
@@ -554,7 +563,7 @@ const fr = {
       motifPlaceholder: "Motif d'hospitalisation",
       submit: "Admettre",
       noLitsAvailable: "Aucun lit disponible actuellement.",
-      errorRequired: "Lit et motif sont requis.",
+      errorRequired: "Patient, lit et motif sont requis.",
       errorSubmit: "Impossible d'admettre le patient.",
     },
     operations: {
@@ -585,6 +594,11 @@ const fr = {
     },
   },
   caisse: {
+    tabs: {
+      session: "Session",
+      creances: "Créances",
+      depenses: "Dépenses",
+    },
     depenses: {
       nouvelle: "Nouvelle dépense",
       categorie: "Catégorie",
@@ -741,6 +755,11 @@ const fr = {
     },
   },
   personnel: {
+    tabs: {
+      employes: "Employés",
+      conges: "Congés",
+      planning: "Planning",
+    },
     employes: {
       newEmploye: "Nouvel employé",
       formNom: "Nom",
@@ -806,6 +825,7 @@ const fr = {
       noConges: "Aucun congé.",
     },
     planning: {
+      today: "Aujourd'hui",
       newCreneau: "Nouveau créneau",
       employeLabel: "Employé",
       employePlaceholder: "Employé…",

@@ -1,24 +1,31 @@
+"use client";
+
+import { useState } from "react";
 import { Creances } from "@/features/caisse/Creances";
 import { Depenses } from "@/features/caisse/Depenses";
 import { SessionCaisseWidget } from "@/features/caisse/SessionCaisseWidget";
+import { Tabs } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+type Tab = "session" | "creances" | "depenses";
 
 export default function CaissePage() {
+  const { t } = useTranslation();
+  const [tab, setTab] = useState<Tab>("session");
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "session", label: t("caisse.tabs.session") },
+    { key: "creances", label: t("caisse.tabs.creances") },
+    { key: "depenses", label: t("caisse.tabs.depenses") },
+  ];
+
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-lg font-semibold mb-4">Session de caisse</h1>
-        <SessionCaisseWidget />
-      </div>
+    <div className="flex flex-col gap-6">
+      <Tabs tabs={tabs} active={tab} onChange={(key) => setTab(key as Tab)} />
 
-      <div>
-        <h1 className="text-lg font-semibold mb-4">Créances</h1>
-        <Creances />
-      </div>
-
-      <div>
-        <h1 className="text-lg font-semibold mb-4">Dépenses</h1>
-        <Depenses />
-      </div>
+      {tab === "session" && <SessionCaisseWidget />}
+      {tab === "creances" && <Creances />}
+      {tab === "depenses" && <Depenses />}
     </div>
   );
 }

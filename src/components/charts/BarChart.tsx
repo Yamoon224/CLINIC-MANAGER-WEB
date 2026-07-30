@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface BarChartDatum {
   label: string;
@@ -23,21 +23,36 @@ export function BarChart({
   formatValue?: (value: number) => string;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width) setContainerWidth(width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const max = Math.max(1, ...data.map((d) => d.value));
-  const barWidth = Math.min(40, Math.max(16, 240 / Math.max(1, data.length) - 12));
+  const chartWidth = Math.max(containerWidth, 240);
   const gap = 12;
-  const chartWidth = data.length * (barWidth + gap) + gap;
+  const barWidth = Math.max(16, (chartWidth - gap * (data.length + 1)) / Math.max(1, data.length));
   const plotHeight = height - 28;
 
   if (data.length === 0) return null;
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div ref={containerRef} className="w-full">
       <svg
         role="img"
         aria-label="Graphique en barres"
-        width={chartWidth}
+        width="100%"
         height={height}
+        viewBox={`0 0 ${chartWidth} ${height}`}
         className="overflow-visible"
       >
         <line

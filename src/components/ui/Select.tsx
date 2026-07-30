@@ -105,7 +105,7 @@ export const Select = forwardRef<
     }
 
     return (
-      <div className="relative" ref={containerRef}>
+      <div className={`relative ${className || "w-full"}`} ref={containerRef}>
         <button
           ref={ref}
           type="button"
@@ -113,9 +113,9 @@ export const Select = forwardRef<
           disabled={disabled}
           aria-required={required}
           onClick={() => !disabled && setOpen((v) => !v)}
-          className={`flex w-full items-center justify-between border border-border bg-surface px-3 py-2 text-left text-sm text-foreground outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60 ${className}`}
+          className="flex w-full items-center justify-between border border-border bg-surface px-3 py-2 text-left text-sm text-foreground outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
         >
-          <span className={selected ? "" : "text-muted"}>
+          <span className={`truncate ${selected ? "" : "text-muted"}`}>
             {selected?.label || "Sélectionner..."}
           </span>
           <ChevronDown size={16} className="shrink-0 text-muted" />
@@ -146,14 +146,16 @@ export const Select = forwardRef<
                     disabled={option.disabled}
                     onMouseEnter={() => setActiveIndex(index)}
                     onClick={() => selectOption(option)}
-                    className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm disabled:opacity-50 ${
+                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm disabled:opacity-50 ${
                       index === activeIndex
                         ? "bg-primary-light text-primary"
                         : "text-foreground"
                     }`}
                   >
-                    {option.label}
-                    {option.value === selected?.value && <Check size={14} />}
+                    <span className="truncate">{option.label}</span>
+                    {option.value === selected?.value && (
+                      <Check size={14} className="shrink-0" />
+                    )}
                   </button>
                 </li>
               ))}

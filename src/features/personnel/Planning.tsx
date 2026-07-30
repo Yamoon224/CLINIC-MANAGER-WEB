@@ -1,18 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { assignerPlanning, fetchEmployes, fetchPlanning, retirerPlanning } from "./personnel-api";
 import { type Creneau, type Employe, type Planning as PlanningEntry } from "./types";
-import { Badge, Button, Card, Field, Input, Modal, Pagination, Select } from "@/components/ui";
+import { Badge, Button, Card, Field, Input, Modal, Select, TONE_CLASSES, type Tone } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
+const CRENEAU_TONE: Record<Creneau, Tone> = {
+  matin: "primary",
+  apres_midi: "accent",
+  nuit: "neutral",
+  garde: "warning",
+};
+
+function toISODate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function startOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function addMonths(date: Date, amount: number): Date {
+  return new Date(date.getFullYear(), date.getMonth() + amount, 1);
+}
+
+function buildMonthGrid(monthCursor: Date): Date[] {
+  const first = startOfMonth(monthCursor);
+  const firstWeekday = (first.getDay() + 6) % 7; // Monday-first
+  const gridStart = new Date(first);
+  gridStart.setDate(first.getDate() - firstWeekday);
+  return Array.from({ length: 42 }, (_, i) => {
+    const day = new Date(gridStart);
+    day.setDate(gridStart.getDate() + i);
+    return day;
+  });
+}
+
 export function Planning() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const [monthCursor, setMonthCursor] = useState(() => startOfMonth(new Date()));
   const [entries, setEntries] = useState<PlanningEntry[]>([]);
   const [busy, setBusy] = useState(false);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [showForm, setShowForm] = useState(false);
+  const [formDate, setFormDate] = useState<string | undefined>(undefined);
+  const [dayDetail, setDayDetail] = useState<string | null>(null);
 
   const CRENEAU_LABELS: Record<Creneau, string> = {
     matin: t("personnel.creneau.matin"),
@@ -21,17 +54,20 @@ export function Planning() {
     garde: t("personnel.creneau.garde"),
   };
 
+  const days = useMemo(() => buildMonthGrid(monthCursor), [monthCursor]);
+  const gridStart = days[0];
+  const gridEnd = days[days.length - 1];
+
   function load() {
-    fetchPlanning(undefined, undefined, page).then((res) => {
+    fetchPlanning(toISODate(gridStart), toISODate(gridEnd), 1, 200).then((res) => {
       setEntries(res.data);
-      setTotalPages(res.meta.last_page);
     });
   }
 
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [monthCursor]);
 
   async function handleRetirer(id: number) {
     setBusy(true);
@@ -43,13 +79,99 @@ export function Planning() {
     }
   }
 
+  const entriesByDay = useMemo(() => {
+    const map = new Map<string, PlanningEntry[]>();
+    for (const entry of entries) {
+      const list = map.get(entry.date) ?? [];
+      list.push(entry);
+      map.set(entry.date, list);
+    }
+    return map;
+  }, [entries]);
+
+  const monthLabel = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(monthCursor);
+  const weekdayLabels = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
+    return days.slice(0, 7).map((day) => formatter.format(day));
+  }, [days, locale]);
+  const dayDetailEntries = dayDetail ? entriesByDay.get(dayDetail) ?? [] : [];
+  const today = toISODate(new Date());
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
-        <Button onClick={() => setShowForm(true)}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setMonthCursor((m) => addMonths(m, -1))}>
+            <ChevronLeft size={16} />
+          </Button>
+          <span className="min-w-[10rem] text-center text-sm font-semibold capitalize">{monthLabel}</span>
+          <Button variant="outline" size="sm" onClick={() => setMonthCursor((m) => addMonths(m, 1))}>
+            <ChevronRight size={16} />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setMonthCursor(startOfMonth(new Date()))}>
+            {t("personnel.planning.today")}
+          </Button>
+        </div>
+        <Button
+          onClick={() => {
+            setFormDate(undefined);
+            setShowForm(true);
+          }}
+        >
           + {t("personnel.planning.newCreneau")}
         </Button>
       </div>
+
+      <Card className="overflow-hidden p-0">
+        <div className="grid grid-cols-7 border-b border-border bg-primary-light/30">
+          {weekdayLabels.map((label) => (
+            <div key={label} className="px-2 py-2 text-center text-xs font-medium capitalize text-muted">
+              {label}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7">
+          {days.map((day) => {
+            const key = toISODate(day);
+            const dayEntries = entriesByDay.get(key) ?? [];
+            const inMonth = day.getMonth() === monthCursor.getMonth();
+            const isToday = key === today;
+            return (
+              <button
+                type="button"
+                key={key}
+                onClick={() => setDayDetail(key)}
+                className={`flex min-h-24 flex-col items-stretch gap-1 border-b border-r border-border p-1.5 text-left last:border-r-0 hover:bg-primary-light/40 ${
+                  inMonth ? "bg-surface" : "bg-foreground/[0.02] text-muted"
+                }`}
+              >
+                <span
+                  className={`text-xs font-medium ${
+                    isToday
+                      ? "inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white"
+                      : ""
+                  }`}
+                >
+                  {day.getDate()}
+                </span>
+                <div className="flex flex-col gap-0.5">
+                  {dayEntries.slice(0, 3).map((entry) => (
+                    <span
+                      key={entry.id}
+                      className={`truncate rounded px-1 py-0.5 text-[10px] font-medium ${TONE_CLASSES[CRENEAU_TONE[entry.creneau]]}`}
+                    >
+                      {entry.employe ? `${entry.employe.prenom} ${entry.employe.nom}` : CRENEAU_LABELS[entry.creneau]}
+                    </span>
+                  ))}
+                  {dayEntries.length > 3 && (
+                    <span className="text-[10px] text-muted">+{dayEntries.length - 3}</span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
 
       <Modal
         open={showForm}
@@ -58,6 +180,7 @@ export function Planning() {
         size="lg"
       >
         <CreateCreneauForm
+          initialDate={formDate}
           onCancel={() => setShowForm(false)}
           onCreated={() => {
             setShowForm(false);
@@ -66,61 +189,74 @@ export function Planning() {
         />
       </Modal>
 
-      <Card className="p-0 overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("personnel.planning.tableDate")}</th>
-              <th>{t("personnel.planning.tableCreneau")}</th>
-              <th>{t("personnel.planning.tableEmploye")}</th>
-              <th>{t("personnel.planning.tableService")}</th>
-              <th>{t("personnel.planning.tableActions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map((p) => (
-              <tr key={p.id}>
-                <td>{p.date}</td>
-                <td>
-                  <Badge tone="primary">{CRENEAU_LABELS[p.creneau]}</Badge>
-                </td>
-                <td>{p.employe && `${p.employe.prenom} ${p.employe.nom}`}</td>
-                <td>{p.service ?? "-"}</td>
-                <td>
+      <Modal
+        open={dayDetail !== null}
+        onClose={() => setDayDetail(null)}
+        title={
+          dayDetail
+            ? new Intl.DateTimeFormat(locale, { dateStyle: "full" }).format(new Date(`${dayDetail}T00:00:00`))
+            : undefined
+        }
+        size="md"
+      >
+        {dayDetail && (
+          <div className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-2">
+              {dayDetailEntries.map((entry) => (
+                <li
+                  key={entry.id}
+                  className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface p-3 text-sm"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone={CRENEAU_TONE[entry.creneau]}>{CRENEAU_LABELS[entry.creneau]}</Badge>
+                    <span>{entry.employe && `${entry.employe.prenom} ${entry.employe.nom}`}</span>
+                    {entry.service && <span className="text-muted">· {entry.service}</span>}
+                  </div>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={() => handleRetirer(p.id)}
+                    onClick={() => handleRetirer(entry.id)}
                     disabled={busy}
                     className="text-danger hover:bg-danger-light"
                   >
                     {t("personnel.planning.retirer")}
                   </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {entries.length === 0 && (
-          <p className="text-sm text-muted p-4">{t("personnel.planning.noEntries")}</p>
+                </li>
+              ))}
+              {dayDetailEntries.length === 0 && (
+                <li className="text-sm text-muted">{t("personnel.planning.noEntries")}</li>
+              )}
+            </ul>
+            <Button
+              onClick={() => {
+                setFormDate(dayDetail);
+                setDayDetail(null);
+                setShowForm(true);
+              }}
+              className="self-start"
+            >
+              + {t("personnel.planning.newCreneau")}
+            </Button>
+          </div>
         )}
-      </Card>
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      </Modal>
     </div>
   );
 }
 
 function CreateCreneauForm({
+  initialDate,
   onCancel,
   onCreated,
 }: {
+  initialDate?: string;
   onCancel?: () => void;
   onCreated: () => void;
 }) {
   const { t } = useTranslation();
   const [employes, setEmployes] = useState<Employe[]>([]);
   const [employeId, setEmployeId] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(initialDate ?? "");
   const [creneau, setCreneau] = useState<Creneau>("matin");
   const [service, setService] = useState("");
   const [error, setError] = useState<string | null>(null);

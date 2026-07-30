@@ -1,6 +1,6 @@
-type Tone = "primary" | "accent" | "success" | "warning" | "danger" | "neutral";
+export type Tone = "primary" | "accent" | "success" | "warning" | "danger" | "neutral";
 
-const TONE_CLASSES: Record<Tone, string> = {
+export const TONE_CLASSES: Record<Tone, string> = {
   primary: "bg-primary-light text-primary",
   accent: "bg-accent-light text-accent",
   success: "bg-success-light text-success",
