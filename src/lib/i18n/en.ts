@@ -238,6 +238,7 @@ const en: Dictionary = {
   },
   rendezvous: {
     title: "Schedule",
+    today: "Today",
     newRendezVous: "New appointment",
     table: {
       heure: "Time",
@@ -418,6 +419,10 @@ const en: Dictionary = {
   },
   vaccinations: {
     title: "Vaccinations",
+    tabs: {
+      stock: "Stock",
+      chaineFroid: "Cold chain",
+    },
     colVaccin: "Vaccine",
     colDose: "Dose",
     colMapi: "AEFI",
@@ -686,6 +691,11 @@ const en: Dictionary = {
     },
   },
   assurances: {
+    tabs: {
+      compagnies: "Companies",
+      prisesEnCharge: "Coverage requests",
+      bordereaux: "Claim batches",
+    },
     patientAssurances: {
       title: "Insurance / third-party payer",
       empty: "No coverage on record.",

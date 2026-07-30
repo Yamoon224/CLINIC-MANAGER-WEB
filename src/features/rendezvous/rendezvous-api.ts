@@ -12,11 +12,18 @@ export function fetchPraticiens(): Promise<{ data: Praticien[] }> {
 }
 
 export function fetchAgenda(
-  date: string,
+  dateFrom: string,
   page = 1,
   praticienId?: number,
+  dateTo?: string,
+  perPage = 20,
 ): Promise<PaginatedResponse<RendezVous>> {
-  const params = new URLSearchParams({ from: date, to: date, page: String(page) });
+  const params = new URLSearchParams({
+    from: dateFrom,
+    to: dateTo ?? dateFrom,
+    page: String(page),
+    per_page: String(perPage),
+  });
   if (praticienId) params.set("praticien_id", String(praticienId));
   return apiFetch<PaginatedResponse<RendezVous>>(`/rendez-vous?${params}`);
 }

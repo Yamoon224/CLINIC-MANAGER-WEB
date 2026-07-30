@@ -6,6 +6,7 @@ import { assignerPlanning, fetchEmployes, fetchPlanning, retirerPlanning } from 
 import { type Creneau, type Employe, type Planning as PlanningEntry } from "./types";
 import { Badge, Button, Card, Field, Input, Modal, Select, TONE_CLASSES, type Tone } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+import { addMonths, buildMonthGrid, startOfMonth, toISODate } from "@/lib/calendar";
 
 const CRENEAU_TONE: Record<Creneau, Tone> = {
   matin: "primary",
@@ -13,30 +14,6 @@ const CRENEAU_TONE: Record<Creneau, Tone> = {
   nuit: "neutral",
   garde: "warning",
 };
-
-function toISODate(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function startOfMonth(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
-}
-
-function addMonths(date: Date, amount: number): Date {
-  return new Date(date.getFullYear(), date.getMonth() + amount, 1);
-}
-
-function buildMonthGrid(monthCursor: Date): Date[] {
-  const first = startOfMonth(monthCursor);
-  const firstWeekday = (first.getDay() + 6) % 7; // Monday-first
-  const gridStart = new Date(first);
-  gridStart.setDate(first.getDate() - firstWeekday);
-  return Array.from({ length: 42 }, (_, i) => {
-    const day = new Date(gridStart);
-    day.setDate(gridStart.getDate() + i);
-    return day;
-  });
-}
 
 export function Planning() {
   const { t, locale } = useTranslation();

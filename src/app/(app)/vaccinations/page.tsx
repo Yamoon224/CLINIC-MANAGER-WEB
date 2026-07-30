@@ -1,18 +1,28 @@
+"use client";
+
+import { useState } from "react";
 import { ChaineFroid } from "@/features/vaccinations/ChaineFroid";
 import { StockVaccins } from "@/features/vaccinations/StockVaccins";
+import { Tabs } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+type Tab = "stock" | "chaineFroid";
 
 export default function VaccinationsPage() {
-  return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-lg font-semibold mb-4">Stock de vaccins</h1>
-        <StockVaccins />
-      </div>
+  const { t } = useTranslation();
+  const [tab, setTab] = useState<Tab>("stock");
 
-      <div>
-        <h1 className="text-lg font-semibold mb-4">Chaîne du froid</h1>
-        <ChaineFroid />
-      </div>
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "stock", label: t("vaccinations.tabs.stock") },
+    { key: "chaineFroid", label: t("vaccinations.tabs.chaineFroid") },
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      <Tabs tabs={tabs} active={tab} onChange={(key) => setTab(key as Tab)} />
+
+      {tab === "stock" && <StockVaccins />}
+      {tab === "chaineFroid" && <ChaineFroid />}
     </div>
   );
 }

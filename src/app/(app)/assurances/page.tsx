@@ -1,24 +1,31 @@
+"use client";
+
+import { useState } from "react";
 import { Bordereaux } from "@/features/assurances/Bordereaux";
 import { CompagniesAssurance } from "@/features/assurances/CompagniesAssurance";
 import { PrisesEnCharge } from "@/features/assurances/PrisesEnCharge";
+import { Tabs } from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+type Tab = "compagnies" | "prisesEnCharge" | "bordereaux";
 
 export default function AssurancesPage() {
+  const { t } = useTranslation();
+  const [tab, setTab] = useState<Tab>("compagnies");
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "compagnies", label: t("assurances.tabs.compagnies") },
+    { key: "prisesEnCharge", label: t("assurances.tabs.prisesEnCharge") },
+    { key: "bordereaux", label: t("assurances.tabs.bordereaux") },
+  ];
+
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-lg font-semibold mb-4">Compagnies d&apos;assurance</h1>
-        <CompagniesAssurance />
-      </div>
+    <div className="flex flex-col gap-6">
+      <Tabs tabs={tabs} active={tab} onChange={(key) => setTab(key as Tab)} />
 
-      <div>
-        <h1 className="text-lg font-semibold mb-4">Prises en charge</h1>
-        <PrisesEnCharge />
-      </div>
-
-      <div>
-        <h1 className="text-lg font-semibold mb-4">Bordereaux de réclamation</h1>
-        <Bordereaux />
-      </div>
+      {tab === "compagnies" && <CompagniesAssurance />}
+      {tab === "prisesEnCharge" && <PrisesEnCharge />}
+      {tab === "bordereaux" && <Bordereaux />}
     </div>
   );
 }

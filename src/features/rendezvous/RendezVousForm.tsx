@@ -14,10 +14,19 @@ import {
 import {
   RENDEZ_VOUS_TYPES,
   type Praticien,
+  type RendezVous,
   type RendezVousType,
 } from "./types";
 
-export function RendezVousForm({ onCancel }: { onCancel?: () => void }) {
+export function RendezVousForm({
+  initialDate,
+  onCancel,
+  onCreated,
+}: {
+  initialDate?: string;
+  onCancel?: () => void;
+  onCreated?: (rendezVous: RendezVous) => void;
+}) {
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -28,7 +37,7 @@ export function RendezVousForm({ onCancel }: { onCancel?: () => void }) {
   const [praticiens, setPraticiens] = useState<Praticien[]>([]);
   const [praticienId, setPraticienId] = useState<number | "">("");
   const [type, setType] = useState<RendezVousType>("consultation");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(initialDate ?? new Date().toISOString().slice(0, 10));
 
   const [creneaux, setCreneaux] = useState<string[]>([]);
   const [startsAt, setStartsAt] = useState("");
@@ -72,14 +81,15 @@ export function RendezVousForm({ onCancel }: { onCancel?: () => void }) {
     }
     setIsSubmitting(true);
     try {
-      await createRendezVous({
+      const { data } = await createRendezVous({
         patient_id: patient.id,
         praticien_id: praticienId,
         type,
         starts_at: startsAt,
         motif: motif || undefined,
       });
-      router.push("/rendez-vous");
+      if (onCreated) onCreated(data);
+      else router.push("/rendez-vous");
     } catch {
       setError(t("rendezvous.form.submitError"));
     } finally {

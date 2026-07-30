@@ -236,6 +236,7 @@ const fr = {
   },
   rendezvous: {
     title: "Agenda",
+    today: "Aujourd'hui",
     newRendezVous: "Nouveau rendez-vous",
     table: {
       heure: "Heure",
@@ -416,6 +417,10 @@ const fr = {
   },
   vaccinations: {
     title: "Vaccinations",
+    tabs: {
+      stock: "Stock",
+      chaineFroid: "Chaîne du froid",
+    },
     colVaccin: "Vaccin",
     colDose: "Dose",
     colMapi: "MAPI",
@@ -684,6 +689,11 @@ const fr = {
     },
   },
   assurances: {
+    tabs: {
+      compagnies: "Compagnies",
+      prisesEnCharge: "Prises en charge",
+      bordereaux: "Bordereaux",
+    },
     patientAssurances: {
       title: "Assurances / tiers payant",
       empty: "Aucune couverture enregistrée.",
