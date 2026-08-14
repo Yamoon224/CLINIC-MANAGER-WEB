@@ -32,7 +32,13 @@ export function updateConsultation(
 
 export function addPrescription(
   consultationId: number,
-  payload: { type: string; designation: string; instructions?: string },
+  payload: {
+    type: string;
+    designation: string;
+    instructions?: string;
+    analyse_type_id?: number;
+    medicament_id?: number;
+  },
 ): Promise<{ data: Prescription }> {
   return apiFetch<{ data: Prescription }>(
     `/consultations/${consultationId}/prescriptions`,

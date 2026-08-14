@@ -13,16 +13,20 @@ import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function DispensationForm({
   patientId,
+  presetMedicamentId,
+  prescriptionId,
   onDispensed,
   onCancel,
 }: {
   patientId: number;
+  presetMedicamentId?: number;
+  prescriptionId?: number;
   onDispensed?: () => void;
   onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [medicaments, setMedicaments] = useState<Medicament[]>([]);
-  const [medicamentId, setMedicamentId] = useState<number | "">("");
+  const [medicamentId, setMedicamentId] = useState<number | "">(presetMedicamentId ?? "");
   const [medicamentOriginalId, setMedicamentOriginalId] = useState<number | null>(null);
   const [lots, setLots] = useState<LotMedicament[]>([]);
   const [lotId, setLotId] = useState<number | "">("");
@@ -77,6 +81,7 @@ export function DispensationForm({
         lot_medicament_id: lotId,
         quantite: Number(quantite),
         patient_id: patientId,
+        prescription_id: prescriptionId,
         medicament_original_id: medicamentOriginalId ?? undefined,
         urgente,
       });
@@ -96,17 +101,23 @@ export function DispensationForm({
 
   return (
     <div className="flex flex-col gap-3">
-      <Select
-        value={medicamentId}
-        onChange={(e) => chooseMedicament(e.target.value ? Number(e.target.value) : "")}
-      >
-        <option value="">{t("pharmacie.selectMedicamentPlaceholder")}</option>
-        {medicaments.map((m) => (
-          <option key={m.id} value={m.id} disabled={m.stock_disponible === 0}>
-            {t("pharmacie.medicamentOption", { dci: m.dci, dosage: m.dosage ?? "", stock: m.stock_disponible })}
-          </option>
-        ))}
-      </Select>
+      {presetMedicamentId ? (
+        <p className="text-sm font-medium text-foreground">
+          {medicaments.find((m) => m.id === presetMedicamentId)?.dci ?? "…"}
+        </p>
+      ) : (
+        <Select
+          value={medicamentId}
+          onChange={(e) => chooseMedicament(e.target.value ? Number(e.target.value) : "")}
+        >
+          <option value="">{t("pharmacie.selectMedicamentPlaceholder")}</option>
+          {medicaments.map((m) => (
+            <option key={m.id} value={m.id} disabled={m.stock_disponible === 0}>
+              {t("pharmacie.medicamentOption", { dci: m.dci, dosage: m.dosage ?? "", stock: m.stock_disponible })}
+            </option>
+          ))}
+        </Select>
+      )}
 
       {substitutions.length > 0 && (
         <div className="rounded-lg border border-warning/30 bg-warning-light p-2 text-sm">

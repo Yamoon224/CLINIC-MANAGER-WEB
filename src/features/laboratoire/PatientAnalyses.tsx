@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DemandeAnalysesAction } from "./DemandeAnalysesAction";
 import { fetchPatientDemandes } from "./laboratoire-api";
 import type { DemandeAnalyse } from "./types";
-import { Badge, Button, Modal, Pagination } from "@/components/ui";
+import { Badge, Button, Modal, PdfButton, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function PatientAnalyses({ patientId }: { patientId: number }) {
@@ -39,9 +39,17 @@ export function PatientAnalyses({ patientId }: { patientId: number }) {
     <div>
       <div className="flex items-center justify-between mb-2">
         <h2 className="font-semibold text-foreground">{t("laboratoire.title")}</h2>
-        <Button size="sm" onClick={() => setShowForm(true)}>
-          + {t("laboratoire.requestTitle")}
-        </Button>
+        <div className="flex items-center gap-2">
+          {demandes.some((d) => d.statut === "valide") && (
+            <PdfButton
+              path={`/patients/${patientId}/resultats-labo.pdf`}
+              label={t("laboratoire.exportResultatsPdf")}
+            />
+          )}
+          <Button size="sm" onClick={() => setShowForm(true)}>
+            + {t("laboratoire.requestTitle")}
+          </Button>
+        </div>
       </div>
       <ul className="flex flex-col gap-2 mb-3 text-sm">
         {demandes.map((d) => (

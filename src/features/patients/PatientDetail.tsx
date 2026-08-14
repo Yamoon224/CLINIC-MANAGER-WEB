@@ -9,7 +9,7 @@ import { MaterniteSection } from "@/features/maternite/MaterniteSection";
 import { PatientDispensations } from "@/features/pharmacie/PatientDispensations";
 import { OrientPatientAction } from "@/features/queue/OrientPatientAction";
 import { CarnetVaccination } from "@/features/vaccinations/CarnetVaccination";
-import { Badge, Button, Card, Modal } from "@/components/ui";
+import { Badge, Button, Card, Modal, PdfButton } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import type { Patient } from "./types";
 
@@ -65,6 +65,11 @@ export function PatientDetail({ patient }: { patient: Patient }) {
       <div className="flex gap-2 flex-wrap">
         <Button onClick={() => setShowOrient(true)}>{t("queue.orient.title")}</Button>
         <Button onClick={() => setShowConsultation(true)}>{t("consultations.startTitle")}</Button>
+        <PdfButton
+          path={`/patients/${patient.id}/dossier.pdf`}
+          label={t("patients.detail.exportDossierPdf")}
+          variant="secondary"
+        />
       </div>
 
       <Modal

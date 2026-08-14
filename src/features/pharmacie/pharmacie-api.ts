@@ -7,6 +7,7 @@ import type {
   DispenserPayload,
   LotMedicament,
   Medicament,
+  PrescriptionEnAttente,
 } from "./types";
 
 export function fetchMedicaments(): Promise<{ data: Medicament[] }> {
@@ -35,6 +36,10 @@ export function fetchSubstitutions(
 
 export function fetchAlertes(): Promise<Alertes> {
   return apiFetch<Alertes>("/medicaments-alertes");
+}
+
+export function fetchPrescriptionsEnAttente(): Promise<{ data: PrescriptionEnAttente[] }> {
+  return apiFetch<{ data: PrescriptionEnAttente[] }>("/prescriptions-en-attente");
 }
 
 export function dispenser(

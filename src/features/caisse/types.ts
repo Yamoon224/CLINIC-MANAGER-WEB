@@ -1,4 +1,4 @@
-export type SourceType = "analyse" | "dispensation" | "sejour";
+export type SourceType = "analyse" | "dispensation" | "sejour" | "consultation";
 
 export interface Facturable {
   type: SourceType;

@@ -13,8 +13,31 @@ import {
   type PrescriptionType,
   type UpdateConsultationPayload,
 } from "./types";
-import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
+import { fetchAnalyseTypes } from "@/features/laboratoire/laboratoire-api";
+import type { AnalyseType } from "@/features/laboratoire/types";
+import { fetchMedicaments } from "@/features/pharmacie/pharmacie-api";
+import type { Medicament } from "@/features/pharmacie/types";
+import { Button, Card, Field, Input, PdfButton, Select, Textarea } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+/**
+ * Very deliberately not a drug-interaction engine — there's no structured
+ * interaction database in this app. This is a best-effort text match
+ * against the patient's free-text allergies field, meant to catch the
+ * obvious case (patient's allergy list literally names the drug) and
+ * prompt a human to double-check, not to be relied on as clinical
+ * decision support.
+ */
+function matchesAllergy(allergiesText: string, medicamentDci: string): boolean {
+  const dci = medicamentDci.trim().toLowerCase();
+  if (!dci) return false;
+  return allergiesText
+    .toLowerCase()
+    .split(/[,;\n]+/)
+    .map((term) => term.trim())
+    .filter((term) => term.length > 2)
+    .some((term) => dci.includes(term) || term.includes(dci));
+}
 
 export function ConsultationScreen({ id }: { id: number }) {
   const { t } = useTranslation();
@@ -24,9 +47,19 @@ export function ConsultationScreen({ id }: { id: number }) {
   const [isFinishing, setIsFinishing] = useState(false);
 
   const [prescriptionType, setPrescriptionType] = useState<PrescriptionType>("medicament");
+  const [analyseTypes, setAnalyseTypes] = useState<AnalyseType[]>([]);
+  const [medicaments, setMedicaments] = useState<Medicament[]>([]);
+  const [analyseTypeId, setAnalyseTypeId] = useState<number | "">("");
+  const [medicamentId, setMedicamentId] = useState<number | "">("");
   const [designation, setDesignation] = useState("");
   const [instructions, setInstructions] = useState("");
+  const [allergyOverride, setAllergyOverride] = useState(false);
   const [isAddingPrescription, setIsAddingPrescription] = useState(false);
+
+  useEffect(() => {
+    fetchAnalyseTypes().then((res) => setAnalyseTypes(res.data));
+    fetchMedicaments().then((res) => setMedicaments(res.data));
+  }, []);
 
   const load = useCallback(() => {
     getConsultation(id).then((res) => {
@@ -36,6 +69,7 @@ export function ConsultationScreen({ id }: { id: number }) {
         diagnostic: res.data.diagnostic ?? "",
         cim10_code: res.data.cim10_code ?? "",
         conduite_a_tenir: res.data.conduite_a_tenir ?? "",
+        prix: res.data.prix ? Number(res.data.prix) : undefined,
         temperature: res.data.constantes.temperature
           ? Number(res.data.constantes.temperature)
           : undefined,
@@ -60,17 +94,51 @@ export function ConsultationScreen({ id }: { id: number }) {
     }
   }
 
+  const selectedMedicament = medicaments.find((m) => m.id === medicamentId);
+  const allergyWarning =
+    prescriptionType === "medicament" &&
+    !!selectedMedicament &&
+    !!consultation?.patient.allergies &&
+    matchesAllergy(consultation.patient.allergies, selectedMedicament.dci);
+
+  function resetPrescriptionForm() {
+    setAnalyseTypeId("");
+    setMedicamentId("");
+    setDesignation("");
+    setInstructions("");
+    setAllergyOverride(false);
+  }
+
   async function handleAddPrescription() {
-    if (!designation.trim()) return;
+    if (allergyWarning && !allergyOverride) return;
+
+    let payload: {
+      type: PrescriptionType;
+      designation: string;
+      instructions?: string;
+      analyse_type_id?: number;
+      medicament_id?: number;
+    };
+    if (prescriptionType === "analyse") {
+      const analyseType = analyseTypes.find((a) => a.id === analyseTypeId);
+      if (!analyseType) return;
+      payload = { type: "analyse", designation: analyseType.nom, analyse_type_id: analyseType.id };
+    } else if (prescriptionType === "medicament") {
+      if (!selectedMedicament) return;
+      payload = {
+        type: "medicament",
+        designation: `${selectedMedicament.dci}${selectedMedicament.dosage ? ` ${selectedMedicament.dosage}` : ""}`,
+        medicament_id: selectedMedicament.id,
+      };
+    } else {
+      if (!designation.trim()) return;
+      payload = { type: "imagerie", designation };
+    }
+
     setIsAddingPrescription(true);
     try {
-      await addPrescription(id, {
-        type: prescriptionType,
-        designation,
-        instructions: instructions || undefined,
-      });
-      setDesignation("");
-      setInstructions("");
+      await addPrescription(id, { ...payload, instructions: instructions || undefined });
+      resetPrescriptionForm();
       load();
     } finally {
       setIsAddingPrescription(false);
@@ -209,6 +277,22 @@ export function ConsultationScreen({ id }: { id: number }) {
         />
       </Field>
 
+      <div className="max-w-xs">
+        <Field label={t("consultations.prix")}>
+          <Input
+            type="number"
+            step="1"
+            min="0"
+            disabled={readOnly}
+            placeholder={t("consultations.prixPlaceholder")}
+            value={form.prix ?? ""}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, prix: e.target.value ? Number(e.target.value) : undefined }))
+            }
+          />
+        </Field>
+      </div>
+
       {!readOnly && (
         <Button variant="outline" onClick={handleSave} disabled={isSaving} className="self-start">
           {isSaving ? t("consultations.saving") : t("consultations.save")}
@@ -216,7 +300,15 @@ export function ConsultationScreen({ id }: { id: number }) {
       )}
 
       <Card className="p-4">
-        <h2 className="font-semibold text-foreground mb-3">{t("consultations.prescriptions")}</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold text-foreground">{t("consultations.prescriptions")}</h2>
+          {consultation.prescriptions.length > 0 && (
+            <PdfButton
+              path={`/consultations/${id}/ordonnance.pdf`}
+              label={t("consultations.printOrdonnance")}
+            />
+          )}
+        </div>
         <ul className="flex flex-col gap-2 mb-3 text-sm">
           {consultation.prescriptions.map((p) => (
             <li key={p.id} className="rounded-lg border border-border p-2">
@@ -234,7 +326,10 @@ export function ConsultationScreen({ id }: { id: number }) {
             <div className="flex gap-2">
               <Select
                 value={prescriptionType}
-                onChange={(e) => setPrescriptionType(e.target.value as PrescriptionType)}
+                onChange={(e) => {
+                  setPrescriptionType(e.target.value as PrescriptionType);
+                  resetPrescriptionForm();
+                }}
               >
                 {Object.entries(PRESCRIPTION_TYPE_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -242,13 +337,65 @@ export function ConsultationScreen({ id }: { id: number }) {
                   </option>
                 ))}
               </Select>
-              <Input
-                placeholder={t("consultations.designationPlaceholder")}
-                value={designation}
-                onChange={(e) => setDesignation(e.target.value)}
-                className="flex-1"
-              />
+
+              {prescriptionType === "analyse" && (
+                <Select
+                  value={analyseTypeId}
+                  onChange={(e) => setAnalyseTypeId(e.target.value ? Number(e.target.value) : "")}
+                  className="flex-1"
+                >
+                  <option value="">{t("consultations.selectAnalysePlaceholder")}</option>
+                  {analyseTypes.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.nom}
+                    </option>
+                  ))}
+                </Select>
+              )}
+
+              {prescriptionType === "medicament" && (
+                <Select
+                  value={medicamentId}
+                  onChange={(e) => {
+                    setMedicamentId(e.target.value ? Number(e.target.value) : "");
+                    setAllergyOverride(false);
+                  }}
+                  className="flex-1"
+                >
+                  <option value="">{t("consultations.selectMedicamentPlaceholder")}</option>
+                  {medicaments.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.dci} {m.dosage ?? ""}
+                    </option>
+                  ))}
+                </Select>
+              )}
+
+              {prescriptionType === "imagerie" && (
+                <Input
+                  placeholder={t("consultations.designationPlaceholder")}
+                  value={designation}
+                  onChange={(e) => setDesignation(e.target.value)}
+                  className="flex-1"
+                />
+              )}
             </div>
+
+            {allergyWarning && (
+              <div className="rounded-lg border border-danger/30 bg-danger-light p-2 text-sm text-danger">
+                <p className="font-semibold">⚠ {t("consultations.allergyWarningTitle")}</p>
+                <p>{t("consultations.allergyWarningBody", { allergies: consultation.patient.allergies ?? "" })}</p>
+                <label className="mt-1 flex items-center gap-2 font-normal">
+                  <input
+                    type="checkbox"
+                    checked={allergyOverride}
+                    onChange={(e) => setAllergyOverride(e.target.checked)}
+                  />
+                  {t("consultations.allergyOverride")}
+                </label>
+              </div>
+            )}
+
             <Input
               placeholder={t("consultations.instructionsPlaceholder")}
               value={instructions}
@@ -256,7 +403,7 @@ export function ConsultationScreen({ id }: { id: number }) {
             />
             <Button
               onClick={handleAddPrescription}
-              disabled={isAddingPrescription}
+              disabled={isAddingPrescription || (allergyWarning && !allergyOverride)}
               className="self-start"
             >
               {t("consultations.add")}

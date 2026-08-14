@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { annulerFacture, encaisser, fetchFacture } from "./caisse-api";
 import { MODE_PAIEMENT_LABELS, type Facture, type ModePaiement } from "./types";
-import { Badge, Button, Card, Input, Modal, PageHeader, Select } from "@/components/ui";
+import { Badge, Button, Card, Input, Modal, PageHeader, PdfButton, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const STATUT_TONES: Record<Facture["statut"], "primary" | "warning" | "success" | "neutral"> = {
@@ -52,7 +52,12 @@ export function FactureDetail({ id }: { id: number }) {
         description={t("caisse.factureDetail.description", {
           numero: facture.patient.numero_dossier,
         })}
-        actions={<Badge tone={STATUT_TONES[facture.statut]}>{t(`caisse.factureStatut.${facture.statut}`)}</Badge>}
+        actions={
+          <div className="flex items-center gap-2">
+            <PdfButton path={`/factures/${id}/pdf`} label={t("caisse.factureDetail.exportPdf")} />
+            <Badge tone={STATUT_TONES[facture.statut]}>{t(`caisse.factureStatut.${facture.statut}`)}</Badge>
+          </div>
+        }
       />
 
       <Card className="p-0 overflow-hidden">

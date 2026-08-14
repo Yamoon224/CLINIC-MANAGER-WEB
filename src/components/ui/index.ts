@@ -10,5 +10,6 @@ export { Badge, TONE_CLASSES } from "./Badge";
 export type { Tone } from "./Badge";
 export { Pagination } from "./Pagination";
 export { Modal } from "./Modal";
+export { PdfButton } from "./PdfButton";
 export { Tabs } from "./Tabs";
 export type { TabItem } from "./Tabs";

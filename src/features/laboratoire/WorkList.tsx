@@ -45,12 +45,12 @@ export function WorkList() {
     }
   }
 
-  async function handleSaisirResultat(id: number) {
-    const valeur = valeurs[id];
+  async function handleSaisirResultat(d: DemandeAnalyse) {
+    const valeur = valeurs[d.id] ?? d.resultat_valeur;
     if (!valeur) return;
-    setBusyId(id);
+    setBusyId(d.id);
     try {
-      await saisirResultat(id, valeur);
+      await saisirResultat(d.id, valeur);
       load();
     } finally {
       setBusyId(null);
@@ -138,21 +138,21 @@ export function WorkList() {
                         {t("laboratoire.preleve")}
                       </Button>
                     )}
-                    {d.statut === "preleve" && (
+                    {(d.statut === "preleve" || d.statut === "valide_technicien") && (
                       <span className="flex items-center gap-2">
                         <Input
                           placeholder={t("laboratoire.valeurPlaceholder")}
-                          value={valeurs[d.id] ?? ""}
+                          value={valeurs[d.id] ?? d.resultat_valeur ?? ""}
                           onChange={(e) => setValeurs((v) => ({ ...v, [d.id]: e.target.value }))}
                           className="w-24"
                         />
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSaisirResultat(d.id)}
+                          onClick={() => handleSaisirResultat(d)}
                           disabled={busyId === d.id}
                         >
-                          {t("laboratoire.saisir")}
+                          {d.statut === "valide_technicien" ? t("laboratoire.modifier") : t("laboratoire.saisir")}
                         </Button>
                       </span>
                     )}

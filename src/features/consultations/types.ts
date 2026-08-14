@@ -9,6 +9,8 @@ export const PRESCRIPTION_TYPE_LABELS: Record<PrescriptionType, string> = {
 export interface Prescription {
   id: number;
   type: PrescriptionType;
+  analyse_type_id: number | null;
+  medicament_id: number | null;
   designation: string;
   instructions: string | null;
   created_at: string | null;
@@ -28,6 +30,7 @@ export interface Consultation {
   diagnostic: string | null;
   cim10_code: string | null;
   conduite_a_tenir: string | null;
+  prix: string | null;
   constantes: Constantes;
   statut: "en_cours" | "terminee";
   started_at: string | null;
@@ -58,6 +61,7 @@ export interface UpdateConsultationPayload {
   diagnostic?: string;
   cim10_code?: string;
   conduite_a_tenir?: string;
+  prix?: number;
   temperature?: number;
   tension?: string;
   poids?: number;

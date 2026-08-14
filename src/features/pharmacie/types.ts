@@ -64,6 +64,16 @@ export interface DispenserPayload {
   lot_medicament_id: number;
   quantite: number;
   patient_id?: number;
+  prescription_id?: number;
   medicament_original_id?: number;
   urgente?: boolean;
+}
+
+export interface PrescriptionEnAttente {
+  id: number;
+  designation: string;
+  instructions: string | null;
+  medicament: { id: number; dci: string; dosage: string | null };
+  patient: { id: number; nom: string; prenom: string; numero_dossier: string } | null;
+  created_at: string | null;
 }
