@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
+import { useAuth } from "@/features/auth/auth-context";
 import {
   fetchNotifications,
   fetchUnreadCount,
@@ -10,11 +11,13 @@ import {
 } from "@/features/notifications/notifications-api";
 import { emitNotificationsChanged, onNotificationsChanged } from "@/features/notifications/events";
 import type { Notification } from "@/features/notifications/types";
+import { getEcho } from "@/lib/echo";
 import { useClickOutside } from "@/lib/useClickOutside";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function NotificationBell() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[] | null>(
@@ -34,6 +37,9 @@ export function NotificationBell() {
 
   useEffect(() => {
     refreshUnreadCount();
+    // Filet de sécurité si le WebSocket est momentanément coupé (Reverb pas
+    // démarré, réseau capricieux) — le polling reste actif mais espacé,
+    // le temps réel ci-dessous est la voie normale de mise à jour.
     const interval = setInterval(refreshUnreadCount, 60_000);
     return () => clearInterval(interval);
   }, [refreshUnreadCount]);
@@ -44,6 +50,27 @@ export function NotificationBell() {
       setNotifications(null);
     });
   }, [refreshUnreadCount]);
+
+  // Temps réel : une notification créée côté serveur (cf.
+  // GenericNotification, diffusée sur le canal privé de l'utilisateur)
+  // arrive ici sans attendre le prochain polling.
+  useEffect(() => {
+    if (!user) return;
+    const echo = getEcho();
+    if (!echo) return;
+
+    const channel = echo.private(`users.${user.id}`);
+    channel.notification((notification: Notification) => {
+      setUnreadCount((c) => c + 1);
+      setNotifications((current) =>
+        current ? [{ ...notification, lue: false }, ...current] : current,
+      );
+    });
+
+    return () => {
+      echo.leave(`users.${user.id}`);
+    };
+  }, [user]);
 
   async function handleOpen() {
     const willOpen = !open;

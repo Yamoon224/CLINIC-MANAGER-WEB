@@ -5,6 +5,8 @@ import type {
   CreerLotPayload,
   Dispensation,
   DispenserPayload,
+  GraviteInteraction,
+  InteractionMedicamenteuse,
   LotMedicament,
   Medicament,
   PrescriptionEnAttente,
@@ -40,6 +42,34 @@ export function fetchAlertes(): Promise<Alertes> {
 
 export function fetchPrescriptionsEnAttente(): Promise<{ data: PrescriptionEnAttente[] }> {
   return apiFetch<{ data: PrescriptionEnAttente[] }>("/prescriptions-en-attente");
+}
+
+export function fetchInteractions(): Promise<{ data: InteractionMedicamenteuse[] }> {
+  return apiFetch<{ data: InteractionMedicamenteuse[] }>("/interactions-medicamenteuses");
+}
+
+export function createInteraction(payload: {
+  medicament_a_id: number;
+  medicament_b_id: number;
+  gravite: GraviteInteraction;
+  description?: string;
+}): Promise<{ data: InteractionMedicamenteuse }> {
+  return apiFetch<{ data: InteractionMedicamenteuse }>("/interactions-medicamenteuses", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteInteraction(id: number): Promise<void> {
+  return apiFetch<void>(`/interactions-medicamenteuses/${id}`, { method: "DELETE" });
+}
+
+export function checkInteractions(
+  medicamentIds: number[],
+): Promise<{ data: InteractionMedicamenteuse[] }> {
+  const params = new URLSearchParams();
+  medicamentIds.forEach((id) => params.append("medicament_ids[]", String(id)));
+  return apiFetch<{ data: InteractionMedicamenteuse[] }>(`/interactions-medicamenteuses/verifier?${params}`);
 }
 
 export function dispenser(

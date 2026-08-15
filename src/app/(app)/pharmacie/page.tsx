@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { AlertesStock } from "@/features/pharmacie/AlertesStock";
+import { InteractionsMedicamenteuses } from "@/features/pharmacie/InteractionsMedicamenteuses";
 import { PrescriptionsEnAttente } from "@/features/pharmacie/PrescriptionsEnAttente";
 import { StockMedicaments } from "@/features/pharmacie/StockMedicaments";
 import { Tabs } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
-type Tab = "stock" | "alertes" | "enAttente";
+type Tab = "stock" | "alertes" | "enAttente" | "interactions";
 
 export default function PharmaciePage() {
   const { t } = useTranslation();
@@ -17,6 +18,7 @@ export default function PharmaciePage() {
     { key: "stock", label: t("pharmacie.tabs.stock") },
     { key: "alertes", label: t("pharmacie.tabs.alertes") },
     { key: "enAttente", label: t("pharmacie.tabs.enAttente") },
+    { key: "interactions", label: t("pharmacie.tabs.interactions") },
   ];
 
   return (
@@ -26,6 +28,7 @@ export default function PharmaciePage() {
       {tab === "stock" && <StockMedicaments />}
       {tab === "alertes" && <AlertesStock />}
       {tab === "enAttente" && <PrescriptionsEnAttente />}
+      {tab === "interactions" && <InteractionsMedicamenteuses />}
     </div>
   );
 }

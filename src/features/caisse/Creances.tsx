@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchCreances } from "./caisse-api";
 import type { Facture } from "./types";
-import { Card, Pagination } from "@/components/ui";
+import { Card, CsvButton, Field, Input, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function Creances() {
@@ -12,6 +12,8 @@ export function Creances() {
   const [creances, setCreances] = useState<Facture[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [dateDebut, setDateDebut] = useState("");
+  const [dateFin, setDateFin] = useState("");
 
   useEffect(() => {
     fetchCreances(page).then((res) => {
@@ -20,8 +22,25 @@ export function Creances() {
     });
   }, [page]);
 
+  const exportParams = new URLSearchParams();
+  if (dateDebut) exportParams.set("from", dateDebut);
+  if (dateFin) exportParams.set("to", dateFin);
+
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex items-end gap-2">
+        <Field label={t("caisse.export.from")}>
+          <Input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} />
+        </Field>
+        <Field label={t("caisse.export.to")}>
+          <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
+        </Field>
+        <CsvButton
+          path={`/factures/export.csv?${exportParams}`}
+          label={t("caisse.export.csvFactures")}
+          filename="factures.csv"
+        />
+      </div>
       <Card className="p-0 overflow-hidden">
         <table className="table">
           <thead>

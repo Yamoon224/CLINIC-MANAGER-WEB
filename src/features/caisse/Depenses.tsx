@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createDepense, fetchDepenses } from "./caisse-api";
 import type { Depense } from "./types";
-import { Button, Card, Field, Input, Modal, Pagination } from "@/components/ui";
+import { Button, Card, CsvButton, Field, Input, Modal, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function Depenses() {
@@ -12,6 +12,8 @@ export function Depenses() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showForm, setShowForm] = useState(false);
+  const [dateDebut, setDateDebut] = useState("");
+  const [dateFin, setDateFin] = useState("");
 
   function load() {
     fetchDepenses(page).then((res) => {
@@ -24,9 +26,26 @@ export function Depenses() {
     load();
   }, [page]);
 
+  const exportParams = new URLSearchParams();
+  if (dateDebut) exportParams.set("from", dateDebut);
+  if (dateFin) exportParams.set("to", dateFin);
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex items-end gap-2">
+          <Field label={t("caisse.export.from")}>
+            <Input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} />
+          </Field>
+          <Field label={t("caisse.export.to")}>
+            <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
+          </Field>
+          <CsvButton
+            path={`/depenses/export.csv?${exportParams}`}
+            label={t("caisse.export.csv")}
+            filename="depenses.csv"
+          />
+        </div>
         <Button onClick={() => setShowForm(true)}>
           + {t("caisse.depenses.nouvelle")}
         </Button>

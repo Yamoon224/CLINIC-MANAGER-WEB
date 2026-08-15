@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import * as authApi from "./auth-api";
 import type { LoginCredentials, UpdateProfilePayload, User } from "./types";
+import { disconnectEcho } from "@/lib/echo";
 
 interface AuthContextValue {
   user: User | null;
@@ -51,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     await authApi.logout().catch(() => undefined);
     window.localStorage.removeItem("auth_token");
+    disconnectEcho();
     setUser(null);
     router.push("/");
   }, [router]);

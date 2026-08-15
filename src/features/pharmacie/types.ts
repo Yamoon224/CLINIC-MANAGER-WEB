@@ -77,3 +77,13 @@ export interface PrescriptionEnAttente {
   patient: { id: number; nom: string; prenom: string; numero_dossier: string } | null;
   created_at: string | null;
 }
+
+export type GraviteInteraction = "mineure" | "moderee" | "majeure";
+
+export interface InteractionMedicamenteuse {
+  id: number;
+  gravite: GraviteInteraction;
+  description: string | null;
+  medicament_a: { id: number; dci: string };
+  medicament_b: { id: number; dci: string };
+}

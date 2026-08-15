@@ -11,5 +11,6 @@ export type { Tone } from "./Badge";
 export { Pagination } from "./Pagination";
 export { Modal } from "./Modal";
 export { PdfButton } from "./PdfButton";
+export { CsvButton } from "./CsvButton";
 export { Tabs } from "./Tabs";
 export type { TabItem } from "./Tabs";

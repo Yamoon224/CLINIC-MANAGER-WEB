@@ -15,8 +15,8 @@ import {
 } from "./types";
 import { fetchAnalyseTypes } from "@/features/laboratoire/laboratoire-api";
 import type { AnalyseType } from "@/features/laboratoire/types";
-import { fetchMedicaments } from "@/features/pharmacie/pharmacie-api";
-import type { Medicament } from "@/features/pharmacie/types";
+import { checkInteractions, fetchMedicaments } from "@/features/pharmacie/pharmacie-api";
+import type { InteractionMedicamenteuse, Medicament } from "@/features/pharmacie/types";
 import { Button, Card, Field, Input, PdfButton, Select, Textarea } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
@@ -54,6 +54,8 @@ export function ConsultationScreen({ id }: { id: number }) {
   const [designation, setDesignation] = useState("");
   const [instructions, setInstructions] = useState("");
   const [allergyOverride, setAllergyOverride] = useState(false);
+  const [interactionWarnings, setInteractionWarnings] = useState<InteractionMedicamenteuse[]>([]);
+  const [interactionOverride, setInteractionOverride] = useState(false);
   const [isAddingPrescription, setIsAddingPrescription] = useState(false);
 
   useEffect(() => {
@@ -80,6 +82,14 @@ export function ConsultationScreen({ id }: { id: number }) {
     });
   }, [id]);
 
+  // Adding a prescription only changes the prescriptions list — refreshing
+  // the whole form here (like `load` does) would silently overwrite any
+  // clinical fields (diagnostic, price...) the practitioner typed but
+  // hadn't hit "Enregistrer" for yet.
+  const reloadPrescriptionsOnly = useCallback(() => {
+    getConsultation(id).then((res) => setConsultation(res.data));
+  }, [id]);
+
   useEffect(() => {
     load();
   }, [load]);
@@ -101,16 +111,38 @@ export function ConsultationScreen({ id }: { id: number }) {
     !!consultation?.patient.allergies &&
     matchesAllergy(consultation.patient.allergies, selectedMedicament.dci);
 
+  // Checked against the medicaments already prescribed in this same
+  // consultation — not the patient's full history, which this app has no
+  // "currently active medication" concept for (see Dispensation, which is
+  // a one-off dispensing record, not a course of treatment with an end
+  // date).
+  useEffect(() => {
+    if (prescriptionType !== "medicament" || !medicamentId || !consultation) {
+      setInteractionWarnings([]);
+      return;
+    }
+    const otherIds = consultation.prescriptions
+      .filter((p): p is typeof p & { medicament_id: number } => p.type === "medicament" && p.medicament_id !== null)
+      .map((p) => p.medicament_id);
+    if (otherIds.length === 0) {
+      setInteractionWarnings([]);
+      return;
+    }
+    checkInteractions([...otherIds, medicamentId]).then((res) => setInteractionWarnings(res.data));
+  }, [prescriptionType, medicamentId, consultation]);
+
   function resetPrescriptionForm() {
     setAnalyseTypeId("");
     setMedicamentId("");
     setDesignation("");
     setInstructions("");
     setAllergyOverride(false);
+    setInteractionOverride(false);
   }
 
   async function handleAddPrescription() {
     if (allergyWarning && !allergyOverride) return;
+    if (interactionWarnings.length > 0 && !interactionOverride) return;
 
     let payload: {
       type: PrescriptionType;
@@ -139,7 +171,7 @@ export function ConsultationScreen({ id }: { id: number }) {
     try {
       await addPrescription(id, { ...payload, instructions: instructions || undefined });
       resetPrescriptionForm();
-      load();
+      reloadPrescriptionsOnly();
     } finally {
       setIsAddingPrescription(false);
     }
@@ -359,6 +391,7 @@ export function ConsultationScreen({ id }: { id: number }) {
                   onChange={(e) => {
                     setMedicamentId(e.target.value ? Number(e.target.value) : "");
                     setAllergyOverride(false);
+                    setInteractionOverride(false);
                   }}
                   className="flex-1"
                 >
@@ -396,6 +429,32 @@ export function ConsultationScreen({ id }: { id: number }) {
               </div>
             )}
 
+            {interactionWarnings.map((interaction) => (
+              <div
+                key={interaction.id}
+                className="rounded-lg border border-warning/30 bg-warning-light p-2 text-sm text-warning"
+              >
+                <p className="font-semibold">⚠ {t("pharmacie.interactions.warningTitle")}</p>
+                <p>
+                  {t("pharmacie.interactions.warningBody", {
+                    a: interaction.medicament_a.dci,
+                    b: interaction.medicament_b.dci,
+                    description: interaction.description ?? "",
+                  })}
+                </p>
+              </div>
+            ))}
+            {interactionWarnings.length > 0 && (
+              <label className="flex items-center gap-2 text-sm font-normal text-warning">
+                <input
+                  type="checkbox"
+                  checked={interactionOverride}
+                  onChange={(e) => setInteractionOverride(e.target.checked)}
+                />
+                {t("pharmacie.interactions.warningOverride")}
+              </label>
+            )}
+
             <Input
               placeholder={t("consultations.instructionsPlaceholder")}
               value={instructions}
@@ -403,7 +462,11 @@ export function ConsultationScreen({ id }: { id: number }) {
             />
             <Button
               onClick={handleAddPrescription}
-              disabled={isAddingPrescription || (allergyWarning && !allergyOverride)}
+              disabled={
+                isAddingPrescription ||
+                (allergyWarning && !allergyOverride) ||
+                (interactionWarnings.length > 0 && !interactionOverride)
+              }
               className="self-start"
             >
               {t("consultations.add")}

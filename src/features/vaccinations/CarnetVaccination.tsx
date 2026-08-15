@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { administrerVaccin, fetchCarnet, fetchVaccins } from "./vaccinations-api";
 import type { Carnet, Vaccin } from "./types";
-import { Badge, Button, Card, Input, Modal, Pagination, Select, Textarea } from "@/components/ui";
+import { Badge, Button, Card, Input, Modal, PdfButton, Pagination, Select, Textarea } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function CarnetVaccination({ patientId }: { patientId: number }) {
@@ -30,7 +30,15 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold text-foreground mb-2">{t("vaccinations.title")}</h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="font-semibold text-foreground">{t("vaccinations.title")}</h2>
+        {carnet.data.length > 0 && (
+          <PdfButton
+            path={`/patients/${patientId}/carnet-vaccination.pdf`}
+            label={t("vaccinations.exportCarnetPdf")}
+          />
+        )}
+      </div>
 
       <Card className="p-0 overflow-hidden mb-3">
         <table className="table">
