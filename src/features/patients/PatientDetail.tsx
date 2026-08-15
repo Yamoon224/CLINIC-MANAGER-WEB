@@ -7,14 +7,16 @@ import { PatientSejours } from "@/features/hospitalisation/PatientSejours";
 import { PatientAnalyses } from "@/features/laboratoire/PatientAnalyses";
 import { MaterniteSection } from "@/features/maternite/MaterniteSection";
 import { PatientDispensations } from "@/features/pharmacie/PatientDispensations";
+import { ActivatePortailAccess } from "@/features/portail/ActivatePortailAccess";
 import { OrientPatientAction } from "@/features/queue/OrientPatientAction";
 import { CarnetVaccination } from "@/features/vaccinations/CarnetVaccination";
 import { Badge, Button, Card, Modal, PdfButton } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import type { Patient } from "./types";
 
-export function PatientDetail({ patient }: { patient: Patient }) {
+export function PatientDetail({ patient: initialPatient }: { patient: Patient }) {
   const { t } = useTranslation();
+  const [patient, setPatient] = useState(initialPatient);
   const [showOrient, setShowOrient] = useState(false);
   const [showConsultation, setShowConsultation] = useState(false);
 
@@ -70,6 +72,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
           label={t("patients.detail.exportDossierPdf")}
           variant="secondary"
         />
+        <ActivatePortailAccess patient={patient} onUpdated={setPatient} />
       </div>
 
       <Modal

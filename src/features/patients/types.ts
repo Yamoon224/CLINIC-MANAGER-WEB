@@ -16,6 +16,8 @@ export interface Patient {
   allergies: string | null;
   antecedents: string | null;
   created_at: string | null;
+  portail_email: string | null;
+  portail_active_at: string | null;
 }
 
 export interface RegisterPatientPayload {
