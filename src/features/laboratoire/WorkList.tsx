@@ -1,18 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { annuler, fetchWorkList, preleve, saisirResultat, validerBiologiste } from "./laboratoire-api";
+import { annuler, fetchWorkList, preleve } from "./laboratoire-api";
+import { SaisirResultatModal } from "./SaisirResultatModal";
+import { ValiderResultatModal } from "./ValiderResultatModal";
 import type { DemandeAnalyse } from "./types";
-import { Badge, Button, Card, Input, Pagination } from "@/components/ui";
+import { Badge, Button, Card, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function WorkList() {
   const { t } = useTranslation();
   const [demandes, setDemandes] = useState<DemandeAnalyse[]>([]);
-  const [valeurs, setValeurs] = useState<Record<number, string>>({});
   const [busyId, setBusyId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [saisieTarget, setSaisieTarget] = useState<DemandeAnalyse | null>(null);
+  const [validationTarget, setValidationTarget] = useState<DemandeAnalyse | null>(null);
 
   const STATUT_LABELS: Record<DemandeAnalyse["statut"], string> = {
     demandee: t("laboratoire.statutDemandee"),
@@ -39,28 +42,6 @@ export function WorkList() {
     setBusyId(id);
     try {
       await preleve(id);
-      load();
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  async function handleSaisirResultat(d: DemandeAnalyse) {
-    const valeur = valeurs[d.id] ?? d.resultat_valeur;
-    if (!valeur) return;
-    setBusyId(d.id);
-    try {
-      await saisirResultat(d.id, valeur);
-      load();
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  async function handleValider(id: number) {
-    setBusyId(id);
-    try {
-      await validerBiologiste(id);
       load();
     } finally {
       setBusyId(null);
@@ -139,30 +120,12 @@ export function WorkList() {
                       </Button>
                     )}
                     {(d.statut === "preleve" || d.statut === "valide_technicien") && (
-                      <span className="flex items-center gap-2">
-                        <Input
-                          placeholder={t("laboratoire.valeurPlaceholder")}
-                          value={valeurs[d.id] ?? d.resultat_valeur ?? ""}
-                          onChange={(e) => setValeurs((v) => ({ ...v, [d.id]: e.target.value }))}
-                          className="w-24"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleSaisirResultat(d)}
-                          disabled={busyId === d.id}
-                        >
-                          {d.statut === "valide_technicien" ? t("laboratoire.modifier") : t("laboratoire.saisir")}
-                        </Button>
-                      </span>
+                      <Button variant="ghost" size="sm" onClick={() => setSaisieTarget(d)}>
+                        {d.statut === "valide_technicien" ? t("laboratoire.modifier") : t("laboratoire.saisir")}
+                      </Button>
                     )}
                     {d.statut === "valide_technicien" && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleValider(d.id)}
-                        disabled={busyId === d.id}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setValidationTarget(d)}>
                         {t("laboratoire.validerBiologiste")}
                       </Button>
                     )}
@@ -192,6 +155,28 @@ export function WorkList() {
         </table>
       </Card>
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
+      {saisieTarget && (
+        <SaisirResultatModal
+          demande={saisieTarget}
+          onClose={() => setSaisieTarget(null)}
+          onSaved={() => {
+            setSaisieTarget(null);
+            load();
+          }}
+        />
+      )}
+
+      {validationTarget && (
+        <ValiderResultatModal
+          demande={validationTarget}
+          onClose={() => setValidationTarget(null)}
+          onValidated={() => {
+            setValidationTarget(null);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }

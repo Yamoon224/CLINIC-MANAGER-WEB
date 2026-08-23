@@ -48,6 +48,9 @@ export default function PortailResultatsPage() {
                         <Badge tone="warning">{t("portail.resultats.anormal")}</Badge>
                       )}
                     </div>
+                    {r.commentaire && (
+                      <p className="mt-1 text-xs italic text-muted">{r.commentaire}</p>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-muted">
                     {r.valide_at

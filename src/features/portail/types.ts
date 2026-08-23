@@ -62,6 +62,7 @@ export interface PortailResultat {
   resultat_valeur: string | null;
   resultat_anormal: boolean;
   resultat_critique: boolean;
+  commentaire: string | null;
   valide_at: string | null;
 }
 

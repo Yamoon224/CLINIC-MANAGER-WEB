@@ -72,6 +72,9 @@ export function PatientAnalyses({ patientId }: { patientId: number }) {
                 {d.resultat_critique && t("laboratoire.criticalValue")}
               </p>
             )}
+            {d.commentaire && d.statut === "valide" && (
+              <p className="mt-1 text-muted italic">{d.commentaire}</p>
+            )}
           </li>
         ))}
         {demandes.length === 0 && (

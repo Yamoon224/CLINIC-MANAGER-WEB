@@ -16,6 +16,10 @@ export interface AnalyseType {
   valeur_ref_max: string | null;
   valeur_critique_min: string | null;
   valeur_critique_max: string | null;
+  /** Mots-clés (séparés par des virgules) qui signalent un résultat texte comme anormal — ex. "positif". */
+  valeurs_anormales: string | null;
+  /** Idem pour "critique" — voir DemandeAnalyseService::evaluerValeurQualitative côté backend. */
+  valeurs_critiques: string | null;
   prix: string | null;
 }
 
@@ -33,6 +37,7 @@ export interface DemandeAnalyse {
   resultat_valeur: string | null;
   resultat_anormal: boolean;
   resultat_critique: boolean;
+  commentaire: string | null;
   preleve_at: string | null;
   valide_technicien_at: string | null;
   valide_biologiste_at: string | null;

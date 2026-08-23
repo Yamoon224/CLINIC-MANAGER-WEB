@@ -47,9 +47,13 @@ export function saisirResultat(
   });
 }
 
-export function validerBiologiste(id: number): Promise<{ data: DemandeAnalyse }> {
+export function validerBiologiste(
+  id: number,
+  commentaire?: string,
+): Promise<{ data: DemandeAnalyse }> {
   return apiFetch<{ data: DemandeAnalyse }>(`/demandes-analyse/${id}/validation-biologiste`, {
     method: "POST",
+    body: JSON.stringify({ commentaire: commentaire || undefined }),
   });
 }
 
