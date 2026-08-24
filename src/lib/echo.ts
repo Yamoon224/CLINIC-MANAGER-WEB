@@ -21,10 +21,28 @@ let echoToken: string | null = null;
  *
  * Returns null when there's no logged-in user yet, or outside the browser.
  */
+let warnedMissingKey = false;
+
 export function getEcho(): InstanceType<typeof Echo> | null {
   if (typeof window === "undefined") return null;
   const token = window.localStorage.getItem("auth_token");
   if (!token) return null;
+
+  // pusher-js throws synchronously (not a rejected promise) if the app key
+  // is missing, which crashes the whole React tree since nothing here is
+  // inside a try/catch on the caller's side — real-time notifications are
+  // a nice-to-have, not something worth taking the entire page down for.
+  // Deployments that haven't configured Reverb (e.g. no public
+  // NEXT_PUBLIC_REVERB_* vars set) silently get no live updates instead.
+  if (!process.env.NEXT_PUBLIC_REVERB_APP_KEY) {
+    if (!warnedMissingKey) {
+      console.warn(
+        "[echo] NEXT_PUBLIC_REVERB_APP_KEY absent — notifications temps réel désactivées.",
+      );
+      warnedMissingKey = true;
+    }
+    return null;
+  }
 
   // Token changed (new login) — the old connection was authorized for a
   // different user, so it can't just be reused.
