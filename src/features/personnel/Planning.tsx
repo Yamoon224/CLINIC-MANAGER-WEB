@@ -99,6 +99,14 @@ export function Planning() {
         </Button>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        {(Object.keys(CRENEAU_LABELS) as Creneau[]).map((key) => (
+          <Badge key={key} tone={CRENEAU_TONE[key]}>
+            {CRENEAU_LABELS[key]}
+          </Badge>
+        ))}
+      </div>
+
       <Card className="overflow-hidden p-0">
         <div className="grid grid-cols-7 border-b border-border bg-primary-light/30">
           {weekdayLabels.map((label) => (

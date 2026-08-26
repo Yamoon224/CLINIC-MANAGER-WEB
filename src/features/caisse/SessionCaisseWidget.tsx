@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Wallet } from "lucide-react";
 import { cloturerSession, fetchSessionCourante, ouvrirSession } from "./caisse-api";
 import type { SessionCaisse } from "./types";
-import { Button, Card, Input } from "@/components/ui";
+import { Badge, Button, Card, Input } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function SessionCaisseWidget() {
@@ -51,6 +52,15 @@ export function SessionCaisseWidget() {
   if (!session) {
     return (
       <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground/5 text-muted">
+            <Wallet size={18} />
+          </span>
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold text-foreground">{t("caisse.session.title")}</h2>
+            <Badge tone="neutral">{t("caisse.session.statutFermee")}</Badge>
+          </div>
+        </div>
         {dernierRapport && (
           <Card className="text-sm">
             <p className="font-semibold">{t("caisse.session.rapportTitle")}</p>
@@ -79,21 +89,32 @@ export function SessionCaisseWidget() {
   }
 
   return (
-    <Card className="flex flex-col gap-3">
-      <p className="text-sm">
-        {t("caisse.session.ouverte", { montant: session.montant_ouverture })}
-      </p>
-      <div className="flex items-center gap-2">
-        <Input
-          placeholder={t("caisse.session.montantComptePlaceholder")}
-          value={montantCloture}
-          onChange={(e) => setMontantCloture(e.target.value)}
-          className="flex-1"
-        />
-        <Button variant="outline" onClick={handleCloturer} disabled={busy}>
-          {t("caisse.session.cloturer")}
-        </Button>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success-light text-success">
+          <Wallet size={18} />
+        </span>
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold text-foreground">{t("caisse.session.title")}</h2>
+          <Badge tone="success">{t("caisse.session.statutOuverte")}</Badge>
+        </div>
       </div>
-    </Card>
+      <Card className="flex flex-col gap-3">
+        <p className="text-sm">
+          {t("caisse.session.ouverte", { montant: session.montant_ouverture })}
+        </p>
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder={t("caisse.session.montantComptePlaceholder")}
+            value={montantCloture}
+            onChange={(e) => setMontantCloture(e.target.value)}
+            className="flex-1"
+          />
+          <Button variant="outline" onClick={handleCloturer} disabled={busy}>
+            {t("caisse.session.cloturer")}
+          </Button>
+        </div>
+      </Card>
+    </div>
   );
 }

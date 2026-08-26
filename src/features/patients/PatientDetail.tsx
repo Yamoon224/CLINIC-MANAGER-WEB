@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AlertTriangle, Route, Stethoscope } from "lucide-react";
 import { PatientAssurances } from "@/features/assurances/PatientAssurances";
 import { PatientFactures } from "@/features/caisse/PatientFactures";
 import { PatientHistory } from "@/features/consultations/PatientHistory";
@@ -10,7 +11,7 @@ import { PatientDispensations } from "@/features/pharmacie/PatientDispensations"
 import { ActivatePortailAccess } from "@/features/portail/ActivatePortailAccess";
 import { OrientPatientAction } from "@/features/queue/OrientPatientAction";
 import { CarnetVaccination } from "@/features/vaccinations/CarnetVaccination";
-import { Badge, Button, Card, Modal, PdfButton } from "@/components/ui";
+import { Badge, Button, Card, Modal, PageHeader, PdfButton } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import type { Patient } from "./types";
 
@@ -22,26 +23,22 @@ export function PatientDetail({ patient: initialPatient }: { patient: Patient })
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <Card>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-semibold text-foreground">
-              {patient.prenom} {patient.nom}
-            </h1>
-            <p className="text-sm text-muted">
-              {t("patients.detail.dossierNumero", { numero: patient.numero_dossier })}
-            </p>
-          </div>
-          {patient.sexe && (
+      <PageHeader
+        title={`${patient.prenom} ${patient.nom}`}
+        description={t("patients.detail.dossierNumero", { numero: patient.numero_dossier })}
+        actions={
+          patient.sexe ? (
             <Badge tone={patient.sexe === "F" ? "accent" : "primary"}>
               {patient.sexe === "F"
                 ? t("patients.detail.sexeFeminin")
                 : t("patients.detail.sexeMasculin")}
             </Badge>
-          )}
-        </div>
+          ) : undefined
+        }
+      />
 
-        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+      <Card>
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
           <Row label={t("patients.detail.dateNaissance")} value={patient.date_naissance} />
           <Row label={t("patients.detail.telephone")} value={patient.telephone} />
           <Row label={t("patients.detail.adresse")} value={patient.adresse} />
@@ -57,16 +54,25 @@ export function PatientDetail({ patient: initialPatient }: { patient: Patient })
         </dl>
 
         {patient.allergies && (
-          <div className="mt-4 rounded-lg border border-danger/30 bg-danger-light px-3 py-2 text-sm">
-            <span className="font-semibold text-danger">{t("patients.detail.allergies")}</span>
-            {patient.allergies}
+          <div className="mt-4 flex items-start gap-2 rounded-lg border border-danger/30 bg-danger-light px-3 py-2 text-sm text-danger">
+            <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+            <p>
+              <span className="font-semibold">{t("patients.detail.allergies")}</span>
+              {patient.allergies}
+            </p>
           </div>
         )}
       </Card>
 
       <div className="flex gap-2 flex-wrap">
-        <Button onClick={() => setShowOrient(true)}>{t("queue.orient.title")}</Button>
-        <Button onClick={() => setShowConsultation(true)}>{t("consultations.startTitle")}</Button>
+        <Button onClick={() => setShowOrient(true)}>
+          <Route size={16} className="mr-1.5" />
+          {t("queue.orient.title")}
+        </Button>
+        <Button onClick={() => setShowConsultation(true)}>
+          <Stethoscope size={16} className="mr-1.5" />
+          {t("consultations.startTitle")}
+        </Button>
         <PdfButton
           path={`/patients/${patient.id}/dossier.pdf`}
           label={t("patients.detail.exportDossierPdf")}

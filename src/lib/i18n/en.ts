@@ -192,6 +192,8 @@ const en: Dictionary = {
     empty: "No notifications yet.",
     emptyShort: "No notifications.",
     seeAll: "See all",
+    statTotal: "Total",
+    statNonLues: "Unread",
   },
   patients: {
     title: "Patients",
@@ -202,6 +204,9 @@ const en: Dictionary = {
     prenom: "First name",
     telephone: "Phone",
     noResults: "No patients found.",
+    stats: {
+      total: "Patients found",
+    },
     form: {
       nom: "Last name",
       nomPlaceholder: "E.g: Dupont",
@@ -265,6 +270,12 @@ const en: Dictionary = {
     },
     cancel: "Cancel",
     noResults: "No appointments that day.",
+    stats: {
+      totalMois: "Appointments this month",
+      honores: "Completed",
+      aVenir: "Upcoming",
+      annulesAbsents: "Cancelled / No-show",
+    },
     statut: {
       programme: "Scheduled",
       confirme: "Confirmed",
@@ -340,6 +351,10 @@ const en: Dictionary = {
     newAdmission: "Emergency admission",
     aTrier: "To triage",
     empty: "No patients currently in the emergency room.",
+    stats: {
+      enFile: "Patients in queue",
+      nonTries: "Not triaged",
+    },
     niveau: {
       reanimation: "Resuscitation",
       tres_urgent: "Very urgent",
@@ -402,6 +417,8 @@ const en: Dictionary = {
     subHeader: "File #{{numero}} · Reason: {{motif}}",
     allergiesLabel: "Allergies: ",
     completed: "Consultation completed.",
+    statutEnCours: "In progress",
+    statutTerminee: "Completed",
     temperature: "Temperature (°C)",
     temperaturePlaceholder: "37.0",
     tension: "Blood pressure",
@@ -443,10 +460,16 @@ const en: Dictionary = {
   },
   vaccinations: {
     title: "Vaccinations",
+    pageSubtitle: "Vaccination booklets, vaccine stock, and cold chain monitoring.",
     tabs: {
       stock: "Stock",
       chaineFroid: "Cold chain",
     },
+    statTotalReleves: "Readings recorded",
+    statAnomalies: "Out-of-range readings",
+    statLots: "Batches recorded",
+    statLotsPerimes: "Expired batches",
+    statStockTotal: "Doses available",
     colVaccin: "Vaccine",
     colDose: "Dose",
     colMapi: "AEFI",
@@ -478,6 +501,9 @@ const en: Dictionary = {
     administerTitle: "Administer a vaccine",
   },
   laboratoire: {
+    pageTitle: "Work list",
+    pageSubtitle: "Track test requests from sample collection to biologist validation.",
+    statUrgentes: "Urgent",
     statutDemandee: "Requested",
     statutPreleve: "Sample taken",
     statutValideTechnicien: "Result entered",
@@ -528,6 +554,9 @@ const en: Dictionary = {
   },
   pharmacie: {
     title: "Pharmacy",
+    pageSubtitle: "Medication stock, stock-out/expiry alerts, and drug interactions.",
+    statTotalMedicaments: "Medications on file",
+    statSousLeSeuil: "Below alert threshold",
     tabs: {
       stock: "Stock",
       alertes: "Alerts",
@@ -603,11 +632,14 @@ const en: Dictionary = {
       empty: "No inpatient stays.",
     },
     bedPlan: {
+      pageTitle: "Bed plan",
+      pageDescription: "Overview of bed occupancy by room.",
       room: "Room {{chambre}}",
       statutLibre: "Free",
       statutOccupe: "Occupied",
       statutReserve: "Reserved",
       statutNettoyage: "Being cleaned",
+      statFree: "Free beds",
       markFree: "Mark free",
       admit: "Admit",
       viewSejour: "View stay",
@@ -616,6 +648,8 @@ const en: Dictionary = {
     detail: {
       title: "Inpatient stay - {{prenom}} {{nom}}",
       description: "Room {{chambre}} - {{numero}} · {{motif}}",
+      statutEnCours: "Ongoing",
+      statutTermine: "Discharged",
       dischargedBanner:
         "Discharge recorded - {{days}} day(s), stay fee: {{montant}} F CFA",
       temperatureSheet: "Vital signs chart",
@@ -676,6 +710,7 @@ const en: Dictionary = {
     },
   },
   caisse: {
+    pageSubtitle: "Cash sessions, expenses, and outstanding invoices.",
     tabs: {
       session: "Session",
       creances: "Receivables",
@@ -697,6 +732,8 @@ const en: Dictionary = {
       descriptionPlaceholder: "Description",
       submit: "Save expense",
       empty: "No expenses.",
+      statTotal: "Total expenses",
+      statMontantPage: "Amount (this page)",
     },
     factures: {
       title: "Billing",
@@ -717,6 +754,8 @@ const en: Dictionary = {
       montantDu: "Amount due",
       dueSuffix: "{{montant}} F CFA due",
       empty: "No outstanding invoices.",
+      statTotal: "Total outstanding invoices",
+      statMontantPage: "Amount due (this page)",
     },
     factureDetail: {
       title: "Invoice #{{id}} - {{prenom}} {{nom}}",
@@ -754,6 +793,9 @@ const en: Dictionary = {
       errorSubmit: "Could not create the invoice.",
     },
     session: {
+      title: "Cash register session",
+      statutOuverte: "Open",
+      statutFermee: "Closed",
       rapportTitle: "Z report for the last session",
       theorique: "Expected: {{montant}} F CFA",
       compte: "Counted: {{montant}} F CFA",
@@ -773,6 +815,7 @@ const en: Dictionary = {
     },
   },
   assurances: {
+    pageSubtitle: "Companies, coverage requests, and claim batches.",
     tabs: {
       compagnies: "Companies",
       prisesEnCharge: "Coverage requests",
@@ -817,6 +860,8 @@ const en: Dictionary = {
       enregistrerReglement: "Record a settlement",
       empty: "No claim batches.",
       newBordereau: "New claim batch",
+      statTotal: "Total claim batches",
+      statMontantPage: "Amount claimed (this page)",
     },
     bordereauStatut: {
       brouillon: "Draft",
@@ -830,6 +875,7 @@ const en: Dictionary = {
       plafondSuffix: " (cap {{montant}} F CFA)",
       approuver: "Approve",
       refuser: "Reject",
+      resultsCount: "{{count}} result(s)",
     },
     priseEnChargeStatut: {
       en_attente: "Pending",
@@ -846,9 +892,13 @@ const en: Dictionary = {
       submit: "Add company",
       empty: "No companies.",
       newCompagnie: "New company",
+      statTotal: "Companies",
+      statActives: "Active companies",
     },
   },
   personnel: {
+    title: "Staff",
+    subtitle: "Employees, leave and staff schedule.",
     tabs: {
       employes: "Employees",
       conges: "Leave",
@@ -869,7 +919,16 @@ const en: Dictionary = {
       tableFonction: "Position",
       tableService: "Department",
       tableTypeContrat: "Contract type",
+      tableStatut: "Status",
       noEmployes: "No employees.",
+      statTotal: "Total staff",
+      statActifs: "Active",
+      statInactifs: "Inactive / suspended",
+    },
+    employeStatut: {
+      actif: "Active",
+      inactif: "Inactive",
+      suspendu: "Suspended",
     },
     typeContrat: {
       cdi: "Permanent",
@@ -1013,6 +1072,8 @@ const en: Dictionary = {
     },
   },
   audit: {
+    title: "Audit log",
+    subtitle: "History of creations, updates and deletions.",
     filters: {
       objet: "Subject",
       tousObjets: "All subjects",

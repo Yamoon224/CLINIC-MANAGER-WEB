@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Bell, BellRing, type LucideIcon } from "lucide-react";
 import * as api from "./notifications-api";
 import { emitNotificationsChanged } from "./events";
 import type { Notification } from "./types";
@@ -13,6 +14,33 @@ const TONE_BY_TYPE: Record<Notification["type"], "primary" | "success" | "warnin
   warning: "warning",
   danger: "danger",
 };
+
+function StatCard({
+  label,
+  value,
+  tone,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  tone: "primary" | "warning";
+  icon: LucideIcon;
+}) {
+  const chipClass =
+    tone === "warning" ? "bg-warning-light text-warning" : "bg-primary-light text-primary";
+  const valueClass = tone === "warning" ? "text-warning" : "text-primary";
+  return (
+    <Card className="flex items-start gap-3 p-4">
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${chipClass}`}>
+        <Icon size={18} />
+      </span>
+      <div className="min-w-0">
+        <div className="text-xs font-medium text-muted">{label}</div>
+        <div className={`mt-1 text-2xl font-semibold ${valueClass}`}>{value}</div>
+      </div>
+    </Card>
+  );
+}
 
 export function NotificationsList() {
   const { t, locale } = useTranslation();
@@ -42,9 +70,27 @@ export function NotificationsList() {
   }
 
   const hasUnread = notifications?.some((n) => !n.lue) ?? false;
+  const unreadCount = notifications?.filter((n) => !n.lue).length ?? 0;
 
   return (
     <div className="flex flex-col gap-4">
+      {notifications !== null && notifications.length > 0 && (
+        <div className="grid grid-cols-2 gap-4 sm:max-w-md">
+          <StatCard
+            label={t("notifications.statTotal")}
+            value={notifications.length}
+            tone="primary"
+            icon={Bell}
+          />
+          <StatCard
+            label={t("notifications.statNonLues")}
+            value={unreadCount}
+            tone="warning"
+            icon={BellRing}
+          />
+        </div>
+      )}
+
       <div className="flex justify-end">
         <Button
           variant="outline"

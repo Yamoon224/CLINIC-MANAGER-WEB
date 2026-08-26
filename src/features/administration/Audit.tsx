@@ -8,7 +8,7 @@ import {
   type AuditEntry,
   type AuditEvent,
 } from "./types";
-import { Badge, Button, Card, Field, Input, Pagination, Select } from "@/components/ui";
+import { Badge, Card, Field, Input, Pagination, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const AUDIT_EVENT_TONE: Record<AuditEvent, "success" | "primary" | "danger"> = {

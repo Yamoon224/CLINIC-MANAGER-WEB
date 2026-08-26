@@ -190,6 +190,8 @@ const fr = {
     empty: "Aucune notification pour le moment.",
     emptyShort: "Aucune notification.",
     seeAll: "Tout voir",
+    statTotal: "Total",
+    statNonLues: "Non lues",
   },
   patients: {
     title: "Patients",
@@ -200,6 +202,9 @@ const fr = {
     prenom: "Prénom",
     telephone: "Téléphone",
     noResults: "Aucun patient trouvé.",
+    stats: {
+      total: "Patients trouvés",
+    },
     form: {
       nom: "Nom",
       nomPlaceholder: "Ex: Dupont",
@@ -263,6 +268,12 @@ const fr = {
     },
     cancel: "Annuler",
     noResults: "Aucun rendez-vous ce jour-là.",
+    stats: {
+      totalMois: "Rendez-vous ce mois",
+      honores: "Honorés",
+      aVenir: "À venir",
+      annulesAbsents: "Annulés / Absents",
+    },
     statut: {
       programme: "Programmé",
       confirme: "Confirmé",
@@ -338,6 +349,10 @@ const fr = {
     newAdmission: "Admission d'urgence",
     aTrier: "À trier",
     empty: "Aucun patient aux urgences actuellement.",
+    stats: {
+      enFile: "Patients en file",
+      nonTries: "Non triés",
+    },
     niveau: {
       reanimation: "Réanimation",
       tres_urgent: "Très urgent",
@@ -400,6 +415,8 @@ const fr = {
     subHeader: "Dossier n° {{numero}} · Motif : {{motif}}",
     allergiesLabel: "Allergies : ",
     completed: "Consultation terminée.",
+    statutEnCours: "En cours",
+    statutTerminee: "Terminée",
     temperature: "Température (°C)",
     temperaturePlaceholder: "37.0",
     tension: "Tension",
@@ -441,10 +458,16 @@ const fr = {
   },
   vaccinations: {
     title: "Vaccinations",
+    pageSubtitle: "Carnets de vaccination, stocks de vaccins et suivi de la chaîne du froid.",
     tabs: {
       stock: "Stock",
       chaineFroid: "Chaîne du froid",
     },
+    statTotalReleves: "Relevés enregistrés",
+    statAnomalies: "Relevés hors plage",
+    statLots: "Lots enregistrés",
+    statLotsPerimes: "Lots périmés",
+    statStockTotal: "Doses disponibles",
     colVaccin: "Vaccin",
     colDose: "Dose",
     colMapi: "MAPI",
@@ -476,6 +499,9 @@ const fr = {
     administerTitle: "Administrer un vaccin",
   },
   laboratoire: {
+    pageTitle: "Liste de travail",
+    pageSubtitle: "Suivi des demandes d'analyses, du prélèvement à la validation biologiste.",
+    statUrgentes: "Urgentes",
     statutDemandee: "Demandée",
     statutPreleve: "Prélevée",
     statutValideTechnicien: "Résultat saisi",
@@ -526,6 +552,9 @@ const fr = {
   },
   pharmacie: {
     title: "Pharmacie",
+    pageSubtitle: "Stock de médicaments, alertes de rupture/péremption et interactions médicamenteuses.",
+    statTotalMedicaments: "Médicaments référencés",
+    statSousLeSeuil: "Sous le seuil d'alerte",
     tabs: {
       stock: "Stock",
       alertes: "Alertes",
@@ -601,11 +630,14 @@ const fr = {
       empty: "Aucune hospitalisation.",
     },
     bedPlan: {
+      pageTitle: "Plan des lits",
+      pageDescription: "Vue d'ensemble de l'occupation des lits par chambre.",
       room: "Chambre {{chambre}}",
       statutLibre: "Libre",
       statutOccupe: "Occupé",
       statutReserve: "Réservé",
       statutNettoyage: "En nettoyage",
+      statFree: "Lits libres",
       markFree: "Marquer libre",
       admit: "Admettre",
       viewSejour: "Voir le séjour",
@@ -614,6 +646,8 @@ const fr = {
     detail: {
       title: "Hospitalisation - {{prenom}} {{nom}}",
       description: "Chambre {{chambre}} - {{numero}} · {{motif}}",
+      statutEnCours: "En cours",
+      statutTermine: "Terminé",
       dischargedBanner:
         "Sortie enregistrée - {{days}} jour(s), frais de séjour : {{montant}} F CFA",
       temperatureSheet: "Feuille de température",
@@ -674,6 +708,7 @@ const fr = {
     },
   },
   caisse: {
+    pageSubtitle: "Encaissements, dépenses et créances de la clinique.",
     tabs: {
       session: "Session",
       creances: "Créances",
@@ -695,6 +730,8 @@ const fr = {
       descriptionPlaceholder: "Description",
       submit: "Enregistrer la dépense",
       empty: "Aucune dépense.",
+      statTotal: "Dépenses totales",
+      statMontantPage: "Montant (page)",
     },
     factures: {
       title: "Facturation",
@@ -715,6 +752,8 @@ const fr = {
       montantDu: "Montant dû",
       dueSuffix: "{{montant}} F CFA dû",
       empty: "Aucun impayé.",
+      statTotal: "Créances totales",
+      statMontantPage: "Montant dû (page)",
     },
     factureDetail: {
       title: "Facture #{{id}} - {{prenom}} {{nom}}",
@@ -752,6 +791,9 @@ const fr = {
       errorSubmit: "Impossible de créer la facture.",
     },
     session: {
+      title: "Session de caisse",
+      statutOuverte: "Ouverte",
+      statutFermee: "Fermée",
       rapportTitle: "Rapport Z de la dernière session",
       theorique: "Théorique : {{montant}} F CFA",
       compte: "Compté : {{montant}} F CFA",
@@ -771,6 +813,7 @@ const fr = {
     },
   },
   assurances: {
+    pageSubtitle: "Compagnies, prises en charge et bordereaux de remboursement.",
     tabs: {
       compagnies: "Compagnies",
       prisesEnCharge: "Prises en charge",
@@ -815,6 +858,8 @@ const fr = {
       enregistrerReglement: "Enregistrer un règlement",
       empty: "Aucun bordereau.",
       newBordereau: "Nouveau bordereau",
+      statTotal: "Bordereaux totaux",
+      statMontantPage: "Montant réclamé (page)",
     },
     bordereauStatut: {
       brouillon: "Brouillon",
@@ -828,6 +873,7 @@ const fr = {
       plafondSuffix: " (plafond {{montant}} F CFA)",
       approuver: "Approuver",
       refuser: "Refuser",
+      resultsCount: "{{count}} résultat(s)",
     },
     priseEnChargeStatut: {
       en_attente: "En attente",
@@ -844,9 +890,13 @@ const fr = {
       submit: "Ajouter la compagnie",
       empty: "Aucune compagnie.",
       newCompagnie: "Nouvelle compagnie",
+      statTotal: "Compagnies",
+      statActives: "Compagnies actives",
     },
   },
   personnel: {
+    title: "Personnel",
+    subtitle: "Employés, congés et planning du personnel.",
     tabs: {
       employes: "Employés",
       conges: "Congés",
@@ -867,7 +917,16 @@ const fr = {
       tableFonction: "Fonction",
       tableService: "Service",
       tableTypeContrat: "Type de contrat",
+      tableStatut: "Statut",
       noEmployes: "Aucun employé.",
+      statTotal: "Effectif total",
+      statActifs: "Actifs",
+      statInactifs: "Inactifs / suspendus",
+    },
+    employeStatut: {
+      actif: "Actif",
+      inactif: "Inactif",
+      suspendu: "Suspendu",
     },
     typeContrat: {
       cdi: "CDI",
@@ -1011,6 +1070,8 @@ const fr = {
     },
   },
   audit: {
+    title: "Journal d'audit",
+    subtitle: "Historique des créations, modifications et suppressions.",
     filters: {
       objet: "Objet",
       tousObjets: "Tous les objets",

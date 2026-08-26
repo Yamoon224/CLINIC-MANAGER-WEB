@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Badge, Button, Card, Input, Select } from "@/components/ui";
+import { Activity, ClipboardList, LogOut, Thermometer } from "lucide-react";
+import { Badge, Button, Card, Input, PageHeader, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import {
   ajouterActe,
@@ -127,41 +128,38 @@ export function UrgenceDetail({ id }: { id: number }) {
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <Card>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-semibold text-foreground">
-              {t("urgences.detail.title", {
-                prenom: admission.patient.prenom,
-                nom: admission.patient.nom,
-              })}
-            </h1>
-            <p className="text-sm text-muted">
-              {t("urgences.detail.dossierNumero", { numero: admission.patient.numero_dossier })}
-            </p>
-          </div>
+      <PageHeader
+        title={t("urgences.detail.title", {
+          prenom: admission.patient.prenom,
+          nom: admission.patient.nom,
+        })}
+        description={t("urgences.detail.dossierNumero", { numero: admission.patient.numero_dossier })}
+        actions={
           <Badge tone={STATUT_TONE[admission.statut]}>
             {t(`urgences.statut.${admission.statut}`)}
           </Badge>
+        }
+      />
+
+      {admission.patient.allergies && (
+        <div className="rounded-lg border border-danger/30 bg-danger-light px-3 py-2 text-sm">
+          <span className="font-semibold text-danger">{t("urgences.detail.allergies")}</span>
+          {admission.patient.allergies}
         </div>
+      )}
 
-        {admission.patient.allergies && (
-          <div className="mt-4 rounded-lg border border-danger/30 bg-danger-light px-3 py-2 text-sm">
-            <span className="font-semibold text-danger">{t("urgences.detail.allergies")}</span>
-            {admission.patient.allergies}
-          </div>
-        )}
-
-        {readOnly && (
-          <div className="mt-4 rounded-lg border border-success/30 bg-success-light px-3 py-2 text-sm text-success">
-            {t("urgences.detail.sortieEnregistree")}
-            {admission.issue && t(`urgences.issue.${admission.issue}`)}
-          </div>
-        )}
-      </Card>
+      {readOnly && (
+        <div className="rounded-lg border border-success/30 bg-success-light px-3 py-2 text-sm text-success">
+          {t("urgences.detail.sortieEnregistree")}
+          {admission.issue && t(`urgences.issue.${admission.issue}`)}
+        </div>
+      )}
 
       <Card>
-        <h2 className="font-semibold text-foreground mb-3">{t("urgences.detail.triage")}</h2>
+        <h2 className="flex items-center gap-2 font-semibold text-foreground mb-3">
+          <Activity size={18} className="text-primary" />
+          {t("urgences.detail.triage")}
+        </h2>
         <div className="flex flex-wrap gap-2">
           {NIVEAUX_TRIAGE.map((niveau) => {
             const selected = admission.niveau_triage === niveau;
@@ -184,7 +182,10 @@ export function UrgenceDetail({ id }: { id: number }) {
       </Card>
 
       <Card>
-        <h2 className="font-semibold text-foreground mb-3">{t("urgences.detail.constantes")}</h2>
+        <h2 className="flex items-center gap-2 font-semibold text-foreground mb-3">
+          <Thermometer size={18} className="text-primary" />
+          {t("urgences.detail.constantes")}
+        </h2>
         <div className="grid grid-cols-4 gap-3">
           <Input
             placeholder={t("urgences.detail.temperature")}
@@ -224,7 +225,10 @@ export function UrgenceDetail({ id }: { id: number }) {
       </Card>
 
       <Card>
-        <h2 className="font-semibold text-foreground mb-3">{t("urgences.detail.gestesTraitements")}</h2>
+        <h2 className="flex items-center gap-2 font-semibold text-foreground mb-3">
+          <ClipboardList size={18} className="text-primary" />
+          {t("urgences.detail.gestesTraitements")}
+        </h2>
         <ul className="flex flex-col gap-1.5 mb-3 text-sm">
           {admission.actes.map((acte) => (
             <li key={acte.id} className="rounded-lg border border-border px-3 py-2">
@@ -277,6 +281,7 @@ export function UrgenceDetail({ id }: { id: number }) {
             ))}
           </Select>
           <Button onClick={handleSortie} disabled={busy}>
+            <LogOut size={16} />
             {t("urgences.detail.sortie")}
           </Button>
         </Card>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Boxes, PackageX } from "lucide-react";
 import { createLot, fetchLots, fetchVaccins } from "./vaccinations-api";
 import type { LotVaccin, Vaccin } from "./types";
 import { Badge, Button, Card, Input, Modal, Select } from "@/components/ui";
@@ -45,6 +46,28 @@ export function StockVaccins() {
 
       {selected && (
         <>
+          <div className="grid grid-cols-2 gap-4 max-w-2xl">
+            <Card className="flex items-center gap-3 p-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
+                <Boxes size={18} />
+              </span>
+              <div className="min-w-0">
+                <div className="text-xs font-medium text-muted">{t("vaccinations.statLots")}</div>
+                <div className="mt-1 text-2xl font-semibold text-primary">{lots.length}</div>
+              </div>
+            </Card>
+            <Card className="flex items-center gap-3 p-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-light text-danger">
+                <PackageX size={18} />
+              </span>
+              <div className="min-w-0">
+                <div className="text-xs font-medium text-muted">{t("vaccinations.statLotsPerimes")}</div>
+                <div className="mt-1 text-2xl font-semibold text-danger">
+                  {lots.filter((l) => l.est_perime).length}
+                </div>
+              </div>
+            </Card>
+          </div>
           <Card className="p-0 max-w-2xl overflow-hidden">
             <table className="table">
               <thead>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle, Clock, Users, type LucideIcon } from "lucide-react";
 import { Badge, Button, Card, Modal, PageHeader, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { AdmissionForm } from "./AdmissionForm";
@@ -15,6 +16,42 @@ const TRIAGE_TONE: Record<NiveauTriage, "primary" | "accent" | "success" | "warn
   semi_urgent: "primary",
   non_urgent: "success",
 };
+
+type StatTone = "primary" | "danger";
+
+const STAT_CHIP: Record<StatTone, string> = {
+  primary: "bg-primary-light text-primary",
+  danger: "bg-danger-light text-danger",
+};
+
+const STAT_TEXT: Record<StatTone, string> = {
+  primary: "text-primary",
+  danger: "text-danger",
+};
+
+function StatCard({
+  label,
+  value,
+  tone,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  tone: StatTone;
+  icon: LucideIcon;
+}) {
+  return (
+    <Card className="flex items-start gap-3 p-4">
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${STAT_CHIP[tone]}`}>
+        <Icon size={18} />
+      </span>
+      <div className="min-w-0">
+        <div className="text-xs font-medium text-muted">{label}</div>
+        <div className={`mt-1 text-2xl font-semibold ${STAT_TEXT[tone]}`}>{value}</div>
+      </div>
+    </Card>
+  );
+}
 
 export function UrgenceQueue() {
   const { t } = useTranslation();
@@ -47,6 +84,16 @@ export function UrgenceQueue() {
         }
       />
 
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatCard label={t("urgences.stats.enFile")} value={admissions.length} tone="primary" icon={Users} />
+        <StatCard
+          label={t("urgences.stats.nonTries")}
+          value={admissions.filter((a) => !a.niveau_triage).length}
+          tone="danger"
+          icon={AlertTriangle}
+        />
+      </div>
+
       {admissions.map((a) => (
         <Link key={a.id} href={`/urgences/${a.id}`}>
           <Card className="flex items-center justify-between hover:bg-primary-light/40 transition-colors">
@@ -63,7 +110,8 @@ export function UrgenceQueue() {
               </span>
               <span className="text-sm text-muted">{a.patient.numero_dossier}</span>
             </div>
-            <span className="text-sm text-muted">
+            <span className="flex items-center gap-1 text-sm text-muted">
+              <Clock size={14} />
               {a.admitted_at &&
                 new Date(a.admitted_at).toLocaleTimeString("fr-FR", {
                   hour: "2-digit",

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button, Card, Input, Modal, PageHeader, Pagination } from "@/components/ui";
+import { Users } from "lucide-react";
+import { Badge, Button, Card, Input, Modal, PageHeader, Pagination } from "@/components/ui";
 import { searchPatients } from "./patients-api";
 import { PatientForm } from "./PatientForm";
 import type { Patient } from "./types";
@@ -14,6 +15,7 @@ export function PatientList() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
@@ -28,6 +30,7 @@ export function PatientList() {
         .then((res) => {
           setPatients(res.data);
           setTotalPages(res.meta.last_page);
+          setTotal(res.meta.total);
         })
         .finally(() => setIsLoading(false));
     }, 250);
@@ -44,6 +47,16 @@ export function PatientList() {
           </Button>
         }
       />
+
+      <Card className="flex w-fit items-start gap-3 p-4">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
+          <Users size={18} />
+        </span>
+        <div className="min-w-0">
+          <div className="text-xs font-medium text-muted">{t("patients.stats.total")}</div>
+          <div className="mt-1 text-2xl font-semibold text-primary">{total}</div>
+        </div>
+      </Card>
 
       <div className="flex items-center justify-between gap-4">
         <Input
@@ -62,6 +75,7 @@ export function PatientList() {
               <th>{t("patients.numeroDossier")}</th>
               <th>{t("patients.nom")}</th>
               <th>{t("patients.prenom")}</th>
+              <th>{t("patients.form.sexe")}</th>
               <th>{t("patients.telephone")}</th>
             </tr>
           </thead>
@@ -78,6 +92,15 @@ export function PatientList() {
                 </td>
                 <td>{patient.nom}</td>
                 <td>{patient.prenom}</td>
+                <td>
+                  {patient.sexe && (
+                    <Badge tone={patient.sexe === "F" ? "accent" : "primary"}>
+                      {patient.sexe === "F"
+                        ? t("patients.detail.sexeFeminin")
+                        : t("patients.detail.sexeMasculin")}
+                    </Badge>
+                  )}
+                </td>
                 <td>{patient.telephone ?? "-"}</td>
               </tr>
             ))}

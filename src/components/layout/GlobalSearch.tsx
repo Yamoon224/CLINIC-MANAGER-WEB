@@ -42,7 +42,7 @@ export function GlobalSearch() {
 
   return (
     <div className="relative w-full max-w-sm" ref={ref}>
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
         <Search size={16} className="shrink-0 text-muted" />
         <input
           value={query}

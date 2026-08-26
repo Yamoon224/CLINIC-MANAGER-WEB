@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import {
   dispenser,
   fetchLots,
@@ -121,7 +122,10 @@ export function DispensationForm({
 
       {substitutions.length > 0 && (
         <div className="rounded-lg border border-warning/30 bg-warning-light p-2 text-sm">
-          <p className="font-medium text-foreground">{t("pharmacie.rupture")}</p>
+          <p className="flex items-center gap-1.5 font-medium text-warning">
+            <AlertTriangle size={16} />
+            {t("pharmacie.rupture")}
+          </p>
           <div className="flex flex-wrap gap-2 mt-2">
             {substitutions.map((s) => (
               <Button

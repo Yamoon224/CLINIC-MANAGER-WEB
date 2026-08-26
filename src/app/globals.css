@@ -2,58 +2,62 @@
 
 :root {
   color-scheme: light;
-  --background: #f5f7fa;
-  --foreground: #1a2233;
+  /* Palette inspirée du template Preclinic (Dreams Technologies) :
+     indigo #2E37A4 en primaire, teal #00D3C7 en accent. */
+  --background: #f5f6f8;
+  --foreground: #0a1b39;
 
-  --color-primary: #2f6fd1;
-  --color-primary-hover: #2558ab;
-  --color-primary-light: #eaf2fc;
-  --color-accent: #4fb8a4;
-  --color-accent-light: #e5f6f2;
+  --color-primary: #2e37a4;
+  --color-primary-hover: #3c449c;
+  --color-primary-light: #ecedf7;
+  --color-accent: #0c9c90;
+  --color-accent-light: #e8fbfa;
   --color-danger: #dc2626;
-  --color-danger-light: #fdecec;
+  --color-danger-light: #fef4f4;
   --color-success: #16a34a;
-  --color-success-light: #eafaf0;
+  --color-success-light: #f4fbf7;
   --color-warning: #d97706;
-  --color-warning-light: #fef6e7;
-  --color-border: #e2e6ed;
+  --color-warning-light: #fefbf5;
+  --color-border: #e7e8eb;
   --color-surface: #ffffff;
-  --color-muted: #64748b;
+  --color-muted: #6c7688;
 
-  --color-sidebar: #1d4ed8;
-  --color-sidebar-hover: rgba(255, 255, 255, 0.12);
-  --color-sidebar-active: rgba(255, 255, 255, 0.18);
-  --color-sidebar-foreground: #eaf0fd;
-  --color-sidebar-muted: #b6c9f5;
-  --color-sidebar-border: rgba(255, 255, 255, 0.14);
+  /* Sidebar claire type Preclinic (au lieu d'un aplat de couleur) :
+     item actif = fond teinté + texte primaire, pas de texte blanc. */
+  --color-sidebar: #ffffff;
+  --color-sidebar-hover: #f5f6f8;
+  --color-sidebar-active: #ecedf7;
+  --color-sidebar-foreground: #0a1b39;
+  --color-sidebar-muted: #6c7688;
+  --color-sidebar-border: #e7e8eb;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --background: #0b1220;
-  --foreground: #e4e9f2;
+  --background: #06081f;
+  --foreground: #d9dcff;
 
-  --color-primary: #5b93f0;
-  --color-primary-hover: #7ba6f4;
-  --color-primary-light: #172852;
-  --color-accent: #5fd1b8;
-  --color-accent-light: #103328;
+  --color-primary: #6672e0;
+  --color-primary-hover: #8189e8;
+  --color-primary-light: #181b30;
+  --color-accent: #2fe0d2;
+  --color-accent-light: #103937;
   --color-danger: #f87171;
   --color-danger-light: #3a1418;
   --color-success: #4ade80;
   --color-success-light: #10281a;
   --color-warning: #fbbf24;
   --color-warning-light: #3a2a0a;
-  --color-border: #24304a;
-  --color-surface: #111a2e;
-  --color-muted: #8b9bb4;
+  --color-border: #1e2140;
+  --color-surface: #0e1130;
+  --color-muted: #8891a3;
 
-  --color-sidebar: #08122a;
-  --color-sidebar-hover: rgba(255, 255, 255, 0.08);
-  --color-sidebar-active: rgba(255, 255, 255, 0.14);
-  --color-sidebar-foreground: #dbe6fb;
-  --color-sidebar-muted: #7f93c4;
-  --color-sidebar-border: rgba(255, 255, 255, 0.1);
+  --color-sidebar: #0e1130;
+  --color-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --color-sidebar-active: #181b30;
+  --color-sidebar-foreground: #d9dcff;
+  --color-sidebar-muted: #8891a3;
+  --color-sidebar-border: #1e2140;
 }
 
 @theme inline {
@@ -93,24 +97,21 @@ body {
   font-size: 14px;
 }
 
-/* Design carré : aucun angle arrondi nulle part dans l'application. */
-*,
-*::before,
-*::after {
-  border-radius: 0 !important;
-}
-
 /* Tableaux : bordés, zébrés, surlignés au survol. Une seule classe à
    ajouter sur l'élément <table> existant. */
 table.table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
 table.table th,
 table.table td {
-  border: 1px solid var(--color-border);
-  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.625rem 0.875rem;
   text-align: left;
 }
 table.table thead th {
@@ -119,6 +120,10 @@ table.table thead th {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--color-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+table.table tbody tr:last-child td {
+  border-bottom: none;
 }
 table.table tbody tr:nth-child(even) {
   background: color-mix(in srgb, var(--color-foreground) 4%, transparent);

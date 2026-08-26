@@ -17,7 +17,8 @@ import { fetchAnalyseTypes } from "@/features/laboratoire/laboratoire-api";
 import type { AnalyseType } from "@/features/laboratoire/types";
 import { checkInteractions, fetchMedicaments } from "@/features/pharmacie/pharmacie-api";
 import type { InteractionMedicamenteuse, Medicament } from "@/features/pharmacie/types";
-import { Button, Card, Field, Input, PdfButton, Select, Textarea } from "@/components/ui";
+import { AlertTriangle, CheckCircle2, ClipboardList } from "lucide-react";
+import { Badge, Button, Card, Field, Input, PageHeader, PdfButton, Select, Textarea } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 /**
@@ -194,30 +195,35 @@ export function ConsultationScreen({ id }: { id: number }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-lg font-semibold text-foreground">
-          {t("consultations.header", {
-            prenom: consultation.patient.prenom,
-            nom: consultation.patient.nom,
-          })}
-        </h1>
-        <p className="text-sm text-muted">
-          {t("consultations.subHeader", {
-            numero: consultation.patient.numero_dossier,
-            motif: consultation.motif,
-          })}
-        </p>
-      </div>
+      <PageHeader
+        title={t("consultations.header", {
+          prenom: consultation.patient.prenom,
+          nom: consultation.patient.nom,
+        })}
+        description={t("consultations.subHeader", {
+          numero: consultation.patient.numero_dossier,
+          motif: consultation.motif,
+        })}
+        actions={
+          <Badge tone={readOnly ? "success" : "primary"}>
+            {readOnly ? t("consultations.statutTerminee") : t("consultations.statutEnCours")}
+          </Badge>
+        }
+      />
 
       {consultation.patient.allergies && (
-        <div className="rounded-xl border border-danger/30 bg-danger-light p-3 text-sm">
-          <span className="font-semibold text-danger">⚠ {t("consultations.allergiesLabel")}</span>
-          {consultation.patient.allergies}
+        <div className="flex items-start gap-2 rounded-xl border border-danger/30 bg-danger-light p-3 text-sm">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-danger" />
+          <p>
+            <span className="font-semibold text-danger">{t("consultations.allergiesLabel")}</span>
+            {consultation.patient.allergies}
+          </p>
         </div>
       )}
 
       {readOnly && (
-        <div className="rounded-xl border border-success/30 bg-success-light p-3 text-sm text-success">
+        <div className="flex items-center gap-2 rounded-xl border border-success/30 bg-success-light p-3 text-sm text-success">
+          <CheckCircle2 size={16} className="shrink-0" />
           {t("consultations.completed")}
         </div>
       )}
@@ -333,7 +339,10 @@ export function ConsultationScreen({ id }: { id: number }) {
 
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-foreground">{t("consultations.prescriptions")}</h2>
+          <h2 className="flex items-center gap-2 font-semibold text-foreground">
+            <ClipboardList size={18} className="text-primary" />
+            {t("consultations.prescriptions")}
+          </h2>
           {consultation.prescriptions.length > 0 && (
             <PdfButton
               path={`/consultations/${id}/ordonnance.pdf`}
@@ -343,9 +352,12 @@ export function ConsultationScreen({ id }: { id: number }) {
         </div>
         <ul className="flex flex-col gap-2 mb-3 text-sm">
           {consultation.prescriptions.map((p) => (
-            <li key={p.id} className="rounded-lg border border-border p-2">
-              <span className="font-medium text-foreground">{PRESCRIPTION_TYPE_LABELS[p.type]}</span> - {p.designation}
-              {p.instructions && <p className="text-muted">{p.instructions}</p>}
+            <li key={p.id} className="flex items-start gap-2 rounded-lg border border-border p-2">
+              <Badge tone="neutral">{PRESCRIPTION_TYPE_LABELS[p.type]}</Badge>
+              <div>
+                <span className="font-medium text-foreground">{p.designation}</span>
+                {p.instructions && <p className="text-muted">{p.instructions}</p>}
+              </div>
             </li>
           ))}
           {consultation.prescriptions.length === 0 && (
@@ -415,33 +427,39 @@ export function ConsultationScreen({ id }: { id: number }) {
             </div>
 
             {allergyWarning && (
-              <div className="rounded-lg border border-danger/30 bg-danger-light p-2 text-sm text-danger">
-                <p className="font-semibold">⚠ {t("consultations.allergyWarningTitle")}</p>
-                <p>{t("consultations.allergyWarningBody", { allergies: consultation.patient.allergies ?? "" })}</p>
-                <label className="mt-1 flex items-center gap-2 font-normal">
-                  <input
-                    type="checkbox"
-                    checked={allergyOverride}
-                    onChange={(e) => setAllergyOverride(e.target.checked)}
-                  />
-                  {t("consultations.allergyOverride")}
-                </label>
+              <div className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger-light p-2 text-sm text-danger">
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold">{t("consultations.allergyWarningTitle")}</p>
+                  <p>{t("consultations.allergyWarningBody", { allergies: consultation.patient.allergies ?? "" })}</p>
+                  <label className="mt-1 flex items-center gap-2 font-normal">
+                    <input
+                      type="checkbox"
+                      checked={allergyOverride}
+                      onChange={(e) => setAllergyOverride(e.target.checked)}
+                    />
+                    {t("consultations.allergyOverride")}
+                  </label>
+                </div>
               </div>
             )}
 
             {interactionWarnings.map((interaction) => (
               <div
                 key={interaction.id}
-                className="rounded-lg border border-warning/30 bg-warning-light p-2 text-sm text-warning"
+                className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning-light p-2 text-sm text-warning"
               >
-                <p className="font-semibold">⚠ {t("pharmacie.interactions.warningTitle")}</p>
-                <p>
-                  {t("pharmacie.interactions.warningBody", {
-                    a: interaction.medicament_a.dci,
-                    b: interaction.medicament_b.dci,
-                    description: interaction.description ?? "",
-                  })}
-                </p>
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold">{t("pharmacie.interactions.warningTitle")}</p>
+                  <p>
+                    {t("pharmacie.interactions.warningBody", {
+                      a: interaction.medicament_a.dci,
+                      b: interaction.medicament_b.dci,
+                      description: interaction.description ?? "",
+                    })}
+                  </p>
+                </div>
               </div>
             ))}
             {interactionWarnings.length > 0 && (

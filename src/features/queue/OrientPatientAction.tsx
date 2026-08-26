@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle2 } from "lucide-react";
 import { Button, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { orientPatient } from "./queue-api";
@@ -51,7 +52,8 @@ export function OrientPatientAction({
         </Button>
       </div>
       {ticketLabel && (
-        <p className="text-sm text-success">
+        <p className="flex items-center gap-1.5 rounded-lg bg-success-light px-3 py-2 text-sm text-success">
+          <CheckCircle2 size={16} className="shrink-0" />
           {t("queue.orient.createdPrefix")}
           <span className="font-semibold">{ticketLabel}</span>
         </p>

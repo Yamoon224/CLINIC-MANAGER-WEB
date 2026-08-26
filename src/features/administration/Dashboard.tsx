@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  AlertTriangle,
+  Circle,
+  ShieldCheck,
+  TrendingUp,
+  XCircle,
+  type LucideIcon,
+} from "lucide-react";
 import { fetchDashboard } from "./administration-api";
 import type { DashboardStats } from "./types";
 import { Card, Tabs } from "@/components/ui";
@@ -17,6 +25,24 @@ const TONE_TEXT: Record<Tone, string> = {
   warning: "text-warning",
   danger: "text-danger",
   neutral: "text-foreground",
+};
+
+const TONE_CHIP: Record<Tone, string> = {
+  primary: "bg-primary-light text-primary",
+  accent: "bg-accent-light text-accent",
+  success: "bg-success-light text-success",
+  warning: "bg-warning-light text-warning",
+  danger: "bg-danger-light text-danger",
+  neutral: "bg-foreground/5 text-muted",
+};
+
+const TONE_ICON: Record<Tone, LucideIcon> = {
+  primary: TrendingUp,
+  accent: ShieldCheck,
+  success: ShieldCheck,
+  warning: AlertTriangle,
+  danger: XCircle,
+  neutral: Circle,
 };
 
 const TONE_COLOR: Record<Tone, string> = {
@@ -37,10 +63,16 @@ function StatCard({
   value: string | number;
   tone?: Tone;
 }) {
+  const Icon = TONE_ICON[tone];
   return (
-    <Card className="p-4">
-      <div className="text-xs font-medium text-muted">{label}</div>
-      <div className={`mt-1 text-2xl font-semibold ${TONE_TEXT[tone]}`}>{value}</div>
+    <Card className="flex items-start gap-3 p-4">
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${TONE_CHIP[tone]}`}>
+        <Icon size={18} />
+      </span>
+      <div className="min-w-0">
+        <div className="text-xs font-medium text-muted">{label}</div>
+        <div className={`mt-1 text-2xl font-semibold ${TONE_TEXT[tone]}`}>{value}</div>
+      </div>
     </Card>
   );
 }

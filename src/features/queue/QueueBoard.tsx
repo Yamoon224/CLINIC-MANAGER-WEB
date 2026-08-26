@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Clock, PhoneCall, CheckCircle2, type LucideIcon } from "lucide-react";
 import { Badge, Card, PageHeader, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { callTicket, completeTicket, fetchQueue } from "./queue-api";
@@ -11,6 +12,24 @@ const STATUS_TONE: Record<Ticket["statut"], "primary" | "success" | "warning" | 
   appele: "primary",
   traite: "success",
   annule: "danger",
+};
+
+const STAT_ICON: Record<"en_attente" | "appele" | "traite", LucideIcon> = {
+  en_attente: Clock,
+  appele: PhoneCall,
+  traite: CheckCircle2,
+};
+
+const STAT_CHIP: Record<"en_attente" | "appele" | "traite", string> = {
+  en_attente: "bg-warning-light text-warning",
+  appele: "bg-primary-light text-primary",
+  traite: "bg-success-light text-success",
+};
+
+const STAT_TEXT: Record<"en_attente" | "appele" | "traite", string> = {
+  en_attente: "text-warning",
+  appele: "text-primary",
+  traite: "text-success",
 };
 
 export function QueueBoard() {
@@ -58,9 +77,35 @@ export function QueueBoard() {
     }
   }
 
+  const counts = useMemo(
+    () => ({
+      en_attente: tickets.filter((tk) => tk.statut === "en_attente").length,
+      appele: tickets.filter((tk) => tk.statut === "appele").length,
+      traite: tickets.filter((tk) => tk.statut === "traite").length,
+    }),
+    [tickets],
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader title={t("queue.title")} />
+
+      <div className="grid grid-cols-3 gap-4">
+        {(["en_attente", "appele", "traite"] as const).map((key) => {
+          const Icon = STAT_ICON[key];
+          return (
+            <Card key={key} className="flex items-start gap-3 p-4">
+              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${STAT_CHIP[key]}`}>
+                <Icon size={18} />
+              </span>
+              <div className="min-w-0">
+                <div className="text-xs font-medium text-muted">{t(`queue.statut.${key}`)}</div>
+                <div className={`mt-1 text-2xl font-semibold ${STAT_TEXT[key]}`}>{counts[key]}</div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
 
       <div className="flex items-center gap-2 text-sm flex-wrap">
         <button

@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle, Baby, ClipboardList } from "lucide-react";
 import { getGrossesse } from "./maternite-api";
 import { AccouchementForm } from "./AccouchementForm";
 import { CpnForm } from "./CpnForm";
 import { NouveauNeForm } from "./NouveauNeForm";
 import type { Grossesse } from "./types";
-import { Badge, Button, Card, Modal } from "@/components/ui";
+import { Badge, Button, Card, Modal, PageHeader } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function GrossesseDetail({ id }: { id: number }) {
@@ -22,6 +23,12 @@ export function GrossesseDetail({ id }: { id: number }) {
     interrompue: t("maternite.detail.statutInterrompue"),
   };
 
+  const STATUT_TONE: Record<Grossesse["statut"], "primary" | "success" | "danger"> = {
+    suivie: "primary",
+    accouchee: "success",
+    interrompue: "danger",
+  };
+
   const load = useCallback(() => {
     getGrossesse(id).then((res) => setGrossesse(res.data));
   }, [id]);
@@ -34,20 +41,20 @@ export function GrossesseDetail({ id }: { id: number }) {
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <div>
-        <h1 className="text-lg font-semibold text-foreground">
-          {t("maternite.detail.title", {
-            prenom: grossesse.patient.prenom,
-            nom: grossesse.patient.nom,
-          })}
-        </h1>
-        <p className="text-sm text-muted">
-          {t("maternite.detail.dossierNumero", { numero: grossesse.patient.numero_dossier })}
-        </p>
-      </div>
+      <PageHeader
+        title={t("maternite.detail.title", {
+          prenom: grossesse.patient.prenom,
+          nom: grossesse.patient.nom,
+        })}
+        description={t("maternite.detail.dossierNumero", { numero: grossesse.patient.numero_dossier })}
+        actions={
+          <Badge tone={STATUT_TONE[grossesse.statut]}>{STATUT_LABELS[grossesse.statut]}</Badge>
+        }
+      />
 
       {grossesse.a_risque && (
-        <div className="rounded-lg bg-danger-light px-3 py-2 text-sm font-semibold text-danger">
+        <div className="flex items-center gap-2 rounded-lg bg-danger-light px-3 py-2 text-sm font-semibold text-danger">
+          <AlertTriangle size={16} className="shrink-0" />
           {t("maternite.detail.aRisque")}
         </div>
       )}
@@ -73,14 +80,6 @@ export function GrossesseDetail({ id }: { id: number }) {
             }
           />
           <Row label={t("maternite.detail.groupeSanguin")} value={grossesse.groupe_sanguin} />
-          <div className="contents">
-            <dt className="text-muted">{t("maternite.detail.statut")}</dt>
-            <dd>
-              <Badge tone={grossesse.statut === "suivie" ? "primary" : "neutral"}>
-                {STATUT_LABELS[grossesse.statut]}
-              </Badge>
-            </dd>
-          </div>
         </dl>
       </Card>
 
@@ -94,7 +93,8 @@ export function GrossesseDetail({ id }: { id: number }) {
       )}
 
       <div>
-        <h2 className="mb-2 font-semibold text-foreground">
+        <h2 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+          <ClipboardList size={18} className="text-primary" />
           {t("maternite.detail.consultationsPrenatales", {
             count: grossesse.consultations_prenatales.length,
           })}
@@ -119,7 +119,10 @@ export function GrossesseDetail({ id }: { id: number }) {
                   .join(" · ")}
               </p>
               {cpn.risque_detecte && (
-                <p className="mt-1 font-medium text-danger">⚠ {cpn.risque_details}</p>
+                <p className="mt-1 flex items-start gap-1.5 font-medium text-danger">
+                  <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                  {cpn.risque_details}
+                </p>
               )}
             </Card>
           ))}
@@ -149,7 +152,8 @@ export function GrossesseDetail({ id }: { id: number }) {
       </div>
 
       <div>
-        <h2 className="mb-2 font-semibold text-foreground">
+        <h2 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+          <Baby size={18} className="text-primary" />
           {t("maternite.detail.accouchementTitle")}
         </h2>
         {grossesse.accouchement ? (

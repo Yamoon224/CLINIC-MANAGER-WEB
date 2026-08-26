@@ -49,7 +49,9 @@ export function StartConsultationAction({
           {isSubmitting ? t("consultations.starting") : t("consultations.start")}
         </Button>
       </div>
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && (
+        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+      )}
       {onCancel && (
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={onCancel}>

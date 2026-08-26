@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Bordereaux } from "@/features/assurances/Bordereaux";
 import { CompagniesAssurance } from "@/features/assurances/CompagniesAssurance";
 import { PrisesEnCharge } from "@/features/assurances/PrisesEnCharge";
-import { Tabs } from "@/components/ui";
+import { PageHeader, Tabs } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 type Tab = "compagnies" | "prisesEnCharge" | "bordereaux";
@@ -21,6 +21,7 @@ export default function AssurancesPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader title={t("nav.assurances")} description={t("assurances.pageSubtitle")} />
       <Tabs tabs={tabs} active={tab} onChange={(key) => setTab(key as Tab)} />
 
       {tab === "compagnies" && <CompagniesAssurance />}

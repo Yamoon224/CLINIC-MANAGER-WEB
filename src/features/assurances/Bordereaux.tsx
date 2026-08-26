@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FileStack, Landmark, type LucideIcon } from "lucide-react";
 import {
   creerBordereau,
   envoyerBordereau,
@@ -19,11 +20,34 @@ const STATUT_TONES: Record<BordereauAssurance["statut"], "neutral" | "primary" |
   paye: "success",
 };
 
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <Card className="flex items-center gap-3 p-4">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-light text-accent">
+        <Icon size={18} />
+      </span>
+      <div className="min-w-0">
+        <div className="text-xs font-medium text-muted">{label}</div>
+        <div className="mt-1 text-2xl font-semibold text-foreground">{value}</div>
+      </div>
+    </Card>
+  );
+}
+
 export function Bordereaux() {
   const { t } = useTranslation();
   const [bordereaux, setBordereaux] = useState<BordereauAssurance[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalBordereaux, setTotalBordereaux] = useState(0);
   const [compagnies, setCompagnies] = useState<CompagnieAssurance[]>([]);
   const [montantRegle, setMontantRegle] = useState<Record<number, string>>({});
   const [busy, setBusy] = useState(false);
@@ -33,6 +57,7 @@ export function Bordereaux() {
     fetchBordereaux(page).then((res) => {
       setBordereaux(res.data);
       setTotalPages(res.meta.last_page);
+      setTotalBordereaux(res.meta.total);
     });
   }
 
@@ -67,8 +92,24 @@ export function Bordereaux() {
     }
   }
 
+  const montantReclamePage = bordereaux.reduce((sum, b) => sum + Number(b.montant_total), 0);
+
   return (
     <div className="flex flex-col gap-4">
+      {bordereaux.length > 0 && (
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard
+            icon={FileStack}
+            label={t("assurances.bordereaux.statTotal")}
+            value={totalBordereaux}
+          />
+          <StatCard
+            icon={Landmark}
+            label={t("assurances.bordereaux.statMontantPage")}
+            value={`${montantReclamePage.toLocaleString("fr-FR")} F CFA`}
+          />
+        </div>
+      )}
       <Button onClick={() => setShowForm(true)} className="self-start">
         + {t("assurances.bordereaux.newBordereau")}
       </Button>

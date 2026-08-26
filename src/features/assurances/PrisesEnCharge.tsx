@@ -38,18 +38,23 @@ export function PrisesEnCharge() {
 
   return (
     <div className="flex flex-col gap-3 max-w-2xl">
-      <Select
-        value={statut}
-        onChange={(e) => setStatut(e.target.value as PriseEnChargeStatut | "")}
-        className="w-56"
-      >
-        <option value="">{t("assurances.prisesEnCharge.tousStatuts")}</option>
-        {(Object.keys(STATUT_TONES) as PriseEnChargeStatut[]).map((value) => (
-          <option key={value} value={value}>
-            {t(`assurances.priseEnChargeStatut.${value}`)}
-          </option>
-        ))}
-      </Select>
+      <div className="flex items-center justify-between gap-2">
+        <Select
+          value={statut}
+          onChange={(e) => setStatut(e.target.value as PriseEnChargeStatut | "")}
+          className="w-56"
+        >
+          <option value="">{t("assurances.prisesEnCharge.tousStatuts")}</option>
+          {(Object.keys(STATUT_TONES) as PriseEnChargeStatut[]).map((value) => (
+            <option key={value} value={value}>
+              {t(`assurances.priseEnChargeStatut.${value}`)}
+            </option>
+          ))}
+        </Select>
+        <span className="text-xs text-muted">
+          {t("assurances.prisesEnCharge.resultsCount", { count: prises.length })}
+        </span>
+      </div>
 
       <ul className="flex flex-col gap-2 text-sm">
         {prises.map((p) => (

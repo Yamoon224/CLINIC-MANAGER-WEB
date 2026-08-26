@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Calendar,
+  CalendarCheck,
+  CalendarClock,
+  CalendarX,
+  ChevronLeft,
+  ChevronRight,
+  type LucideIcon,
+} from "lucide-react";
 import { Badge, Button, Card, Modal, PageHeader, TONE_CLASSES, type Tone } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { addMonths, buildMonthGrid, startOfMonth, toISODate } from "@/lib/calendar";
@@ -25,6 +33,37 @@ const STATUT_TONE: Record<RendezVousStatut, Tone> = {
   absent: "danger",
   annule: "danger",
   reporte: "warning",
+};
+
+const A_VENIR_STATUTS: RendezVousStatut[] = [
+  "programme",
+  "confirme",
+  "arrive",
+  "en_consultation",
+  "reporte",
+];
+
+type StatKey = "total" | "honore" | "aVenir" | "annuleAbsent";
+
+const STAT_ICON: Record<StatKey, LucideIcon> = {
+  total: Calendar,
+  honore: CalendarCheck,
+  aVenir: CalendarClock,
+  annuleAbsent: CalendarX,
+};
+
+const STAT_CHIP: Record<StatKey, string> = {
+  total: "bg-foreground/5 text-muted",
+  honore: "bg-success-light text-success",
+  aVenir: "bg-primary-light text-primary",
+  annuleAbsent: "bg-danger-light text-danger",
+};
+
+const STAT_TEXT: Record<StatKey, string> = {
+  total: "text-foreground",
+  honore: "text-success",
+  aVenir: "text-primary",
+  annuleAbsent: "text-danger",
 };
 
 export function AgendaBoard() {
@@ -92,6 +131,17 @@ export function AgendaBoard() {
   const dayDetailEntries = dayDetail ? entriesByDay.get(dayDetail) ?? [] : [];
   const today = toISODate(new Date());
 
+  const stats: Record<StatKey, number> = useMemo(
+    () => ({
+      total: rendezVous.length,
+      honore: rendezVous.filter((rdv) => rdv.statut === "honore").length,
+      aVenir: rendezVous.filter((rdv) => A_VENIR_STATUTS.includes(rdv.statut)).length,
+      annuleAbsent: rendezVous.filter((rdv) => rdv.statut === "annule" || rdv.statut === "absent")
+        .length,
+    }),
+    [rendezVous],
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -107,6 +157,30 @@ export function AgendaBoard() {
           </Button>
         }
       />
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {(
+          [
+            ["total", t("rendezvous.stats.totalMois")],
+            ["honore", t("rendezvous.stats.honores")],
+            ["aVenir", t("rendezvous.stats.aVenir")],
+            ["annuleAbsent", t("rendezvous.stats.annulesAbsents")],
+          ] as [StatKey, string][]
+        ).map(([key, label]) => {
+          const Icon = STAT_ICON[key];
+          return (
+            <Card key={key} className="flex items-start gap-3 p-4">
+              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${STAT_CHIP[key]}`}>
+                <Icon size={18} />
+              </span>
+              <div className="min-w-0">
+                <div className="text-xs font-medium text-muted">{label}</div>
+                <div className={`mt-1 text-2xl font-semibold ${STAT_TEXT[key]}`}>{stats[key]}</div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
 
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={() => setMonthCursor((m) => addMonths(m, -1))}>

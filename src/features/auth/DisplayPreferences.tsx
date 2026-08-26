@@ -41,7 +41,7 @@ export function DisplayPreferences() {
             <button
               key={option}
               onClick={() => applyDensity(option)}
-              className={`flex-1 border px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
                 density === option
                   ? "border-primary bg-primary-light text-primary"
                   : "border-border text-muted hover:bg-primary-light/40"
@@ -65,7 +65,7 @@ export function DisplayPreferences() {
             <button
               key={option}
               onClick={() => setTheme(option)}
-              className={`flex-1 border px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
                 theme === option
                   ? "border-primary bg-primary-light text-primary"
                   : "border-border text-muted hover:bg-primary-light/40"
@@ -94,7 +94,7 @@ export function DisplayPreferences() {
             <button
               key={option.code}
               onClick={() => setLocale(option.code)}
-              className={`flex-1 border px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
                 locale === option.code
                   ? "border-primary bg-primary-light text-primary"
                   : "border-border text-muted hover:bg-primary-light/40"

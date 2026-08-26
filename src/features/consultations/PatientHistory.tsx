@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Calendar, Stethoscope } from "lucide-react";
 import { fetchPatientHistory } from "./consultations-api";
 import type { Consultation } from "./types";
 import { Card, Pagination } from "@/components/ui";
@@ -38,7 +39,8 @@ export function PatientHistory({ patientId }: { patientId: number }) {
                 <Link href={`/consultations/${c.id}`} className="font-semibold text-primary hover:underline">
                   {c.motif}
                 </Link>
-                <span className="text-muted">
+                <span className="flex items-center gap-1 text-muted">
+                  <Calendar size={14} />
                   {c.started_at &&
                     new Date(c.started_at).toLocaleString("fr-FR", {
                       dateStyle: "medium",
@@ -46,7 +48,8 @@ export function PatientHistory({ patientId }: { patientId: number }) {
                     })}
                 </span>
               </div>
-              <p className="text-muted">
+              <p className="flex items-center gap-1 text-muted">
+                <Stethoscope size={14} className="shrink-0" />
                 {t("consultations.doctorPrefix", { name: c.praticien.name })}
                 {c.diagnostic && <> - {c.diagnostic}</>}
               </p>

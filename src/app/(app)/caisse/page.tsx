@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Creances } from "@/features/caisse/Creances";
 import { Depenses } from "@/features/caisse/Depenses";
 import { SessionCaisseWidget } from "@/features/caisse/SessionCaisseWidget";
-import { Tabs } from "@/components/ui";
+import { PageHeader, Tabs } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 type Tab = "session" | "creances" | "depenses";
@@ -21,6 +21,7 @@ export default function CaissePage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader title={t("nav.caisse")} description={t("caisse.pageSubtitle")} />
       <Tabs tabs={tabs} active={tab} onChange={(key) => setTab(key as Tab)} />
 
       {tab === "session" && <SessionCaisseWidget />}

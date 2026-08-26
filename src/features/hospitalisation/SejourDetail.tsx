@@ -34,6 +34,11 @@ const OPERATION_STATUT_TONE = {
   annulee: "neutral",
 } as const;
 
+const SEJOUR_STATUT_TONE = {
+  en_cours: "primary",
+  termine: "success",
+} as const;
+
 export function SejourDetail({ id }: { id: number }) {
   const { t } = useTranslation();
   const [sejour, setSejour] = useState<Sejour | null>(null);
@@ -125,6 +130,11 @@ export function SejourDetail({ id }: { id: number }) {
           numero: sejour.lit.numero,
           motif: sejour.motif,
         })}
+        actions={
+          <Badge tone={SEJOUR_STATUT_TONE[sejour.statut]}>
+            {t(`hospitalisation.detail.statut${sejour.statut === "en_cours" ? "EnCours" : "Termine"}`)}
+          </Badge>
+        }
       />
 
       {readOnly && (

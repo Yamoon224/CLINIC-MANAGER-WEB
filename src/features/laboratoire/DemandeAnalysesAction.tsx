@@ -45,10 +45,13 @@ export function DemandeAnalysesAction({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-1 max-h-40 overflow-y-auto text-sm">
+    <div className="flex flex-col gap-3">
+      <div className="flex max-h-48 flex-col gap-1 overflow-y-auto rounded-lg border border-border p-1 text-sm">
         {analyseTypes.map((a) => (
-          <label key={a.id} className="flex items-center gap-2">
+          <label
+            key={a.id}
+            className="flex items-center gap-2 rounded-md px-2 py-1.5 text-foreground transition-colors hover:bg-primary-light/60"
+          >
             <input
               type="checkbox"
               checked={selected.includes(a.id)}
@@ -57,8 +60,11 @@ export function DemandeAnalysesAction({
             {a.nom}
           </label>
         ))}
+        {analyseTypes.length === 0 && (
+          <p className="px-2 py-1.5 text-muted">{t("common.loading")}</p>
+        )}
       </div>
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm text-foreground">
         <input type="checkbox" checked={urgente} onChange={(e) => setUrgente(e.target.checked)} />
         {t("laboratoire.urgentLabel")}
       </label>

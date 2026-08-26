@@ -5,7 +5,7 @@ import { AlertesStock } from "@/features/pharmacie/AlertesStock";
 import { InteractionsMedicamenteuses } from "@/features/pharmacie/InteractionsMedicamenteuses";
 import { PrescriptionsEnAttente } from "@/features/pharmacie/PrescriptionsEnAttente";
 import { StockMedicaments } from "@/features/pharmacie/StockMedicaments";
-import { Tabs } from "@/components/ui";
+import { PageHeader, Tabs } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 type Tab = "stock" | "alertes" | "enAttente" | "interactions";
@@ -23,6 +23,7 @@ export default function PharmaciePage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader title={t("pharmacie.title")} description={t("pharmacie.pageSubtitle")} />
       <Tabs tabs={tabs} active={tab} onChange={(key) => setTab(key as Tab)} />
 
       {tab === "stock" && <StockMedicaments />}

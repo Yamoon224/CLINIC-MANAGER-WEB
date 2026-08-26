@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CalendarClock, PackageX } from "lucide-react";
 import { fetchAlertes } from "./pharmacie-api";
 import type { Alertes } from "./types";
-import { Badge } from "@/components/ui";
+import { Badge, Card } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function AlertesStock() {
@@ -18,6 +19,26 @@ export function AlertesStock() {
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="flex items-center gap-3 p-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-light text-danger">
+            <PackageX size={18} />
+          </span>
+          <div className="min-w-0">
+            <div className="text-xs font-medium text-muted">{t("dashboard.pharmacie.rupturesStock")}</div>
+            <div className="mt-1 text-2xl font-semibold text-danger">{alertes.ruptures.length}</div>
+          </div>
+        </Card>
+        <Card className="flex items-center gap-3 p-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-light text-warning">
+            <CalendarClock size={18} />
+          </span>
+          <div className="min-w-0">
+            <div className="text-xs font-medium text-muted">{t("dashboard.pharmacie.peremptionsProches")}</div>
+            <div className="mt-1 text-2xl font-semibold text-warning">{alertes.peremptions_proches.length}</div>
+          </div>
+        </Card>
+      </div>
       <div>
         <h3 className="font-medium text-foreground mb-2">{t("pharmacie.rupturesTitle")}</h3>
         <ul className="text-sm flex flex-col gap-2">

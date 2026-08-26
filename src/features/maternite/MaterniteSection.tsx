@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Baby } from "lucide-react";
 import { createGrossesse, fetchGrossesses } from "./maternite-api";
 import type { Grossesse } from "./types";
 import { Badge, Button, Card, Input } from "@/components/ui";
@@ -35,10 +36,13 @@ export function MaterniteSection({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="mb-2 font-semibold text-foreground">{t("maternite.section.title")}</h2>
-      <div className="mb-3 flex flex-col gap-1 text-sm">
+      <h2 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+        <Baby size={18} className="text-primary" />
+        {t("maternite.section.title")}
+      </h2>
+      <div className="mb-3 flex flex-col gap-2 text-sm">
         {grossesses.map((g) => (
-          <div key={g.id} className="flex items-center gap-2">
+          <Card key={g.id} className="flex items-center gap-2 p-3">
             <Link href={`/grossesses/${g.id}`} className="font-medium text-primary hover:underline">
               {g.statut === "suivie" ? t("maternite.section.enCours") : g.statut}
             </Link>
@@ -48,7 +52,7 @@ export function MaterniteSection({ patientId }: { patientId: number }) {
                 {t("maternite.section.termePrevu", { terme: g.terme })}
               </span>
             )}
-          </div>
+          </Card>
         ))}
         {grossesses.length === 0 && (
           <p className="text-muted">{t("maternite.section.noGrossesse")}</p>

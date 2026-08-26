@@ -12,7 +12,7 @@ export function Topbar({ onOpenSidebar }: { onOpenSidebar: () => void }) {
   const { t } = useTranslation();
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-surface/80 px-4 py-3 backdrop-blur lg:px-6">
+    <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-surface px-4 py-3 shadow-sm lg:px-6">
       <button
         onClick={onOpenSidebar}
         className="rounded-lg p-2 text-muted hover:bg-primary-light hover:text-primary lg:hidden"

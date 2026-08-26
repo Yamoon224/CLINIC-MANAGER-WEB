@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button, Modal, Pagination } from "@/components/ui";
+import { Badge, Button, Modal, Pagination } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { AdmissionAction } from "./AdmissionAction";
 import { fetchPatientSejours } from "./hospitalisation-api";
@@ -31,15 +31,20 @@ export function PatientSejours({ patientId }: { patientId: number }) {
       <h2 className="font-semibold mb-2 text-foreground">{t("hospitalisation.sejours.title")}</h2>
       <ul className="flex flex-col gap-2 mb-3 text-sm">
         {sejours.map((s) => (
-          <li key={s.id} className="rounded-xl border border-border bg-surface p-3">
+          <li
+            key={s.id}
+            className="flex items-center justify-between rounded-xl border border-border bg-surface p-3"
+          >
             <Link href={`/sejours/${s.id}`} className="font-medium text-primary hover:underline">
               {t("hospitalisation.sejours.room", { chambre: s.lit.chambre, numero: s.lit.numero })}
-            </Link>{" "}
-            <span className="text-muted">
-              {s.statut === "en_cours"
-                ? t("hospitalisation.sejours.ongoing")
-                : t("hospitalisation.sejours.days", { count: s.nombre_jours })}
-            </span>
+            </Link>
+            {s.statut === "en_cours" ? (
+              <Badge tone="primary">{t("hospitalisation.sejours.ongoing")}</Badge>
+            ) : (
+              <Badge tone="neutral">
+                {t("hospitalisation.sejours.days", { count: s.nombre_jours })}
+              </Badge>
+            )}
           </li>
         ))}
         {sejours.length === 0 && (

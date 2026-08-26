@@ -110,7 +110,9 @@ export function FactureDetail({ id }: { id: number }) {
         </div>
         <div className="flex justify-between">
           <span>{t("caisse.factureDetail.solde")}</span>
-          <span className="font-semibold">{facture.solde} F CFA</span>
+          <span className={`font-semibold ${Number(facture.solde) > 0 ? "text-danger" : "text-success"}`}>
+            {facture.solde} F CFA
+          </span>
         </div>
       </Card>
 

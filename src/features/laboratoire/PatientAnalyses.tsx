@@ -4,8 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 import { DemandeAnalysesAction } from "./DemandeAnalysesAction";
 import { fetchPatientDemandes } from "./laboratoire-api";
 import type { DemandeAnalyse } from "./types";
-import { Badge, Button, Modal, PdfButton, Pagination } from "@/components/ui";
+import { Badge, Button, Modal, PdfButton, Pagination, type Tone } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+const STATUT_TONE: Record<DemandeAnalyse["statut"], Tone> = {
+  demandee: "neutral",
+  preleve: "accent",
+  valide_technicien: "primary",
+  valide: "success",
+  annulee: "danger",
+};
 
 export function PatientAnalyses({ patientId }: { patientId: number }) {
   const { t } = useTranslation();
@@ -56,7 +64,7 @@ export function PatientAnalyses({ patientId }: { patientId: number }) {
           <li key={d.id} className="rounded-lg border border-border p-2">
             <div className="flex items-center justify-between">
               <span className="font-medium text-foreground">{d.analyse_type.nom}</span>
-              <Badge tone="neutral">{STATUT_LABELS[d.statut]}</Badge>
+              <Badge tone={STATUT_TONE[d.statut]}>{STATUT_LABELS[d.statut]}</Badge>
             </div>
             {d.resultat_valeur && d.statut === "valide" && (
               <p

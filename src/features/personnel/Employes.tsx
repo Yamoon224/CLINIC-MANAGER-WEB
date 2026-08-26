@@ -1,10 +1,51 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { UserCheck, UserX, Users, type LucideIcon } from "lucide-react";
 import { createEmploye, fetchEmployes } from "./personnel-api";
-import type { Employe, TypeContrat } from "./types";
-import { Badge, Button, Card, Field, Input, Modal, Select } from "@/components/ui";
+import type { Employe, EmployeStatut, TypeContrat } from "./types";
+import { Badge, Button, Card, Field, Input, Modal, Select, type Tone } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+const EMPLOYE_STATUT_TONE: Record<EmployeStatut, Tone> = {
+  actif: "success",
+  inactif: "neutral",
+  suspendu: "danger",
+};
+
+function StatCard({
+  label,
+  value,
+  tone,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  tone: "primary" | "success" | "danger";
+  icon: LucideIcon;
+}) {
+  const chipClass = {
+    primary: "bg-primary-light text-primary",
+    success: "bg-success-light text-success",
+    danger: "bg-danger-light text-danger",
+  }[tone];
+  const valueClass = {
+    primary: "text-primary",
+    success: "text-success",
+    danger: "text-danger",
+  }[tone];
+  return (
+    <Card className="flex items-start gap-3 p-4">
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${chipClass}`}>
+        <Icon size={18} />
+      </span>
+      <div className="min-w-0">
+        <div className="text-xs font-medium text-muted">{label}</div>
+        <div className={`mt-1 text-2xl font-semibold ${valueClass}`}>{value}</div>
+      </div>
+    </Card>
+  );
+}
 
 export function Employes() {
   const { t } = useTranslation();
@@ -18,6 +59,12 @@ export function Employes() {
     stage: t("personnel.typeContrat.stage"),
   };
 
+  const EMPLOYE_STATUT_LABELS: Record<EmployeStatut, string> = {
+    actif: t("personnel.employeStatut.actif"),
+    inactif: t("personnel.employeStatut.inactif"),
+    suspendu: t("personnel.employeStatut.suspendu"),
+  };
+
   function load() {
     fetchEmployes().then((res) => setEmployes(res.data));
   }
@@ -26,8 +73,17 @@ export function Employes() {
     load();
   }, []);
 
+  const actifsCount = employes.filter((e) => e.statut === "actif").length;
+  const inactifsCount = employes.length - actifsCount;
+
   return (
     <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <StatCard label={t("personnel.employes.statTotal")} value={employes.length} tone="primary" icon={Users} />
+        <StatCard label={t("personnel.employes.statActifs")} value={actifsCount} tone="success" icon={UserCheck} />
+        <StatCard label={t("personnel.employes.statInactifs")} value={inactifsCount} tone="danger" icon={UserX} />
+      </div>
+
       <div className="flex justify-end">
         <Button onClick={() => setShowForm(true)}>
           + {t("personnel.employes.newEmploye")}
@@ -59,6 +115,7 @@ export function Employes() {
               <th>{t("personnel.employes.tableFonction")}</th>
               <th>{t("personnel.employes.tableService")}</th>
               <th>{t("personnel.employes.tableTypeContrat")}</th>
+              <th>{t("personnel.employes.tableStatut")}</th>
             </tr>
           </thead>
           <tbody>
@@ -71,6 +128,9 @@ export function Employes() {
                 <td>{e.service ?? "-"}</td>
                 <td>
                   <Badge tone="neutral">{TYPE_CONTRAT_LABELS[e.type_contrat]}</Badge>
+                </td>
+                <td>
+                  <Badge tone={EMPLOYE_STATUT_TONE[e.statut]}>{EMPLOYE_STATUT_LABELS[e.statut]}</Badge>
                 </td>
               </tr>
             ))}

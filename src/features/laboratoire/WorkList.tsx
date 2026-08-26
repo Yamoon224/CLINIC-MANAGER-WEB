@@ -1,12 +1,63 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle, Clock, FlaskConical, Zap, type LucideIcon } from "lucide-react";
 import { annuler, fetchWorkList, preleve } from "./laboratoire-api";
 import { SaisirResultatModal } from "./SaisirResultatModal";
 import { ValiderResultatModal } from "./ValiderResultatModal";
 import type { DemandeAnalyse } from "./types";
-import { Badge, Button, Card, Pagination } from "@/components/ui";
+import { Badge, Button, Card, Pagination, type Tone } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+const STATUT_TONE: Record<DemandeAnalyse["statut"], Tone> = {
+  demandee: "neutral",
+  preleve: "accent",
+  valide_technicien: "primary",
+  valide: "success",
+  annulee: "danger",
+};
+
+const STAT_CHIP: Record<Tone, string> = {
+  primary: "bg-primary-light text-primary",
+  accent: "bg-accent-light text-accent",
+  success: "bg-success-light text-success",
+  warning: "bg-warning-light text-warning",
+  danger: "bg-danger-light text-danger",
+  neutral: "bg-foreground/5 text-muted",
+};
+
+const STAT_TEXT: Record<Tone, string> = {
+  primary: "text-primary",
+  accent: "text-accent",
+  success: "text-success",
+  warning: "text-warning",
+  danger: "text-danger",
+  neutral: "text-foreground",
+};
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  tone = "neutral",
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: number;
+  tone?: Tone;
+}) {
+  return (
+    <Card className="flex items-center gap-3 p-4">
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${STAT_CHIP[tone]}`}>
+        <Icon size={18} />
+      </span>
+      <div className="min-w-0">
+        <div className="text-xs font-medium text-muted">{label}</div>
+        <div className={`mt-1 text-2xl font-semibold ${STAT_TEXT[tone]}`}>{value}</div>
+      </div>
+    </Card>
+  );
+}
 
 export function WorkList() {
   const { t } = useTranslation();
@@ -58,8 +109,19 @@ export function WorkList() {
     }
   }
 
+  const enAttenteCount = demandes.filter((d) => d.statut === "demandee" || d.statut === "preleve").length;
+  const aValiderCount = demandes.filter((d) => d.statut === "valide_technicien").length;
+  const anormauxCount = demandes.filter((d) => d.resultat_anormal || d.resultat_critique).length;
+  const urgentesCount = demandes.filter((d) => d.urgente).length;
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatCard icon={Clock} label={t("dashboard.laboratoire.enAttente")} value={enAttenteCount} tone="warning" />
+        <StatCard icon={FlaskConical} label={t("dashboard.laboratoire.aValiderBiologiste")} value={aValiderCount} tone="primary" />
+        <StatCard icon={AlertTriangle} label={t("dashboard.laboratoire.resultatsAnormaux")} value={anormauxCount} tone="danger" />
+        <StatCard icon={Zap} label={t("laboratoire.statUrgentes")} value={urgentesCount} tone="accent" />
+      </div>
       <Card className="p-0 overflow-hidden">
         <table className="table">
           <thead>
@@ -87,7 +149,7 @@ export function WorkList() {
                 </td>
                 <td>{d.analyse_type.nom}</td>
                 <td>
-                  <Badge tone="neutral">{STATUT_LABELS[d.statut]}</Badge>
+                  <Badge tone={STATUT_TONE[d.statut]}>{STATUT_LABELS[d.statut]}</Badge>
                 </td>
                 <td>
                   {d.resultat_valeur ? (

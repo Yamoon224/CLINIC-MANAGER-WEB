@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Conges } from "@/features/personnel/Conges";
 import { Employes } from "@/features/personnel/Employes";
 import { Planning } from "@/features/personnel/Planning";
-import { Tabs } from "@/components/ui";
+import { PageHeader, Tabs } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 type Tab = "employes" | "conges" | "planning";
@@ -21,6 +21,7 @@ export default function PersonnelPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader title={t("personnel.title")} description={t("personnel.subtitle")} />
       <Tabs tabs={tabs} active={tab} onChange={(key) => setTab(key as Tab)} />
 
       {tab === "employes" && <Employes />}

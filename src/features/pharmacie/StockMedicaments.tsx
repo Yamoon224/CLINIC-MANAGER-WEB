@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PackageX, Pill } from "lucide-react";
 import { createLot, fetchLots, fetchMedicaments } from "./pharmacie-api";
 import type { LotMedicament, Medicament } from "./types";
 import { Badge, Button, Card, Input } from "@/components/ui";
@@ -46,8 +47,30 @@ export function StockMedicaments() {
     }
   }
 
+  const sousLeSeuilCount = medicaments.filter((m) => m.stock_disponible < m.seuil_alerte).length;
+
   return (
     <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-4 max-w-3xl">
+        <Card className="flex items-center gap-3 p-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
+            <Pill size={18} />
+          </span>
+          <div className="min-w-0">
+            <div className="text-xs font-medium text-muted">{t("pharmacie.statTotalMedicaments")}</div>
+            <div className="mt-1 text-2xl font-semibold text-primary">{medicaments.length}</div>
+          </div>
+        </Card>
+        <Card className="flex items-center gap-3 p-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-light text-danger">
+            <PackageX size={18} />
+          </span>
+          <div className="min-w-0">
+            <div className="text-xs font-medium text-muted">{t("pharmacie.statSousLeSeuil")}</div>
+            <div className="mt-1 text-2xl font-semibold text-danger">{sousLeSeuilCount}</div>
+          </div>
+        </Card>
+      </div>
       <Card className="p-0 max-w-3xl overflow-hidden">
         <table className="table">
           <thead>
