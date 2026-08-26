@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Wallet } from "lucide-react";
 import { fetchMesFactures } from "@/features/portail/portail-api";
 import type { PortailFacture } from "@/features/portail/types";
 import { Badge, Card, PageHeader } from "@/components/ui";
@@ -26,9 +27,31 @@ export default function PortailFacturesPage() {
     fetchMesFactures().then(setFactures);
   }, []);
 
+  const soldeDu = factures?.reduce((sum, f) => sum + Number(f.solde), 0) ?? 0;
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("portail.factures.title")} />
+
+      {factures !== null && factures.length > 0 && (
+        <Card className="flex items-start gap-3 p-4">
+          <span
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+              soldeDu > 0 ? "bg-warning-light text-warning" : "bg-success-light text-success"
+            }`}
+          >
+            <Wallet size={18} />
+          </span>
+          <div>
+            <div className="text-xs font-medium text-muted">{t("portail.factures.statSoldeDu")}</div>
+            <div
+              className={`mt-1 text-2xl font-semibold ${soldeDu > 0 ? "text-warning" : "text-success"}`}
+            >
+              {formatMontant(soldeDu)}
+            </div>
+          </div>
+        </Card>
+      )}
 
       {factures === null ? (
         <p className="text-sm text-muted">{t("common.loading")}</p>

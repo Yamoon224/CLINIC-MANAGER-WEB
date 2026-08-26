@@ -25,15 +25,22 @@ export default function PortailDashboardLayout({ children }: { children: React.R
 
   if (isLoading || !patient) return null;
 
+  const initial = patient.prenom.charAt(0).toUpperCase();
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="border-b border-border bg-surface">
+      <header className="border-b border-border bg-surface shadow-sm">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-6 py-4">
-          <div>
-            <p className="text-sm font-semibold">{t("portail.brand")}</p>
-            <p className="text-xs text-muted">
-              {patient.prenom} {patient.nom} · {patient.numero_dossier}
-            </p>
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
+              {initial}
+            </span>
+            <div>
+              <p className="text-sm font-semibold">{t("portail.brand")}</p>
+              <p className="text-xs text-muted">
+                {patient.prenom} {patient.nom} · {patient.numero_dossier}
+              </p>
+            </div>
           </div>
           <nav className="flex flex-wrap items-center gap-1">
             {LINKS.map((link) => (

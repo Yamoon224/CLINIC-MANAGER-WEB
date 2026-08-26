@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FlaskConical, AlertTriangle } from "lucide-react";
 import { fetchMesResultats } from "@/features/portail/portail-api";
 import type { PortailResultat } from "@/features/portail/types";
 import { Badge, Card, PageHeader } from "@/components/ui";
@@ -14,9 +15,43 @@ export default function PortailResultatsPage() {
     fetchMesResultats().then(setResultats);
   }, []);
 
+  const anormauxCount =
+    resultats?.filter((r) => r.resultat_anormal || r.resultat_critique).length ?? 0;
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("portail.resultats.title")} />
+
+      {resultats !== null && resultats.length > 0 && (
+        <div className="grid grid-cols-2 gap-4 sm:max-w-md">
+          <Card className="flex items-start gap-3 p-4">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
+              <FlaskConical size={18} />
+            </span>
+            <div>
+              <div className="text-xs font-medium text-muted">{t("portail.resultats.statTotal")}</div>
+              <div className="mt-1 text-2xl font-semibold text-primary">{resultats.length}</div>
+            </div>
+          </Card>
+          <Card className="flex items-start gap-3 p-4">
+            <span
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                anormauxCount > 0 ? "bg-warning-light text-warning" : "bg-success-light text-success"
+              }`}
+            >
+              <AlertTriangle size={18} />
+            </span>
+            <div>
+              <div className="text-xs font-medium text-muted">{t("portail.resultats.statAnormaux")}</div>
+              <div
+                className={`mt-1 text-2xl font-semibold ${anormauxCount > 0 ? "text-warning" : "text-success"}`}
+              >
+                {anormauxCount}
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {resultats === null ? (
         <p className="text-sm text-muted">{t("common.loading")}</p>

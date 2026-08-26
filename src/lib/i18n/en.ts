@@ -1125,6 +1125,7 @@ const en: Dictionary = {
     rendezVous: {
       title: "My appointments",
       newRendezVous: "Book an appointment",
+      statAVenir: "Upcoming appointments",
       noResults: "No upcoming appointments.",
       cancel: "Cancel",
       cancelConfirm: "Cancel this appointment?",
@@ -1149,6 +1150,8 @@ const en: Dictionary = {
     },
     resultats: {
       title: "My lab results",
+      statTotal: "Available results",
+      statAnormaux: "Abnormal or critical",
       noResults: "No results available yet.",
       table: {
         analyse: "Test",
@@ -1160,6 +1163,7 @@ const en: Dictionary = {
     },
     factures: {
       title: "My invoices",
+      statSoldeDu: "Total balance due",
       noResults: "No invoices.",
       table: {
         date: "Date",

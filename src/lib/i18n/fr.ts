@@ -1123,6 +1123,7 @@ const fr = {
     rendezVous: {
       title: "Mes rendez-vous",
       newRendezVous: "Prendre rendez-vous",
+      statAVenir: "Rendez-vous à venir",
       noResults: "Aucun rendez-vous à venir.",
       cancel: "Annuler",
       cancelConfirm: "Annuler ce rendez-vous ?",
@@ -1147,6 +1148,8 @@ const fr = {
     },
     resultats: {
       title: "Mes résultats de laboratoire",
+      statTotal: "Résultats disponibles",
+      statAnormaux: "Anormaux ou critiques",
       noResults: "Aucun résultat disponible pour le moment.",
       table: {
         analyse: "Analyse",
@@ -1158,6 +1161,7 @@ const fr = {
     },
     factures: {
       title: "Mes factures",
+      statSoldeDu: "Solde dû total",
       noResults: "Aucune facture.",
       table: {
         date: "Date",

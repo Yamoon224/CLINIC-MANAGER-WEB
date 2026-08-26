@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { CalendarClock } from "lucide-react";
 import { annulerRendezVous, fetchMesRendezVous } from "@/features/portail/portail-api";
 import type { PortailRendezVous } from "@/features/portail/types";
 import { Badge, Button, Card, PageHeader } from "@/components/ui";
@@ -35,6 +36,11 @@ export default function PortailRendezVousPage() {
     load();
   }, [load]);
 
+  const aVenirCount = useMemo(
+    () => rendezVous?.filter((rdv) => ANNULABLE.includes(rdv.statut)).length ?? 0,
+    [rendezVous],
+  );
+
   async function handleCancel(id: number) {
     if (!window.confirm(t("portail.rendezVous.cancelConfirm"))) return;
     setError(null);
@@ -62,6 +68,18 @@ export default function PortailRendezVousPage() {
 
       {error && (
         <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+      )}
+
+      {rendezVous !== null && rendezVous.length > 0 && (
+        <Card className="flex items-start gap-3 p-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
+            <CalendarClock size={18} />
+          </span>
+          <div>
+            <div className="text-xs font-medium text-muted">{t("portail.rendezVous.statAVenir")}</div>
+            <div className="mt-1 text-2xl font-semibold text-primary">{aVenirCount}</div>
+          </div>
+        </Card>
       )}
 
       {rendezVous === null ? (
