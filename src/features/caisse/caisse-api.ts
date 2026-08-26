@@ -57,6 +57,15 @@ export function fetchSessionCourante(): Promise<{ data: SessionCaisse | null }> 
   return apiFetch<{ data: SessionCaisse | null }>("/sessions-caisse/courante");
 }
 
+export function fetchSessionsCaisse(
+  statut?: "ouverte" | "cloturee",
+  page = 1,
+): Promise<PaginatedResponse<SessionCaisse>> {
+  const params = new URLSearchParams({ page: String(page) });
+  if (statut) params.set("statut", statut);
+  return apiFetch<PaginatedResponse<SessionCaisse>>(`/sessions-caisse?${params}`);
+}
+
 export function ouvrirSession(montantOuverture: number): Promise<{ data: SessionCaisse }> {
   return apiFetch<{ data: SessionCaisse }>("/sessions-caisse", {
     method: "POST",

@@ -113,7 +113,7 @@ export const Select = forwardRef<
           disabled={disabled}
           aria-required={required}
           onClick={() => !disabled && setOpen((v) => !v)}
-          className="flex w-full items-center justify-between border border-border bg-surface px-3 py-2 text-left text-sm text-foreground outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
+          className="flex w-full items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left text-sm text-foreground outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
         >
           <span className={`truncate ${selected ? "" : "text-muted"}`}>
             {selected?.label || "Sélectionner..."}
@@ -121,7 +121,7 @@ export const Select = forwardRef<
           <ChevronDown size={16} className="shrink-0 text-muted" />
         </button>
         {open && (
-          <div className="absolute left-0 right-0 z-40 mt-1 border border-border bg-surface shadow-lg">
+          <div className="absolute left-0 right-0 z-40 mt-1 overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
             <input
               ref={searchRef}
               value={query}

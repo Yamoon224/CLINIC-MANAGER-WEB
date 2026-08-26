@@ -803,6 +803,10 @@ const fr = {
       ouverte: "Session ouverte - fonds initial {{montant}} F CFA",
       montantComptePlaceholder: "Montant compté en caisse",
       cloturer: "Clôturer (rapport Z)",
+      autresTitle: "Sessions ouvertes des autres caissiers",
+      autresSubtitle: "En tant qu'administrateur, vous pouvez clôturer la session de n'importe quel caissier.",
+      autresEmpty: "Aucune autre session ouverte.",
+      ouvertePar: "Ouverte par {{nom}}",
     },
     modePaiement: {
       especes: "Espèces",

@@ -805,6 +805,10 @@ const en: Dictionary = {
       ouverte: "Session open - initial float {{montant}} F CFA",
       montantComptePlaceholder: "Amount counted in register",
       cloturer: "Close (Z report)",
+      autresTitle: "Other cashiers' open sessions",
+      autresSubtitle: "As an administrator, you can close any cashier's session.",
+      autresEmpty: "No other open session.",
+      ouvertePar: "Opened by {{nom}}",
     },
     modePaiement: {
       especes: "Cash",
