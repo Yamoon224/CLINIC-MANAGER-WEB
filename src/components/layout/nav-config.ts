@@ -1,6 +1,7 @@
 import {
   IconAmbulance,
   IconBed,
+  IconCalculator,
   IconCalendarCheck,
   IconHistory,
   IconLayoutDashboard,
@@ -69,6 +70,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/caisse", labelKey: "nav.caisse", icon: IconWallet },
       { href: "/assurances", labelKey: "nav.assurances", icon: IconShieldCheck },
+      { href: "/comptabilite", labelKey: "nav.comptabilite", icon: IconCalculator },
     ],
   },
   {

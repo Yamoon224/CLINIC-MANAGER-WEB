@@ -9,6 +9,8 @@ import {
 } from "@tabler/icons-react";
 import { createEmploye, fetchEmployes, fetchServices } from "./personnel-api";
 import type { Employe, EmployeStatut, TypeContrat } from "./types";
+import { EmployeRemunerationForm } from "@/features/comptabilite/EmployeRemunerationForm";
+import { useAuth } from "@/features/auth/auth-context";
 import {
   Avatar,
   Badge,
@@ -33,9 +35,18 @@ const EMPLOYE_STATUT_TONE: Record<EmployeStatut, Tone> = {
 
 export function Employes() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [employes, setEmployes] = useState<Employe[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [remunerationTarget, setRemunerationTarget] = useState<Employe | null>(
+    null,
+  );
+
+  const canManagePay =
+    user?.roles.some((r) =>
+      ["comptable", "gestionnaire-rh", "administrateur"].includes(r),
+    ) ?? false;
 
   const TYPE_CONTRAT_LABELS: Record<TypeContrat, string> = {
     cdi: t("personnel.typeContrat.cdi"),
@@ -105,6 +116,27 @@ export function Employes() {
         </Badge>
       ),
     },
+    ...(canManagePay
+      ? [
+          {
+            key: "actions",
+            header: "",
+            className: "text-right",
+            headClassName: "text-right",
+            cell: (e: Employe) => (
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setRemunerationTarget(e)}
+                >
+                  {t("comptabilite.remuneration.bouton")}
+                </Button>
+              </div>
+            ),
+          } as Column<Employe>,
+        ]
+      : []),
   ];
 
   return (
@@ -159,6 +191,25 @@ export function Employes() {
             load();
           }}
         />
+      </Modal>
+
+      <Modal
+        open={remunerationTarget !== null}
+        onClose={() => setRemunerationTarget(null)}
+        title={
+          remunerationTarget
+            ? `${t("comptabilite.remuneration.titre")} — ${remunerationTarget.prenom} ${remunerationTarget.nom}`
+            : ""
+        }
+        size="md"
+      >
+        {remunerationTarget && (
+          <EmployeRemunerationForm
+            employeId={remunerationTarget.id}
+            onCancel={() => setRemunerationTarget(null)}
+            onSaved={() => setRemunerationTarget(null)}
+          />
+        )}
       </Modal>
     </div>
   );
