@@ -13,8 +13,8 @@ import {
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
-import { callTicket, completeTicket, fetchQueue } from "./queue-api";
-import { SERVICES, type Service, type Ticket } from "./types";
+import { callTicket, completeTicket, fetchQueue, fetchServices } from "./queue-api";
+import { FALLBACK_SERVICES, type Service, type ServiceRef, type Ticket } from "./types";
 
 const STATUS_TONE: Record<Ticket["statut"], Tone> = {
   en_attente: "warning",
@@ -26,6 +26,7 @@ const STATUS_TONE: Record<Ticket["statut"], Tone> = {
 export function QueueBoard() {
   const { t } = useTranslation();
   const [service, setService] = useState<Service | "">("");
+  const [services, setServices] = useState<ServiceRef[]>(FALLBACK_SERVICES);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -46,6 +47,21 @@ export function QueueBoard() {
     const interval = setInterval(reload, 5000);
     return () => clearInterval(interval);
   }, [reload]);
+
+  useEffect(() => {
+    fetchServices()
+      .then((res) => {
+        if (res.data.length > 0) setServices(res.data);
+      })
+      .catch(() => {
+        /* on garde la liste de repli */
+      });
+  }, []);
+
+  const serviceLabel = useCallback(
+    (code: string) => services.find((s) => s.code === code)?.nom ?? code,
+    [services],
+  );
 
   async function handleCall(ticket: Ticket) {
     setBusyId(ticket.id);
@@ -86,7 +102,7 @@ export function QueueBoard() {
     {
       key: "service",
       header: t("queue.table.service"),
-      cell: (tk) => t(`queue.service.${tk.service}`),
+      cell: (tk) => serviceLabel(tk.service),
     },
     {
       key: "patient",
@@ -134,7 +150,7 @@ export function QueueBoard() {
     },
   ];
 
-  const serviceOptions: (Service | "")[] = ["", ...SERVICES];
+  const serviceOptions: (Service | "")[] = ["", ...services.map((s) => s.code)];
 
   return (
     <div className="flex flex-col gap-4">
@@ -176,7 +192,7 @@ export function QueueBoard() {
                 : "border-border bg-surface text-muted hover:bg-light",
             )}
           >
-            {s === "" ? t("queue.all") : t(`queue.service.${s}`)}
+            {s === "" ? t("queue.all") : serviceLabel(s)}
           </button>
         ))}
       </div>

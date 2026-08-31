@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { Button, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
-import { orientPatient } from "./queue-api";
-import { SERVICES, type Service } from "./types";
+import { fetchServices, orientPatient } from "./queue-api";
+import { FALLBACK_SERVICES, type ServiceRef } from "./types";
 
 export function OrientPatientAction({
   patientId,
@@ -15,10 +15,23 @@ export function OrientPatientAction({
   onCancel?: () => void;
 }) {
   const { t } = useTranslation();
-  const [service, setService] = useState<Service>(SERVICES[0]);
+  const [services, setServices] = useState<ServiceRef[]>(FALLBACK_SERVICES);
+  const [service, setService] = useState<string>(FALLBACK_SERVICES[0].code);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [ticketLabel, setTicketLabel] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchServices()
+      .then((res) => {
+        if (res.data.length === 0) return;
+        setServices(res.data);
+        setService(res.data[0].code);
+      })
+      .catch(() => {
+        /* on garde la liste de repli */
+      });
+  }, []);
 
   async function handleOrient() {
     setIsSubmitting(true);
@@ -38,12 +51,12 @@ export function OrientPatientAction({
       <div className="flex items-center gap-2">
         <Select
           value={service}
-          onChange={(e) => setService(e.target.value as Service)}
+          onChange={(e) => setService(e.target.value)}
           className="flex-1"
         >
-          {SERVICES.map((s) => (
-            <option key={s} value={s}>
-              {t(`queue.service.${s}`)}
+          {services.map((s) => (
+            <option key={s.code} value={s.code}>
+              {s.nom}
             </option>
           ))}
         </Select>

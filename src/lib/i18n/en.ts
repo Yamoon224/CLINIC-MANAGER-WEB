@@ -176,6 +176,7 @@ const en: Dictionary = {
       securite: "Security",
       affichage: "Display",
       administration: "Administration",
+      services: "Services",
     },
     security: {
       currentPassword: "Current password",
@@ -214,6 +215,31 @@ const en: Dictionary = {
       createError: "Could not create the user. Check the fields.",
       roleChangeError: "Could not change this user's role.",
       statusChangeError: "Could not change this user's status.",
+    },
+    services: {
+      subtitle:
+        "Services / departments reception directs patients to and staff are assigned to.",
+      new: "New service",
+      edit: "Edit service",
+      colNom: "Name",
+      colCode: "Code",
+      colCouleur: "Colour",
+      colOrdre: "Order",
+      colStatut: "Status",
+      colDescription: "Description",
+      codeHint:
+        "Technical identifier set on creation (lowercase, no accents). Cannot be changed later.",
+      actif: "Active",
+      inactif: "Inactive",
+      actifLabel: "Active service (shown when directing patients)",
+      activate: "Activate",
+      deactivate: "Deactivate",
+      empty: "No services.",
+      loadError: "Could not load services.",
+      saveError: "Could not save the service. Check the fields.",
+      deleteMessage: "Delete the service “{{nom}}”? This cannot be undone.",
+      deleteError:
+        "Could not delete this service (it may still be in use). Deactivate it instead.",
     },
   },
   notifications: {

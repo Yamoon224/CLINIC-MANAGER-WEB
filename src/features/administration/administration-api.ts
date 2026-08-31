@@ -7,6 +7,8 @@ import type {
   CreateUserPayload,
   DashboardStats,
   PaginatedResponse,
+  Service,
+  ServicePayload,
 } from "./types";
 
 export function fetchDashboard(): Promise<{ data: DashboardStats }> {
@@ -47,6 +49,36 @@ export function fetchUsers(
 
 export function fetchRoles(): Promise<{ data: string[] }> {
   return apiFetch<{ data: string[] }>("/roles");
+}
+
+export function fetchServices(
+  inclureInactifs = false,
+): Promise<{ data: Service[] }> {
+  const q = inclureInactifs ? "?inclure_inactifs=1" : "";
+  return apiFetch<{ data: Service[] }>(`/services${q}`);
+}
+
+export function createService(
+  payload: ServicePayload,
+): Promise<{ data: Service }> {
+  return apiFetch<{ data: Service }>("/services", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateService(
+  id: number,
+  payload: Omit<ServicePayload, "code">,
+): Promise<{ data: Service }> {
+  return apiFetch<{ data: Service }>(`/services/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteService(id: number): Promise<void> {
+  return apiFetch<void>(`/services/${id}`, { method: "DELETE" });
 }
 
 export function createUser(payload: CreateUserPayload): Promise<{ data: AdminUser }> {

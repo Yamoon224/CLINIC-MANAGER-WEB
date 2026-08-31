@@ -7,6 +7,12 @@ export function fetchEmployes(statut?: string): Promise<{ data: Employe[] }> {
   return apiFetch<{ data: Employe[] }>(`/employes${query}`);
 }
 
+export function fetchServices(): Promise<{
+  data: { code: string; nom: string }[];
+}> {
+  return apiFetch<{ data: { code: string; nom: string }[] }>("/services");
+}
+
 export function createEmploye(payload: {
   nom: string;
   prenom: string;

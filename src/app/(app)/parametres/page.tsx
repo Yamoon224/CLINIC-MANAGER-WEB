@@ -5,10 +5,11 @@ import { useAuth } from "@/features/auth/auth-context";
 import { ChangePasswordForm } from "@/features/auth/ChangePasswordForm";
 import { DisplayPreferences } from "@/features/auth/DisplayPreferences";
 import { UserAdmin } from "@/features/administration/UserAdmin";
+import { ServicesAdmin } from "@/features/administration/ServicesAdmin";
 import { PageHeader, Tabs } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
-type Tab = "securite" | "affichage" | "administration";
+type Tab = "securite" | "affichage" | "administration" | "services";
 
 export default function ParametresPage() {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ export default function ParametresPage() {
   const tabIds: Tab[] = [
     "securite",
     "affichage",
-    ...(isAdmin ? (["administration"] as const) : []),
+    ...(isAdmin ? (["administration", "services"] as const) : []),
   ];
   const tabs = tabIds.map((tabId) => ({ key: tabId, label: t(`parametres.tabs.${tabId}`) }));
 
@@ -34,6 +35,7 @@ export default function ParametresPage() {
       {tab === "securite" && <ChangePasswordForm />}
       {tab === "affichage" && <DisplayPreferences />}
       {tab === "administration" && isAdmin && <UserAdmin />}
+      {tab === "services" && isAdmin && <ServicesAdmin />}
     </div>
   );
 }

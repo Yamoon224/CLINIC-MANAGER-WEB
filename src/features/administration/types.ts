@@ -124,3 +124,22 @@ export interface CreateUserPayload {
   password: string;
   role: string;
 }
+
+export interface Service {
+  id: number;
+  code: string;
+  nom: string;
+  couleur: string | null;
+  description: string | null;
+  ordre: number;
+  actif: boolean;
+}
+
+export interface ServicePayload {
+  code?: string;
+  nom: string;
+  couleur: string | null;
+  description: string | null;
+  ordre: number;
+  actif: boolean;
+}

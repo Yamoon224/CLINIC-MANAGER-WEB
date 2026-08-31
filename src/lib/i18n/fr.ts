@@ -174,6 +174,7 @@ const fr = {
       securite: "Sécurité",
       affichage: "Affichage",
       administration: "Administration",
+      services: "Services",
     },
     security: {
       currentPassword: "Mot de passe actuel",
@@ -212,6 +213,32 @@ const fr = {
       createError: "Impossible de créer l'utilisateur. Vérifiez les champs.",
       roleChangeError: "Impossible de changer le rôle de cet utilisateur.",
       statusChangeError: "Impossible de changer le statut de cet utilisateur.",
+    },
+    services: {
+      subtitle:
+        "Services / départements vers lesquels la réception oriente les patients et auxquels le personnel est rattaché.",
+      new: "Nouveau service",
+      edit: "Modifier le service",
+      colNom: "Nom",
+      colCode: "Code",
+      colCouleur: "Couleur",
+      colOrdre: "Ordre",
+      colStatut: "Statut",
+      colDescription: "Description",
+      codeHint:
+        "Identifiant technique fixé à la création (minuscules, sans accent). Non modifiable ensuite.",
+      actif: "Actif",
+      inactif: "Inactif",
+      actifLabel: "Service actif (visible à l'orientation)",
+      activate: "Activer",
+      deactivate: "Désactiver",
+      empty: "Aucun service.",
+      loadError: "Impossible de charger les services.",
+      saveError: "Impossible d'enregistrer le service. Vérifiez les champs.",
+      deleteMessage:
+        "Supprimer le service « {{nom}} » ? Cette action est définitive.",
+      deleteError:
+        "Impossible de supprimer ce service (il est peut-être encore utilisé). Désactivez-le à la place.",
     },
   },
   notifications: {

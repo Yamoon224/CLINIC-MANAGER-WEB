@@ -1,24 +1,25 @@
-export const SERVICES = [
-  "consultations",
-  "urgences",
-  "laboratoire",
-  "pharmacie",
-  "vaccinations",
-  "maternite",
-  "hospitalisation",
-] as const;
+/**
+ * Le code d'un service. La liste est désormais dynamique (table `services`,
+ * gérée depuis Paramètres → Services) : ce type reste une simple chaîne.
+ */
+export type Service = string;
 
-export type Service = (typeof SERVICES)[number];
+/** Services de repli si l'API n'est pas encore joignable. */
+export const FALLBACK_SERVICES: ServiceRef[] = [
+  { code: "consultations", nom: "Consultations", couleur: null },
+  { code: "urgences", nom: "Urgences", couleur: null },
+  { code: "laboratoire", nom: "Laboratoire", couleur: null },
+  { code: "pharmacie", nom: "Pharmacie", couleur: null },
+  { code: "vaccinations", nom: "Vaccinations", couleur: null },
+  { code: "maternite", nom: "Maternité", couleur: null },
+  { code: "hospitalisation", nom: "Hospitalisation", couleur: null },
+];
 
-export const SERVICE_LABELS: Record<Service, string> = {
-  consultations: "Consultations",
-  urgences: "Urgences",
-  laboratoire: "Laboratoire",
-  pharmacie: "Pharmacie",
-  vaccinations: "Vaccinations",
-  maternite: "Maternité",
-  hospitalisation: "Hospitalisation",
-};
+export interface ServiceRef {
+  code: string;
+  nom: string;
+  couleur: string | null;
+}
 
 export type TicketStatus = "en_attente" | "appele" | "traite" | "annule";
 

@@ -1,6 +1,10 @@
 import { apiFetch } from "@/lib/api-client";
 import type { PaginatedResponse } from "@/lib/pagination";
-import type { Service, Ticket } from "./types";
+import type { Service, ServiceRef, Ticket } from "./types";
+
+export function fetchServices(): Promise<{ data: ServiceRef[] }> {
+  return apiFetch<{ data: ServiceRef[] }>("/services");
+}
 
 export function orientPatient(
   patientId: number,

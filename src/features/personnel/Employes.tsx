@@ -7,7 +7,7 @@ import {
   IconUsers,
   IconUserX,
 } from "@tabler/icons-react";
-import { createEmploye, fetchEmployes } from "./personnel-api";
+import { createEmploye, fetchEmployes, fetchServices } from "./personnel-api";
 import type { Employe, EmployeStatut, TypeContrat } from "./types";
 import {
   Avatar,
@@ -176,9 +176,18 @@ function CreateEmployeForm({
   const [prenom, setPrenom] = useState("");
   const [fonction, setFonction] = useState("");
   const [service, setService] = useState("");
+  const [services, setServices] = useState<{ code: string; nom: string }[]>([]);
   const [typeContrat, setTypeContrat] = useState<TypeContrat>("cdi");
   const [dateEmbauche, setDateEmbauche] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    fetchServices()
+      .then((res) => setServices(res.data))
+      .catch(() => {
+        /* champ libre en repli */
+      });
+  }, []);
 
   const TYPE_CONTRAT_LABELS: Record<TypeContrat, string> = {
     cdi: t("personnel.typeContrat.cdi"),
@@ -227,7 +236,24 @@ function CreateEmployeForm({
           />
         </Field>
         <Field label={t("personnel.employes.formService")}>
-          <Input value={service} onChange={(e) => setService(e.target.value)} />
+          {services.length > 0 ? (
+            <Select
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+            >
+              <option value="">—</option>
+              {services.map((s) => (
+                <option key={s.code} value={s.nom}>
+                  {s.nom}
+                </option>
+              ))}
+            </Select>
+          ) : (
+            <Input
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+            />
+          )}
         </Field>
         <Field label={t("personnel.employes.formTypeContrat")}>
           <Select
