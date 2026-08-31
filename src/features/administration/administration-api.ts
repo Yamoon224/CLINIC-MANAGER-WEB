@@ -32,8 +32,17 @@ export function fetchCausers(): Promise<{ data: AuditCauser[] }> {
   return apiFetch<{ data: AuditCauser[] }>("/audit/causers");
 }
 
-export function fetchUsers(page = 1): Promise<PaginatedResponse<AdminUser>> {
-  return apiFetch<PaginatedResponse<AdminUser>>(`/utilisateurs?page=${page}`);
+export function fetchUsers(
+  page = 1,
+  perPage = 20,
+  q = "",
+): Promise<PaginatedResponse<AdminUser>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    per_page: String(perPage),
+  });
+  if (q) params.set("q", q);
+  return apiFetch<PaginatedResponse<AdminUser>>(`/utilisateurs?${params}`);
 }
 
 export function fetchRoles(): Promise<{ data: string[] }> {

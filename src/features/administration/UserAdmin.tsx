@@ -23,24 +23,33 @@ export function UserAdmin() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
   const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+  const [search, setSearch] = useState("");
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback((targetPage: number) => {
-    Promise.all([api.fetchUsers(targetPage), api.fetchRoles()])
-      .then(([usersRes, { data: rolesData }]) => {
-        setUsers(usersRes.data);
-        setTotal(usersRes.meta.total);
-        setRoles(rolesData);
+  useEffect(() => {
+    api
+      .fetchRoles()
+      .then((res) => setRoles(res.data))
+      .catch(() => setError(t("parametres.admin.roleChangeError")));
+  }, [t]);
+
+  const load = useCallback(() => {
+    api
+      .fetchUsers(page, perPage, search)
+      .then((res) => {
+        setUsers(res.data);
+        setTotal(res.meta.total);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [page, perPage, search]);
 
   useEffect(() => {
-    load(page);
-  }, [load, page]);
+    load();
+  }, [load]);
 
   async function handleChangeRole(user: AdminUser, role: string) {
     setError(null);
@@ -137,9 +146,18 @@ export function UserAdmin() {
         rows={users}
         getRowKey={(u) => u.id}
         page={page}
-        perPage={15}
+        perPage={perPage}
         total={total}
         onPageChange={setPage}
+        onPerPageChange={(n) => {
+          setPerPage(n);
+          setPage(1);
+        }}
+        search={search}
+        onSearchChange={(v) => {
+          setSearch(v);
+          setPage(1);
+        }}
         loading={loading}
         emptyLabel={t("parametres.admin.noUsers")}
         toolbarRight={
@@ -163,7 +181,7 @@ export function UserAdmin() {
           onCancel={() => setShowCreateForm(false)}
           onCreated={() => {
             setShowCreateForm(false);
-            load(page);
+            load();
           }}
         />
       </Modal>

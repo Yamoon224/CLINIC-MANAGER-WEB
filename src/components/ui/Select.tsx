@@ -4,15 +4,17 @@ import {
   Children,
   forwardRef,
   isValidElement,
+  useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import type { ReactNode, SelectHTMLAttributes } from "react";
 import { IconCheck, IconChevronDown } from "@tabler/icons-react";
 import { cn } from "@/lib/cn";
-import { useClickOutside } from "@/lib/useClickOutside";
 
 interface Option {
   value: string;
@@ -54,10 +56,24 @@ export const Select = forwardRef<
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState("");
     const [activeIndex, setActiveIndex] = useState(0);
-    const containerRef = useRef<HTMLDivElement>(null);
+    const [menuRect, setMenuRect] = useState<{
+      top: number;
+      left: number;
+      width: number;
+    } | null>(null);
+
+    const triggerRef = useRef<HTMLButtonElement | null>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
     const searchRef = useRef<HTMLInputElement>(null);
 
-    useClickOutside(containerRef, () => setOpen(false));
+    const setTrigger = useCallback(
+      (node: HTMLButtonElement | null) => {
+        triggerRef.current = node;
+        if (typeof ref === "function") ref(node);
+        else if (ref) ref.current = node;
+      },
+      [ref],
+    );
 
     const selected = options.find((o) => o.value === String(value ?? ""));
 
@@ -67,13 +83,45 @@ export const Select = forwardRef<
       return options.filter((o) => o.label.toLowerCase().includes(q));
     }, [options, query]);
 
+    const reposition = useCallback(() => {
+      const el = triggerRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setMenuRect({ top: r.bottom + 4, left: r.left, width: r.width });
+    }, []);
+
+    useLayoutEffect(() => {
+      if (!open) return;
+      reposition();
+    }, [open, reposition]);
+
     useEffect(() => {
-      if (open) {
-        setQuery("");
-        setActiveIndex(0);
-        requestAnimationFrame(() => searchRef.current?.focus());
+      if (!open) return;
+      setQuery("");
+      setActiveIndex(0);
+      requestAnimationFrame(() => searchRef.current?.focus());
+
+      function onScrollOrResize() {
+        reposition();
       }
-    }, [open]);
+      function onPointerDown(e: MouseEvent) {
+        const t = e.target as Node;
+        if (
+          !triggerRef.current?.contains(t) &&
+          !menuRef.current?.contains(t)
+        ) {
+          setOpen(false);
+        }
+      }
+      window.addEventListener("scroll", onScrollOrResize, true);
+      window.addEventListener("resize", onScrollOrResize);
+      document.addEventListener("mousedown", onPointerDown);
+      return () => {
+        window.removeEventListener("scroll", onScrollOrResize, true);
+        window.removeEventListener("resize", onScrollOrResize);
+        document.removeEventListener("mousedown", onPointerDown);
+      };
+    }, [open, reposition]);
 
     function selectOption(option: Option) {
       if (option.disabled) return;
@@ -106,9 +154,9 @@ export const Select = forwardRef<
     }
 
     return (
-      <div className={cn("relative", className || "w-full")} ref={containerRef}>
+      <div className={cn("relative", className || "w-full")}>
         <button
-          ref={ref}
+          ref={setTrigger}
           type="button"
           id={id}
           disabled={disabled}
@@ -121,47 +169,63 @@ export const Select = forwardRef<
           </span>
           <IconChevronDown size={16} className="shrink-0 text-muted" />
         </button>
-        {open && (
-          <div className="absolute left-0 right-0 z-40 mt-1 overflow-hidden rounded-[5px] border border-border bg-surface shadow-[var(--shadow-preclinic-lg)]">
-            <input
-              ref={searchRef}
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setActiveIndex(0);
+
+        {open &&
+          menuRect &&
+          typeof document !== "undefined" &&
+          createPortal(
+            <div
+              ref={menuRef}
+              style={{
+                position: "fixed",
+                top: menuRect.top,
+                left: menuRect.left,
+                width: menuRect.width,
               }}
-              onKeyDown={handleKeyDown}
-              placeholder="Rechercher..."
-              className="w-full border-b border-border bg-surface px-3 py-2 text-sm outline-none"
-            />
-            <ul className="preclinic-scroll max-h-56 overflow-y-auto py-1">
-              {filtered.length === 0 && (
-                <li className="px-3 py-2 text-sm text-muted">Aucun résultat.</li>
-              )}
-              {filtered.map((option, index) => (
-                <li key={option.value}>
-                  <button
-                    type="button"
-                    disabled={option.disabled}
-                    onMouseEnter={() => setActiveIndex(index)}
-                    onClick={() => selectOption(option)}
-                    className={cn(
-                      "flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm disabled:opacity-50",
-                      index === activeIndex
-                        ? "bg-primary-light text-primary"
-                        : "text-heading",
-                    )}
-                  >
-                    <span className="truncate">{option.label}</span>
-                    {option.value === selected?.value && (
-                      <IconCheck size={14} className="shrink-0" />
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+              className="z-[70] overflow-hidden rounded-[5px] border border-border bg-surface shadow-[var(--shadow-preclinic-lg)]"
+            >
+              <input
+                ref={searchRef}
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setActiveIndex(0);
+                }}
+                onKeyDown={handleKeyDown}
+                placeholder="Rechercher..."
+                className="w-full border-b border-border bg-surface px-3 py-2 text-sm outline-none"
+              />
+              <ul className="preclinic-scroll max-h-56 overflow-y-auto py-1">
+                {filtered.length === 0 && (
+                  <li className="px-3 py-2 text-sm text-muted">
+                    Aucun résultat.
+                  </li>
+                )}
+                {filtered.map((option, index) => (
+                  <li key={option.value}>
+                    <button
+                      type="button"
+                      disabled={option.disabled}
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onClick={() => selectOption(option)}
+                      className={cn(
+                        "flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm disabled:opacity-50",
+                        index === activeIndex
+                          ? "bg-primary-light text-primary"
+                          : "text-heading",
+                      )}
+                    >
+                      <span className="truncate">{option.label}</span>
+                      {option.value === selected?.value && (
+                        <IconCheck size={14} className="shrink-0" />
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>,
+            document.body,
+          )}
       </div>
     );
   },
