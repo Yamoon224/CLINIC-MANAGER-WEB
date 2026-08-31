@@ -1274,6 +1274,7 @@ const fr = {
     edit: "Modifier la campagne",
     empty: "Aucune campagne de vaccination.",
     colNom: "Nom",
+    colVaccin: "Vaccin",
     colPeriode: "Période",
     colZone: "Zone cible",
     colDoses: "Doses",

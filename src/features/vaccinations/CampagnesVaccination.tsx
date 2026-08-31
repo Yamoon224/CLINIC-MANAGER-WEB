@@ -89,7 +89,7 @@ export function CampagnesVaccination() {
     },
     {
       key: "vaccin",
-      header: t("nav.vaccinations"),
+      header: t("campagnes.colVaccin"),
       cell: (c) => c.vaccin?.nom ?? "-",
     },
     {
@@ -267,7 +267,7 @@ function CampagneForm({
             onChange={(e) => setForm({ ...form, nom: e.target.value })}
           />
         </Field>
-        <Field label={t("nav.vaccinations")}>
+        <Field label={t("campagnes.colVaccin")}>
           <Select
             value={form.vaccin_id ? String(form.vaccin_id) : ""}
             onChange={(e) =>

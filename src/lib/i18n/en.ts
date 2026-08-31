@@ -1274,6 +1274,7 @@ const en: Dictionary = {
     edit: "Edit campaign",
     empty: "No vaccination campaign.",
     colNom: "Name",
+    colVaccin: "Vaccine",
     colPeriode: "Period",
     colZone: "Target area",
     colDoses: "Doses",
