@@ -1,7 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Activity, ClipboardList, LogOut, Thermometer } from "lucide-react";
+import {
+  IconActivity,
+  IconChevronLeft,
+  IconClipboardList,
+  IconLogout,
+  IconThermometer,
+} from "@tabler/icons-react";
 import { Badge, Button, Card, Input, PageHeader, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import {
@@ -127,7 +134,14 @@ export function UrgenceDetail({ id }: { id: number }) {
   const readOnly = admission.statut === "sorti";
 
   return (
-    <div className="flex flex-col gap-4 max-w-2xl">
+    <div className="flex flex-col gap-4">
+      <Link
+        href="/urgences"
+        className="inline-flex w-fit items-center gap-1 text-sm font-semibold text-heading hover:text-primary"
+      >
+        <IconChevronLeft size={16} />
+        {t("urgences.title")}
+      </Link>
       <PageHeader
         title={t("urgences.detail.title", {
           prenom: admission.patient.prenom,
@@ -135,29 +149,29 @@ export function UrgenceDetail({ id }: { id: number }) {
         })}
         description={t("urgences.detail.dossierNumero", { numero: admission.patient.numero_dossier })}
         actions={
-          <Badge tone={STATUT_TONE[admission.statut]}>
+          <Badge border tone={STATUT_TONE[admission.statut]}>
             {t(`urgences.statut.${admission.statut}`)}
           </Badge>
         }
       />
 
       {admission.patient.allergies && (
-        <div className="rounded-lg border border-danger/30 bg-danger-light px-3 py-2 text-sm">
+        <div className="rounded-[5px] border border-danger/30 bg-danger-light px-3 py-2 text-sm">
           <span className="font-semibold text-danger">{t("urgences.detail.allergies")}</span>
           {admission.patient.allergies}
         </div>
       )}
 
       {readOnly && (
-        <div className="rounded-lg border border-success/30 bg-success-light px-3 py-2 text-sm text-success">
+        <div className="rounded-[5px] border border-success/30 bg-success-light px-3 py-2 text-sm text-success">
           {t("urgences.detail.sortieEnregistree")}
           {admission.issue && t(`urgences.issue.${admission.issue}`)}
         </div>
       )}
 
       <Card>
-        <h2 className="flex items-center gap-2 font-semibold text-foreground mb-3">
-          <Activity size={18} className="text-primary" />
+        <h2 className="flex items-center gap-2 font-semibold text-heading mb-3">
+          <IconActivity size={18} className="text-primary" />
           {t("urgences.detail.triage")}
         </h2>
         <div className="flex flex-wrap gap-2">
@@ -168,10 +182,10 @@ export function UrgenceDetail({ id }: { id: number }) {
                 key={niveau}
                 disabled={busy || readOnly}
                 onClick={() => handleTrier(niveau)}
-                className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors disabled:opacity-50 ${
+                className={`rounded-[5px] px-3 py-2 text-sm font-semibold transition-colors disabled:opacity-50 ${
                   selected
                     ? TRIAGE_SELECTED_CLASSES[niveau]
-                    : "border border-border bg-surface hover:bg-primary-light/60"
+                    : "border border-border bg-surface hover:bg-light"
                 }`}
               >
                 {t(`urgences.niveau.${niveau}`)}
@@ -182,8 +196,8 @@ export function UrgenceDetail({ id }: { id: number }) {
       </Card>
 
       <Card>
-        <h2 className="flex items-center gap-2 font-semibold text-foreground mb-3">
-          <Thermometer size={18} className="text-primary" />
+        <h2 className="flex items-center gap-2 font-semibold text-heading mb-3">
+          <IconThermometer size={18} className="text-primary" />
           {t("urgences.detail.constantes")}
         </h2>
         <div className="grid grid-cols-4 gap-3">
@@ -225,13 +239,13 @@ export function UrgenceDetail({ id }: { id: number }) {
       </Card>
 
       <Card>
-        <h2 className="flex items-center gap-2 font-semibold text-foreground mb-3">
-          <ClipboardList size={18} className="text-primary" />
+        <h2 className="flex items-center gap-2 font-semibold text-heading mb-3">
+          <IconClipboardList size={18} className="text-primary" />
           {t("urgences.detail.gestesTraitements")}
         </h2>
         <ul className="flex flex-col gap-1.5 mb-3 text-sm">
           {admission.actes.map((acte) => (
-            <li key={acte.id} className="rounded-lg border border-border px-3 py-2">
+            <li key={acte.id} className="rounded-[5px] border border-border px-3 py-2">
               <span className="text-muted">
                 {acte.created_at &&
                   new Date(acte.created_at).toLocaleTimeString("fr-FR", {
@@ -281,7 +295,7 @@ export function UrgenceDetail({ id }: { id: number }) {
             ))}
           </Select>
           <Button onClick={handleSortie} disabled={busy}>
-            <LogOut size={16} />
+            <IconLogout size={16} />
             {t("urgences.detail.sortie")}
           </Button>
         </Card>

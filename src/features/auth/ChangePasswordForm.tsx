@@ -68,12 +68,12 @@ export function ChangePasswordForm() {
           </Field>
         </div>
         {error && (
-          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">
+          <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">
             {error}
           </p>
         )}
         {success && (
-          <p className="rounded-lg bg-success-light px-3 py-2 text-sm text-success">
+          <p className="rounded-[5px] bg-success-light px-3 py-2 text-sm text-success">
             {t("parametres.security.success")}
           </p>
         )}

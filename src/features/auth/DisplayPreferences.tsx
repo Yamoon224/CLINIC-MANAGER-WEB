@@ -30,7 +30,7 @@ export function DisplayPreferences() {
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <h3 className="text-sm font-semibold">
+        <h3 className="m-0 text-[15px] font-semibold text-heading">
           {t("parametres.display.densityTitle")}
         </h3>
         <p className="mt-1 text-sm text-muted">
@@ -41,10 +41,10 @@ export function DisplayPreferences() {
             <button
               key={option}
               onClick={() => applyDensity(option)}
-              className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-[5px] border px-4 py-3 text-sm font-medium transition-colors ${
                 density === option
                   ? "border-primary bg-primary-light text-primary"
-                  : "border-border text-muted hover:bg-primary-light/40"
+                  : "border-border text-muted hover:bg-light"
               }`}
             >
               {t(`parametres.display.${option}`)}
@@ -54,7 +54,7 @@ export function DisplayPreferences() {
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold">
+        <h3 className="m-0 text-[15px] font-semibold text-heading">
           {t("parametres.display.themeTitle")}
         </h3>
         <p className="mt-1 text-sm text-muted">
@@ -65,10 +65,10 @@ export function DisplayPreferences() {
             <button
               key={option}
               onClick={() => setTheme(option)}
-              className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-[5px] border px-4 py-3 text-sm font-medium transition-colors ${
                 theme === option
                   ? "border-primary bg-primary-light text-primary"
-                  : "border-border text-muted hover:bg-primary-light/40"
+                  : "border-border text-muted hover:bg-light"
               }`}
             >
               {t(`parametres.display.theme${option === "light" ? "Light" : "Dark"}`)}
@@ -78,7 +78,7 @@ export function DisplayPreferences() {
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold">
+        <h3 className="m-0 text-[15px] font-semibold text-heading">
           {t("parametres.display.languageTitle")}
         </h3>
         <p className="mt-1 text-sm text-muted">
@@ -94,10 +94,10 @@ export function DisplayPreferences() {
             <button
               key={option.code}
               onClick={() => setLocale(option.code)}
-              className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-[5px] border px-4 py-3 text-sm font-medium transition-colors ${
                 locale === option.code
                   ? "border-primary bg-primary-light text-primary"
-                  : "border-border text-muted hover:bg-primary-light/40"
+                  : "border-border text-muted hover:bg-light"
               }`}
             >
               {option.label}

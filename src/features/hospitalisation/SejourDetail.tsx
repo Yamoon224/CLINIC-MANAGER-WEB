@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { IconChevronLeft, IconPlus } from "@tabler/icons-react";
 import {
   ajouterSuivi,
   annulerOperation,
@@ -120,6 +122,13 @@ export function SejourDetail({ id }: { id: number }) {
 
   return (
     <div className="flex flex-col gap-4">
+      <Link
+        href="/hospitalisation"
+        className="inline-flex w-fit items-center gap-1 text-sm font-semibold text-heading hover:text-primary"
+      >
+        <IconChevronLeft size={16} />
+        {t("nav.hospitalisation")}
+      </Link>
       <PageHeader
         title={t("hospitalisation.detail.title", {
           prenom: sejour.patient.prenom,
@@ -131,14 +140,14 @@ export function SejourDetail({ id }: { id: number }) {
           motif: sejour.motif,
         })}
         actions={
-          <Badge tone={SEJOUR_STATUT_TONE[sejour.statut]}>
+          <Badge border tone={SEJOUR_STATUT_TONE[sejour.statut]}>
             {t(`hospitalisation.detail.statut${sejour.statut === "en_cours" ? "EnCours" : "Termine"}`)}
           </Badge>
         }
       />
 
       {readOnly && (
-        <div className="rounded-xl border border-success/30 bg-success-light p-3 text-sm text-success">
+        <div className="rounded-[6px] border border-success/30 bg-success-light p-3 text-sm text-success">
           {t("hospitalisation.detail.dischargedBanner", {
             days: sejour.nombre_jours,
             montant: sejour.frais_sejour ?? "",
@@ -147,12 +156,12 @@ export function SejourDetail({ id }: { id: number }) {
       )}
 
       <div>
-        <h2 className="font-semibold mb-2 text-foreground">
+        <h2 className="mb-2 font-semibold text-heading">
           {t("hospitalisation.detail.temperatureSheet")}
         </h2>
         <ul className="flex flex-col gap-2 mb-3 text-sm">
           {sejour.suivis.map((s) => (
-            <li key={s.id} className="rounded-xl border border-border bg-surface p-3">
+            <li key={s.id} className="rounded-[6px] border border-border bg-surface p-3">
               <span className="text-muted">
                 {s.releve_at && new Date(s.releve_at).toLocaleString("fr-FR")}
               </span>{" "}
@@ -206,12 +215,12 @@ export function SejourDetail({ id }: { id: number }) {
 
       <div className="border-t border-border pt-4">
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="font-semibold text-foreground">
+          <h2 className="font-semibold text-heading">
             {t("hospitalisation.operations.title")}
           </h2>
           {!readOnly && (
             <Button size="sm" onClick={() => setShowPlanifierModal(true)}>
-              + {t("hospitalisation.operations.newOperation")}
+              <><IconPlus size={15} className="mr-1" />{t("hospitalisation.operations.newOperation")}</>
             </Button>
           )}
         </div>
@@ -242,7 +251,7 @@ export function SejourDetail({ id }: { id: number }) {
                     </td>
                     <td>{operation.praticien?.name ?? "-"}</td>
                     <td>
-                      <Badge tone={OPERATION_STATUT_TONE[operation.statut]}>
+                      <Badge border tone={OPERATION_STATUT_TONE[operation.statut]}>
                         {t(`hospitalisation.operations.statut${operation.statut.charAt(0).toUpperCase()}${operation.statut.slice(1)}`)}
                       </Badge>
                     </td>
@@ -401,7 +410,7 @@ function PlanifierOperationForm({
         </Select>
       </Field>
       {error && (
-        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
       <div className="flex gap-2">
         <Button type="submit" disabled={isSubmitting}>
@@ -457,7 +466,7 @@ function TerminerOperationForm({
         />
       </Field>
       {error && (
-        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
       <div className="flex gap-2">
         <Button type="submit" disabled={isSubmitting}>

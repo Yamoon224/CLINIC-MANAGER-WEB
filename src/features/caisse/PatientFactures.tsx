@@ -33,7 +33,7 @@ export function PatientFactures({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold mb-2 text-foreground">{t("caisse.factures.title")}</h2>
+      <h2 className="mb-2 font-semibold text-heading">{t("caisse.factures.title")}</h2>
       <table className="table">
         <thead>
           <tr>

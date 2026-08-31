@@ -1,14 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   createInteraction,
   deleteInteraction,
   fetchInteractions,
   fetchMedicaments,
 } from "./pharmacie-api";
-import type { GraviteInteraction, InteractionMedicamenteuse, Medicament } from "./types";
-import { Badge, Button, Card, Select, Textarea, type Tone } from "@/components/ui";
+import type {
+  GraviteInteraction,
+  InteractionMedicamenteuse,
+  Medicament,
+} from "./types";
+import {
+  Badge,
+  Button,
+  Card,
+  ConfirmDeleteModal,
+  DataTable,
+  Field,
+  RowActions,
+  Select,
+  Textarea,
+  type Column,
+  type Tone,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const GRAVITE_TONE: Record<GraviteInteraction, Tone> = {
@@ -19,9 +35,14 @@ const GRAVITE_TONE: Record<GraviteInteraction, Tone> = {
 
 export function InteractionsMedicamenteuses() {
   const { t } = useTranslation();
-  const [interactions, setInteractions] = useState<InteractionMedicamenteuse[]>([]);
+  const [interactions, setInteractions] = useState<InteractionMedicamenteuse[]>(
+    [],
+  );
   const [medicaments, setMedicaments] = useState<Medicament[]>([]);
-  const [busyId, setBusyId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] =
+    useState<InteractionMedicamenteuse | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const GRAVITE_LABELS: Record<GraviteInteraction, string> = {
     mineure: t("pharmacie.interactions.graviteMineure"),
@@ -29,78 +50,104 @@ export function InteractionsMedicamenteuses() {
     majeure: t("pharmacie.interactions.graviteMajeure"),
   };
 
-  function load() {
-    fetchInteractions().then((res) => setInteractions(res.data));
-  }
+  const load = useCallback(() => {
+    fetchInteractions()
+      .then((res) => setInteractions(res.data))
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     load();
     fetchMedicaments().then((res) => setMedicaments(res.data));
-  }, []);
+  }, [load]);
 
-  async function handleDelete(id: number) {
-    setBusyId(id);
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setBusy(true);
     try {
-      await deleteInteraction(id);
+      await deleteInteraction(deleteTarget.id);
+      setDeleteTarget(null);
       load();
     } finally {
-      setBusyId(null);
+      setBusy(false);
     }
   }
 
+  const columns: Column<InteractionMedicamenteuse>[] = [
+    {
+      key: "paire",
+      header: t("pharmacie.interactions.colPaire"),
+      cell: (i) => (
+        <span className="font-semibold text-heading">
+          {i.medicament_a.dci} × {i.medicament_b.dci}
+        </span>
+      ),
+    },
+    {
+      key: "gravite",
+      header: t("pharmacie.interactions.colGravite"),
+      cell: (i) => (
+        <Badge tone={GRAVITE_TONE[i.gravite]} border>
+          {GRAVITE_LABELS[i.gravite]}
+        </Badge>
+      ),
+    },
+    {
+      key: "description",
+      header: t("pharmacie.interactions.colDescription"),
+      cell: (i) => <span className="text-muted">{i.description ?? "—"}</span>,
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "text-right",
+      headClassName: "text-right",
+      cell: (i) => (
+        <div className="flex justify-end">
+          <RowActions
+            onDelete={() => setDeleteTarget(i)}
+            deleteLabel={t("common.delete")}
+          />
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
-      <Card className="p-4">
-        <h2 className="mb-3 font-semibold text-foreground">{t("pharmacie.interactions.newTitle")}</h2>
-        <CreateInteractionForm
-          medicaments={medicaments}
-          onCreated={() => load()}
-        />
+      <Card className="p-0">
+        <div className="border-b border-border px-5 py-3.5">
+          <h2 className="m-0 text-[15px] font-semibold text-heading">
+            {t("pharmacie.interactions.newTitle")}
+          </h2>
+        </div>
+        <div className="p-5">
+          <CreateInteractionForm
+            medicaments={medicaments}
+            onCreated={() => load()}
+          />
+        </div>
       </Card>
 
-      <Card className="p-0 overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("pharmacie.interactions.colPaire")}</th>
-              <th>{t("pharmacie.interactions.colGravite")}</th>
-              <th>{t("pharmacie.interactions.colDescription")}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {interactions.map((i) => (
-              <tr key={i.id}>
-                <td>
-                  {i.medicament_a.dci} × {i.medicament_b.dci}
-                </td>
-                <td>
-                  <Badge tone={GRAVITE_TONE[i.gravite]}>{GRAVITE_LABELS[i.gravite]}</Badge>
-                </td>
-                <td className="text-muted">{i.description ?? "—"}</td>
-                <td>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(i.id)}
-                    disabled={busyId === i.id}
-                    className="text-danger hover:bg-danger-light"
-                  >
-                    {t("common.cancel")}
-                  </Button>
-                </td>
-              </tr>
-            ))}
-            {interactions.length === 0 && (
-              <tr>
-                <td colSpan={4} className="text-muted">
-                  {t("pharmacie.interactions.empty")}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </Card>
+      <DataTable
+        columns={columns}
+        rows={interactions}
+        getRowKey={(i) => i.id}
+        searchAccessor={(i) => `${i.medicament_a.dci} ${i.medicament_b.dci}`}
+        loading={loading}
+        emptyLabel={t("pharmacie.interactions.empty")}
+      />
+
+      <ConfirmDeleteModal
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        busy={busy}
+        message={t("common.confirmDeleteMessage")}
+        confirmLabel={t("common.yesDelete")}
+        cancelLabel={t("common.cancel")}
+        title={t("common.confirmDeleteTitle")}
+      />
     </div>
   );
 }
@@ -126,7 +173,8 @@ function CreateInteractionForm({
     majeure: t("pharmacie.interactions.graviteMajeure"),
   };
 
-  async function handleSubmit() {
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     if (!medicamentAId || !medicamentBId || medicamentAId === medicamentBId) {
       setError(t("pharmacie.interactions.error"));
       return;
@@ -152,50 +200,69 @@ function CreateInteractionForm({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-2">
-        <Select
-          value={medicamentAId}
-          onChange={(e) => setMedicamentAId(e.target.value ? Number(e.target.value) : "")}
-          className="flex-1"
-        >
-          <option value="">{t("pharmacie.interactions.selectMedicamentA")}</option>
-          {medicaments.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.dci}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Field label={t("pharmacie.interactions.selectMedicamentA")}>
+          <Select
+            value={medicamentAId}
+            onChange={(e) =>
+              setMedicamentAId(e.target.value ? Number(e.target.value) : "")
+            }
+          >
+            <option value="">
+              {t("pharmacie.interactions.selectMedicamentA")}
             </option>
-          ))}
-        </Select>
-        <Select
-          value={medicamentBId}
-          onChange={(e) => setMedicamentBId(e.target.value ? Number(e.target.value) : "")}
-          className="flex-1"
-        >
-          <option value="">{t("pharmacie.interactions.selectMedicamentB")}</option>
-          {medicaments.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.dci}
+            {medicaments.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.dci}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label={t("pharmacie.interactions.selectMedicamentB")}>
+          <Select
+            value={medicamentBId}
+            onChange={(e) =>
+              setMedicamentBId(e.target.value ? Number(e.target.value) : "")
+            }
+          >
+            <option value="">
+              {t("pharmacie.interactions.selectMedicamentB")}
             </option>
-          ))}
-        </Select>
-        <Select value={gravite} onChange={(e) => setGravite(e.target.value as GraviteInteraction)} className="w-40">
-          {Object.entries(GRAVITE_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </Select>
+            {medicaments.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.dci}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label={t("pharmacie.interactions.colGravite")}>
+          <Select
+            value={gravite}
+            onChange={(e) => setGravite(e.target.value as GraviteInteraction)}
+          >
+            {Object.entries(GRAVITE_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        </Field>
       </div>
-      <Textarea
-        placeholder={t("pharmacie.interactions.descriptionPlaceholder")}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        rows={2}
-      />
+      <Field label={t("pharmacie.interactions.colDescription")}>
+        <Textarea
+          placeholder={t("pharmacie.interactions.descriptionPlaceholder")}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+        />
+      </Field>
       {error && <p className="text-sm text-danger">{error}</p>}
-      <Button onClick={handleSubmit} disabled={busy} className="self-start">
-        {t("pharmacie.interactions.submit")}
-      </Button>
-    </div>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={busy}>
+          {t("pharmacie.interactions.submit")}
+        </Button>
+      </div>
+    </form>
   );
 }

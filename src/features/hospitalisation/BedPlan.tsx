@@ -2,14 +2,19 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { BedDouble, CheckCircle2, Sparkles, Users, type LucideIcon } from "lucide-react";
+import {
+  IconBed,
+  IconCircleCheck,
+  IconSparkles,
+  IconUsers,
+} from "@tabler/icons-react";
 import { fetchLits, libererLit } from "./hospitalisation-api";
 import type { Lit, LitStatut } from "./types";
-import { Badge, Button, Card, Modal, PageHeader } from "@/components/ui";
+import { Badge, Button, Card, Modal, PageHeader, StatCard, type Tone } from "@/components/ui";
 import { AdmissionAction } from "./AdmissionAction";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
-const STATUT_TONES: Record<LitStatut, "success" | "danger" | "warning" | "neutral"> = {
+const STATUT_TONES: Record<LitStatut, Tone> = {
   libre: "success",
   occupe: "danger",
   reserve: "warning",
@@ -22,39 +27,6 @@ const STATUT_ACCENT: Record<LitStatut, string> = {
   reserve: "border-l-4 border-l-warning",
   nettoyage: "border-l-4 border-l-border",
 };
-
-const STAT_CHIP: Record<string, string> = {
-  primary: "bg-primary-light text-primary",
-  accent: "bg-accent-light text-accent",
-  success: "bg-success-light text-success",
-  danger: "bg-danger-light text-danger",
-};
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  tone,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: string | number;
-  tone: "primary" | "accent" | "success" | "danger";
-}) {
-  return (
-    <Card className="flex items-center gap-3 p-4">
-      <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${STAT_CHIP[tone]}`}
-      >
-        <Icon size={18} />
-      </span>
-      <div className="min-w-0">
-        <div className="text-xs font-medium text-muted">{label}</div>
-        <div className="mt-1 text-2xl font-semibold text-foreground">{value}</div>
-      </div>
-    </Card>
-  );
-}
 
 export function BedPlan() {
   const { t } = useTranslation();
@@ -110,25 +82,25 @@ export function BedPlan() {
       {totalLits > 0 && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatCard
-            icon={BedDouble}
+            icon={<IconBed size={18} />}
             label={t("dashboard.hospitalisation.litsTotal")}
             value={totalLits}
             tone="primary"
           />
           <StatCard
-            icon={Users}
+            icon={<IconUsers size={18} />}
             label={t("dashboard.hospitalisation.litsOccupes")}
             value={litsOccupes}
             tone="danger"
           />
           <StatCard
-            icon={CheckCircle2}
+            icon={<IconCircleCheck size={18} />}
             label={t("hospitalisation.bedPlan.statFree")}
             value={litsLibres}
             tone="success"
           />
           <StatCard
-            icon={Sparkles}
+            icon={<IconSparkles size={18} />}
             label={t("dashboard.hospitalisation.tauxOccupation")}
             value={`${tauxOccupation}%`}
             tone="accent"
@@ -138,7 +110,7 @@ export function BedPlan() {
 
       {Object.entries(parChambre).map(([chambre, litsChambre]) => (
         <div key={chambre}>
-          <h2 className="font-medium mb-2 text-foreground">
+          <h2 className="mb-2 font-semibold text-heading">
             {t("hospitalisation.bedPlan.room", { chambre })}
           </h2>
           <div className="flex flex-wrap gap-3">

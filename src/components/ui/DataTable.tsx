@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   IconChevronLeft,
@@ -22,20 +22,27 @@ export interface DataTableProps<T> {
   columns: Column<T>[];
   rows: T[];
   getRowKey: (row: T) => string | number;
-  /** Pagination serveur. */
-  page: number;
-  perPage: number;
-  total: number;
-  onPageChange: (page: number) => void;
+
+  /** --- Mode serveur : fournir les 4 ensemble --- */
+  page?: number;
+  total?: number;
+  onPageChange?: (page: number) => void;
   onPerPageChange?: (perPage: number) => void;
+
+  /** Partagé (contrôle la taille de page dans les deux modes). */
+  perPage?: number;
   perPageOptions?: number[];
-  /** Recherche : si fourni, affiche le champ de recherche. */
+
+  /** --- Mode client : filtre interne sur ce texte --- */
+  searchAccessor?: (row: T) => string;
+
+  /** Recherche contrôlée (mode serveur). */
   search?: string;
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
+
   loading?: boolean;
   emptyLabel?: string;
-  /** Slots à droite de la barre d'outils (Filtres, Tri…). */
   toolbarRight?: ReactNode;
   onRowClick?: (row: T) => void;
 }
@@ -57,11 +64,12 @@ export function DataTable<T>({
   rows,
   getRowKey,
   page,
-  perPage,
   total,
   onPageChange,
   onPerPageChange,
+  perPage,
   perPageOptions = [10, 20, 30, 50],
+  searchAccessor,
   search,
   onSearchChange,
   searchPlaceholder,
@@ -71,30 +79,61 @@ export function DataTable<T>({
   onRowClick,
 }: DataTableProps<T>) {
   const { t } = useTranslation();
-  const [localSearch, setLocalSearch] = useState(search ?? "");
+  const serverMode = total !== undefined && onPageChange !== undefined;
 
-  useEffect(() => {
-    setLocalSearch(search ?? "");
-  }, [search]);
+  // --- État interne (mode client) ---
+  const [cPage, setCPage] = useState(1);
+  const [cPerPage, setCPerPage] = useState(perPage ?? 10);
+  const [searchValue, setSearchValue] = useState(() => search ?? "");
 
+  // Debounce vers onSearchChange (mode serveur uniquement).
   useEffect(() => {
     if (!onSearchChange) return;
     const handle = setTimeout(() => {
-      if (localSearch !== (search ?? "")) onSearchChange(localSearch);
+      if (searchValue !== (search ?? "")) onSearchChange(searchValue);
     }, 300);
     return () => clearTimeout(handle);
-  }, [localSearch, onSearchChange, search]);
+  }, [searchValue, onSearchChange, search]);
 
-  const lastPage = Math.max(1, Math.ceil(total / perPage));
-  const from = total === 0 ? 0 : (page - 1) * perPage + 1;
-  const to = Math.min(page * perPage, total);
+  const showSearch = Boolean(onSearchChange || searchAccessor);
+
+  // --- Filtrage + pagination client ---
+  const filtered = useMemo(() => {
+    if (serverMode || !searchAccessor || !searchValue.trim()) return rows;
+    const q = searchValue.trim().toLowerCase();
+    return rows.filter((r) => searchAccessor(r).toLowerCase().includes(q));
+  }, [rows, serverMode, searchAccessor, searchValue]);
+
+  const effPerPage = serverMode ? (perPage ?? 10) : cPerPage;
+  const effTotal = serverMode ? total! : filtered.length;
+  const effPage = serverMode ? page! : cPage;
+  const lastPage = Math.max(1, Math.ceil(effTotal / effPerPage));
+  const safePage = Math.min(effPage, lastPage);
+
+  const visibleRows = serverMode
+    ? rows
+    : filtered.slice((safePage - 1) * effPerPage, safePage * effPerPage);
+
+  const from = effTotal === 0 ? 0 : (safePage - 1) * effPerPage + 1;
+  const to = Math.min(safePage * effPerPage, effTotal);
+
+  function goToPage(p: number) {
+    if (serverMode) onPageChange!(p);
+    else setCPage(p);
+  }
+  function changePerPage(n: number) {
+    if (serverMode) onPerPageChange?.(n);
+    else {
+      setCPerPage(n);
+      setCPage(1);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Barre d'outils */}
-      {(onSearchChange || toolbarRight) && (
+      {(showSearch || toolbarRight) && (
         <div className="flex flex-wrap items-center justify-between gap-3">
-          {onSearchChange ? (
+          {showSearch ? (
             <div className="relative w-full max-w-xs">
               <IconSearch
                 size={16}
@@ -102,8 +141,11 @@ export function DataTable<T>({
               />
               <input
                 type="search"
-                value={localSearch}
-                onChange={(e) => setLocalSearch(e.target.value)}
+                value={searchValue}
+                onChange={(e) => {
+                  setSearchValue(e.target.value);
+                  if (!serverMode) setCPage(1);
+                }}
                 placeholder={searchPlaceholder ?? t("common.datatable.search")}
                 className="w-full rounded-[5px] border border-border bg-surface py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
               />
@@ -117,7 +159,6 @@ export function DataTable<T>({
         </div>
       )}
 
-      {/* Table */}
       <div className="preclinic-scroll overflow-x-auto rounded-[5px] border border-border">
         <table className="table table-nowrap">
           <thead>
@@ -130,7 +171,7 @@ export function DataTable<T>({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {visibleRows.map((row) => (
               <tr
                 key={getRowKey(row)}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
@@ -143,7 +184,7 @@ export function DataTable<T>({
                 ))}
               </tr>
             ))}
-            {rows.length === 0 && (
+            {visibleRows.length === 0 && (
               <tr>
                 <td
                   colSpan={columns.length}
@@ -159,15 +200,14 @@ export function DataTable<T>({
         </table>
       </div>
 
-      {/* Barre basse */}
       <div className="flex flex-wrap items-center justify-between gap-3 text-[13px] text-muted">
         <div className="flex items-center gap-2">
-          {onPerPageChange && (
+          {(serverMode ? onPerPageChange : true) && (
             <>
               <span>{t("common.datatable.rowsPerPage")}</span>
               <select
-                value={perPage}
-                onChange={(e) => onPerPageChange(Number(e.target.value))}
+                value={effPerPage}
+                onChange={(e) => changePerPage(Number(e.target.value))}
                 className="rounded-[5px] border border-border bg-surface px-2 py-1 text-[13px] outline-none focus:border-primary"
               >
                 {perPageOptions.map((n) => (
@@ -178,23 +218,21 @@ export function DataTable<T>({
               </select>
             </>
           )}
-          <span>
-            {t("common.datatable.range", { from, to, total })}
-          </span>
+          <span>{t("common.datatable.range", { from, to, total: effTotal })}</span>
         </div>
 
         {lastPage > 1 && (
           <div className="flex items-center gap-1">
             <button
               type="button"
-              onClick={() => onPageChange(page - 1)}
-              disabled={page <= 1}
+              onClick={() => goToPage(safePage - 1)}
+              disabled={safePage <= 1}
               className="inline-flex h-7 w-7 items-center justify-center rounded-[5px] border border-border text-muted disabled:opacity-40 hover:enabled:bg-light"
               aria-label={t("common.previous")}
             >
               <IconChevronLeft size={15} />
             </button>
-            {pageWindow(page, lastPage).map((p, i) =>
+            {pageWindow(safePage, lastPage).map((p, i) =>
               p === "…" ? (
                 <span key={`e${i}`} className="px-1">
                   …
@@ -203,10 +241,10 @@ export function DataTable<T>({
                 <button
                   key={p}
                   type="button"
-                  onClick={() => onPageChange(p)}
+                  onClick={() => goToPage(p)}
                   className={cn(
                     "inline-flex h-7 min-w-7 items-center justify-center rounded-[5px] border px-1.5 text-[13px]",
-                    p === page
+                    p === safePage
                       ? "border-primary bg-primary text-white"
                       : "border-border text-muted hover:bg-light",
                   )}
@@ -217,8 +255,8 @@ export function DataTable<T>({
             )}
             <button
               type="button"
-              onClick={() => onPageChange(page + 1)}
-              disabled={page >= lastPage}
+              onClick={() => goToPage(safePage + 1)}
+              disabled={safePage >= lastPage}
               className="inline-flex h-7 w-7 items-center justify-center rounded-[5px] border border-border text-muted disabled:opacity-40 hover:enabled:bg-light"
               aria-label={t("common.next")}
             >

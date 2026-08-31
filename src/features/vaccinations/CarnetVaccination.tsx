@@ -31,7 +31,7 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h2 className="font-semibold text-foreground">{t("vaccinations.title")}</h2>
+        <h2 className="font-semibold text-heading">{t("vaccinations.title")}</h2>
         {carnet.data.length > 0 && (
           <PdfButton
             path={`/patients/${patientId}/carnet-vaccination.pdf`}
@@ -81,7 +81,7 @@ export function CarnetVaccination({ patientId }: { patientId: number }) {
 
       {carnet.echeances.length > 0 && (
         <div className="mb-3 text-sm">
-          <span className="font-medium text-foreground">{t("vaccinations.upcomingLabel")}</span>
+          <span className="font-medium text-heading">{t("vaccinations.upcomingLabel")}</span>
           <span className="text-muted">
             {carnet.echeances
               .map(

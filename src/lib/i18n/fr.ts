@@ -259,9 +259,28 @@ const fr = {
       submitting: "Enregistrement...",
       submit: "Enregistrer le patient",
       error: "Impossible d'enregistrer le patient. Vérifiez les champs.",
+      sections: {
+        identity: "Identité",
+        contact: "Coordonnées",
+        emergency: "Personne à prévenir",
+        medical: "Informations médicales",
+      },
+    },
+    list: {
+      title: "Liste des patients",
+      newPatient: "Nouveau patient",
+      quickNew: "Création rapide",
+      patient: "Patient",
+      age: "{{age}} ans",
+      edit: "Modifier le patient",
+      deleteTitle: "Supprimer le patient",
+      deleteMessage:
+        "Cette action retirera le patient de la liste. Continuer ?",
     },
     detail: {
       dossierNumero: "Dossier n° {{numero}}",
+      about: "À propos",
+      maternite: "Maternité",
       sexeFeminin: "Féminin",
       sexeMasculin: "Masculin",
       dateNaissance: "Date de naissance",
@@ -803,6 +822,7 @@ const fr = {
       noEncaissements: "Aucun encaissement.",
       montantPlaceholder: "Montant",
       referencePlaceholder: "Référence",
+      modePaiement: "Mode de paiement",
       encaisser: "Encaisser",
       encaisserError:
         "Encaissement impossible (session de caisse ouverte requise, montant valide).",
@@ -910,6 +930,10 @@ const fr = {
       approuver: "Approuver",
       refuser: "Refuser",
       resultsCount: "{{count}} résultat(s)",
+      numero: "N°",
+      patient: "Patient",
+      compagnie: "Compagnie",
+      motif: "Motif",
     },
     priseEnChargeStatut: {
       en_attente: "En attente",

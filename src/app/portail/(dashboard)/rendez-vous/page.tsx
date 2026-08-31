@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarClock } from "lucide-react";
+import { IconCalendarClock } from "@tabler/icons-react";
 import { annulerRendezVous, fetchMesRendezVous } from "@/features/portail/portail-api";
 import type { PortailRendezVous } from "@/features/portail/types";
-import { Badge, Button, Card, PageHeader } from "@/components/ui";
+import { Badge, Button, Card, PageHeader, StatCard } from "@/components/ui";
 import type { Tone } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
@@ -67,20 +67,16 @@ export default function PortailRendezVousPage() {
       />
 
       {error && (
-        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
 
-      {rendezVous !== null && rendezVous.length > 0 && (
-        <Card className="flex items-start gap-3 p-4">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
-            <CalendarClock size={18} />
-          </span>
-          <div>
-            <div className="text-xs font-medium text-muted">{t("portail.rendezVous.statAVenir")}</div>
-            <div className="mt-1 text-2xl font-semibold text-primary">{aVenirCount}</div>
-          </div>
-        </Card>
-      )}
+      <StatCard
+        className="sm:max-w-xs"
+        icon={<IconCalendarClock size={18} />}
+        label={t("portail.rendezVous.statAVenir")}
+        value={aVenirCount}
+        tone="primary"
+      />
 
       {rendezVous === null ? (
         <p className="text-sm text-muted">{t("common.loading")}</p>
@@ -93,20 +89,22 @@ export default function PortailRendezVousPage() {
           {rendezVous.map((rdv) => (
             <Card key={rdv.id} className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="font-medium">
+                <p className="m-0 font-semibold text-heading">
                   {new Date(rdv.starts_at).toLocaleString(locale === "en" ? "en-US" : "fr-FR", {
                     dateStyle: "medium",
                     timeStyle: "short",
                   })}
                 </p>
-                <p className="text-sm text-muted">
+                <p className="m-0 text-sm text-muted">
                   {t(`rendezvous.type.${rdv.type}`)} {t("portail.rendezVous.with")}{" "}
                   {rdv.praticien.name}
                   {rdv.motif ? ` — ${rdv.motif}` : ""}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Badge tone={STATUT_TONE[rdv.statut]}>{t(`rendezvous.statut.${rdv.statut}`)}</Badge>
+                <Badge tone={STATUT_TONE[rdv.statut]} border>
+                  {t(`rendezvous.statut.${rdv.statut}`)}
+                </Badge>
                 {ANNULABLE.includes(rdv.statut) && (
                   <Button
                     variant="outline"

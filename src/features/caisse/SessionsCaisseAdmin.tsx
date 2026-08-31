@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Users } from "lucide-react";
+import { IconUsers } from "@tabler/icons-react";
 import { cloturerSession, fetchSessionsCaisse } from "./caisse-api";
 import type { SessionCaisse } from "./types";
 import { useAuth } from "@/features/auth/auth-context";
@@ -52,10 +52,10 @@ export function SessionsCaisseAdmin() {
     <Card className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
-          <Users size={18} />
+          <IconUsers size={18} />
         </span>
         <div>
-          <h2 className="font-semibold text-foreground">{t("caisse.session.autresTitle")}</h2>
+          <h2 className="font-semibold text-heading">{t("caisse.session.autresTitle")}</h2>
           <p className="text-xs text-muted">{t("caisse.session.autresSubtitle")}</p>
         </div>
       </div>
@@ -73,7 +73,7 @@ export function SessionsCaisseAdmin() {
             >
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">
+                  <span className="font-medium text-heading">
                     {t("caisse.session.ouvertePar", { nom: session.caissier?.name ?? "?" })}
                   </span>
                   <Badge tone="success">{t("caisse.session.statutOuverte")}</Badge>

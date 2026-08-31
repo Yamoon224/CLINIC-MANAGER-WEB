@@ -12,7 +12,7 @@ import {
   type PortailPraticien,
   type RendezVousType,
 } from "@/features/portail/types";
-import { Button, Card, Field, PageHeader, Select, Textarea, Input } from "@/components/ui";
+import { Button, Card, Field, PageHeader, Select, Textarea, DateInput } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export default function PortailNouveauRendezVousPage() {
@@ -102,7 +102,7 @@ export default function PortailNouveauRendezVousPage() {
             </Field>
 
             <Field label={t("portail.rendezVous.form.date")}>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              <DateInput value={date} onChange={(e) => setDate(e.target.value)} />
             </Field>
           </div>
 
@@ -146,7 +146,7 @@ export default function PortailNouveauRendezVousPage() {
           </Field>
 
           {error && (
-            <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+            <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
           )}
 
           <div className="flex gap-2">

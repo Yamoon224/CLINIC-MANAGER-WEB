@@ -1,57 +1,45 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import {
-  AlertTriangle,
-  Circle,
-  ShieldCheck,
-  TrendingUp,
-  XCircle,
-  type LucideIcon,
-} from "lucide-react";
+  IconAlertTriangle,
+  IconCircle,
+  IconShieldCheck,
+  IconTrendingUp,
+  IconXboxX,
+} from "@tabler/icons-react";
 import { fetchDashboard } from "./administration-api";
 import type { DashboardStats } from "./types";
-import { Card, Tabs } from "@/components/ui";
-import { BarChart } from "@/components/charts/BarChart";
-import type { BarChartDatum } from "@/components/charts/BarChart";
+import { Card, StatCard as UiStatCard, Tabs } from "@/components/ui";
+import type { Tone as UiTone } from "@/components/ui";
+import { ApexChart, CHART_COLORS } from "@/components/charts/ApexChart";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 type Tone = "primary" | "accent" | "success" | "warning" | "danger" | "neutral";
 
-const TONE_TEXT: Record<Tone, string> = {
-  primary: "text-primary",
-  accent: "text-accent",
-  success: "text-success",
-  warning: "text-warning",
-  danger: "text-danger",
-  neutral: "text-foreground",
-};
+interface ChartDatum {
+  label: string;
+  value: number;
+  color: string;
+}
 
-const TONE_CHIP: Record<Tone, string> = {
-  primary: "bg-primary-light text-primary",
-  accent: "bg-accent-light text-accent",
-  success: "bg-success-light text-success",
-  warning: "bg-warning-light text-warning",
-  danger: "bg-danger-light text-danger",
-  neutral: "bg-foreground/5 text-muted",
-};
-
-const TONE_ICON: Record<Tone, LucideIcon> = {
-  primary: TrendingUp,
-  accent: ShieldCheck,
-  success: ShieldCheck,
-  warning: AlertTriangle,
-  danger: XCircle,
-  neutral: Circle,
+const TONE_ICON: Record<Tone, ReactNode> = {
+  primary: <IconTrendingUp size={18} />,
+  accent: <IconShieldCheck size={18} />,
+  success: <IconShieldCheck size={18} />,
+  warning: <IconAlertTriangle size={18} />,
+  danger: <IconXboxX size={18} />,
+  neutral: <IconCircle size={18} />,
 };
 
 const TONE_COLOR: Record<Tone, string> = {
-  primary: "var(--color-primary)",
-  accent: "var(--color-accent)",
-  success: "var(--color-success)",
-  warning: "var(--color-warning)",
-  danger: "var(--color-danger)",
-  neutral: "var(--color-muted)",
+  primary: CHART_COLORS.primary,
+  accent: CHART_COLORS.secondary,
+  success: CHART_COLORS.success,
+  warning: CHART_COLORS.warning,
+  danger: CHART_COLORS.danger,
+  neutral: "#9AA2B1",
 };
 
 function StatCard({
@@ -63,17 +51,13 @@ function StatCard({
   value: string | number;
   tone?: Tone;
 }) {
-  const Icon = TONE_ICON[tone];
   return (
-    <Card className="flex items-start gap-3 p-4">
-      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${TONE_CHIP[tone]}`}>
-        <Icon size={18} />
-      </span>
-      <div className="min-w-0">
-        <div className="text-xs font-medium text-muted">{label}</div>
-        <div className={`mt-1 text-2xl font-semibold ${TONE_TEXT[tone]}`}>{value}</div>
-      </div>
-    </Card>
+    <UiStatCard
+      label={label}
+      value={value}
+      tone={tone as UiTone}
+      icon={TONE_ICON[tone]}
+    />
   );
 }
 
@@ -87,13 +71,35 @@ function ChartCard({
   formatValue,
 }: {
   title: string;
-  data: BarChartDatum[];
+  data: ChartDatum[];
   formatValue?: (value: number) => string;
 }) {
   return (
-    <Card>
-      <h3 className="mb-2 text-xs font-medium text-muted">{title}</h3>
-      <BarChart data={data} formatValue={formatValue} />
+    <Card className="p-0">
+      <div className="border-b border-border px-5 py-3.5">
+        <h3 className="m-0 text-[15px] font-semibold text-heading">{title}</h3>
+      </div>
+      <div className="p-3">
+        <ApexChart
+          type="bar"
+          height={300}
+          colors={data.map((d) => d.color)}
+          series={[{ name: title, data: data.map((d) => d.value) }]}
+          options={{
+            plotOptions: {
+              bar: { distributed: true, borderRadius: 4, columnWidth: "45%" },
+            },
+            legend: { show: false },
+            xaxis: { categories: data.map((d) => d.label) },
+            yaxis: formatValue
+              ? { labels: { formatter: (v: number) => formatValue(v) } }
+              : undefined,
+            tooltip: formatValue
+              ? { y: { formatter: (v: number) => formatValue(v) } }
+              : undefined,
+          }}
+        />
+      </div>
     </Card>
   );
 }

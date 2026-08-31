@@ -4,16 +4,19 @@ import { useCallback, useEffect, useState } from "react";
 import { fetchPrescriptionsEnAttente } from "./pharmacie-api";
 import type { PrescriptionEnAttente } from "./types";
 import { DispensationForm } from "./DispensationForm";
-import { Button, Card, Modal } from "@/components/ui";
+import { Button, DataTable, Modal, type Column } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function PrescriptionsEnAttente() {
   const { t } = useTranslation();
   const [prescriptions, setPrescriptions] = useState<PrescriptionEnAttente[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<PrescriptionEnAttente | null>(null);
 
   const load = useCallback(() => {
-    fetchPrescriptionsEnAttente().then((res) => setPrescriptions(res.data));
+    fetchPrescriptionsEnAttente()
+      .then((res) => setPrescriptions(res.data))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -22,43 +25,54 @@ export function PrescriptionsEnAttente() {
     return () => clearInterval(interval);
   }, [load]);
 
+  const columns: Column<PrescriptionEnAttente>[] = [
+    {
+      key: "patient",
+      header: t("pharmacie.enAttente.colPatient"),
+      cell: (p) =>
+        p.patient ? `${p.patient.prenom} ${p.patient.nom}` : "—",
+    },
+    {
+      key: "medicament",
+      header: t("pharmacie.enAttente.colMedicament"),
+      cell: (p) => (
+        <span className="font-semibold text-heading">
+          {p.medicament.dci} {p.medicament.dosage ?? ""}
+        </span>
+      ),
+    },
+    {
+      key: "instructions",
+      header: t("pharmacie.enAttente.colInstructions"),
+      cell: (p) => <span className="text-muted">{p.instructions ?? "—"}</span>,
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "text-right",
+      headClassName: "text-right",
+      cell: (p) => (
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setSelected(p)}>
+            {t("pharmacie.enAttente.dispenser")}
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-2">
-      <Card className="p-0 overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("pharmacie.enAttente.colPatient")}</th>
-              <th>{t("pharmacie.enAttente.colMedicament")}</th>
-              <th>{t("pharmacie.enAttente.colInstructions")}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {prescriptions.map((p) => (
-              <tr key={p.id}>
-                <td>{p.patient ? `${p.patient.prenom} ${p.patient.nom}` : "—"}</td>
-                <td>
-                  {p.medicament.dci} {p.medicament.dosage ?? ""}
-                </td>
-                <td className="text-muted">{p.instructions ?? "—"}</td>
-                <td>
-                  <Button variant="ghost" size="sm" onClick={() => setSelected(p)}>
-                    {t("pharmacie.enAttente.dispenser")}
-                  </Button>
-                </td>
-              </tr>
-            ))}
-            {prescriptions.length === 0 && (
-              <tr>
-                <td colSpan={4} className="text-muted">
-                  {t("pharmacie.enAttente.empty")}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </Card>
+      <DataTable
+        columns={columns}
+        rows={prescriptions}
+        getRowKey={(p) => p.id}
+        searchAccessor={(p) =>
+          `${p.patient ? `${p.patient.prenom} ${p.patient.nom}` : ""} ${p.medicament.dci}`
+        }
+        loading={loading}
+        emptyLabel={t("pharmacie.enAttente.empty")}
+      />
 
       <Modal
         open={selected !== null}

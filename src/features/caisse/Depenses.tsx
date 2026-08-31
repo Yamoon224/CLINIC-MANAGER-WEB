@@ -1,96 +1,107 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Receipt, Wallet, type LucideIcon } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { IconPlus, IconReceipt, IconWallet } from "@tabler/icons-react";
 import { createDepense, fetchDepenses } from "./caisse-api";
 import type { Depense } from "./types";
-import { Button, Card, CsvButton, Field, Input, Modal, Pagination } from "@/components/ui";
+import {
+  Button,
+  CsvButton,
+  DataTable,
+  Field,
+  Input,
+  Modal,
+  StatCard,
+  Textarea,
+  type Column,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <Card className="flex items-center gap-3 p-4">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
-        <Icon size={18} />
-      </span>
-      <div className="min-w-0">
-        <div className="text-xs font-medium text-muted">{label}</div>
-        <div className="mt-1 text-2xl font-semibold text-foreground">{value}</div>
-      </div>
-    </Card>
-  );
-}
 
 export function Depenses() {
   const { t } = useTranslation();
   const [depenses, setDepenses] = useState<Depense[]>([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalDepenses, setTotalDepenses] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [dateDebut, setDateDebut] = useState("");
-  const [dateFin, setDateFin] = useState("");
 
-  function load() {
-    fetchDepenses(page).then((res) => {
-      setDepenses(res.data);
-      setTotalPages(res.meta.last_page);
-      setTotalDepenses(res.meta.total);
-    });
-  }
+  const load = useCallback(() => {
+    fetchDepenses(page)
+      .then((res) => {
+        setDepenses(res.data);
+        setTotal(res.meta.total);
+      })
+      .finally(() => setLoading(false));
+  }, [page]);
 
   useEffect(() => {
     load();
-  }, [page]);
+  }, [load]);
 
   const montantPage = depenses.reduce((sum, d) => sum + Number(d.montant), 0);
 
-  const exportParams = new URLSearchParams();
-  if (dateDebut) exportParams.set("from", dateDebut);
-  if (dateFin) exportParams.set("to", dateFin);
+  const columns: Column<Depense>[] = [
+    {
+      key: "categorie",
+      header: t("caisse.depenses.categorie"),
+      cell: (d) => d.categorie,
+    },
+    {
+      key: "description",
+      header: t("caisse.depenses.description"),
+      cell: (d) => d.description ?? "-",
+    },
+    {
+      key: "montant",
+      header: t("caisse.depenses.montant"),
+      className: "font-semibold text-heading",
+      cell: (d) => `${Number(d.montant).toLocaleString("fr-FR")} F CFA`,
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-4">
-      {depenses.length > 0 && (
-        <div className="grid grid-cols-2 gap-4">
-          <StatCard
-            icon={Receipt}
-            label={t("caisse.depenses.statTotal")}
-            value={totalDepenses}
-          />
-          <StatCard
-            icon={Wallet}
-            label={t("caisse.depenses.statMontantPage")}
-            value={`${montantPage.toLocaleString("fr-FR")} F CFA`}
-          />
-        </div>
-      )}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex items-end gap-2">
-          <Field label={t("caisse.export.from")}>
-            <Input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} />
-          </Field>
-          <Field label={t("caisse.export.to")}>
-            <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
-          </Field>
-          <CsvButton
-            path={`/depenses/export.csv?${exportParams}`}
-            label={t("caisse.export.csv")}
-            filename="depenses.csv"
-          />
-        </div>
-        <Button onClick={() => setShowForm(true)}>
-          + {t("caisse.depenses.nouvelle")}
-        </Button>
+      <div className="grid grid-cols-2 gap-4">
+        <StatCard
+          icon={<IconReceipt size={18} />}
+          label={t("caisse.depenses.statTotal")}
+          value={total}
+          tone="primary"
+        />
+        <StatCard
+          icon={<IconWallet size={18} />}
+          label={t("caisse.depenses.statMontantPage")}
+          value={`${montantPage.toLocaleString("fr-FR")} F CFA`}
+          tone="info"
+        />
       </div>
+
+      <DataTable
+        columns={columns}
+        rows={depenses}
+        getRowKey={(d) => d.id}
+        page={page}
+        perPage={15}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+        emptyLabel={t("caisse.depenses.empty")}
+        toolbarRight={
+          <>
+            <CsvButton
+              path="/depenses/export.csv"
+              label={t("caisse.export.csv")}
+              filename="depenses.csv"
+            />
+            <Button
+              icon={<IconPlus size={15} />}
+              onClick={() => setShowForm(true)}
+            >
+              {t("caisse.depenses.nouvelle")}
+            </Button>
+          </>
+        }
+      />
 
       <Modal
         open={showForm}
@@ -105,31 +116,6 @@ export function Depenses() {
           }}
         />
       </Modal>
-
-      <Card className="p-0 overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("caisse.depenses.categorie")}</th>
-              <th>{t("caisse.depenses.description")}</th>
-              <th>{t("caisse.depenses.montant")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {depenses.map((d) => (
-              <tr key={d.id}>
-                <td>{d.categorie}</td>
-                <td>{d.description ?? "-"}</td>
-                <td>{d.montant} F CFA</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {depenses.length === 0 && (
-          <p className="text-sm text-muted p-4">{t("caisse.depenses.empty")}</p>
-        )}
-      </Card>
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
@@ -157,9 +143,6 @@ function DepenseForm({
         montant: Number(montant),
         description: description || undefined,
       });
-      setCategorie("");
-      setMontant("");
-      setDescription("");
       onCreated();
     } finally {
       setIsSubmitting(false);
@@ -167,43 +150,42 @@ function DepenseForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <Field label={t("caisse.depenses.categorie")}>
-            <Input
-              placeholder={t("caisse.depenses.categoriePlaceholder")}
-              value={categorie}
-              onChange={(e) => setCategorie(e.target.value)}
-            />
-          </Field>
-        </div>
-        <div className="w-32">
-          <Field label={t("caisse.depenses.montant")}>
-            <Input
-              placeholder={t("caisse.depenses.montantPlaceholder")}
-              value={montant}
-              onChange={(e) => setMontant(e.target.value)}
-            />
-          </Field>
-        </div>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("caisse.depenses.categorie")} required>
+          <Input
+            placeholder={t("caisse.depenses.categoriePlaceholder")}
+            value={categorie}
+            onChange={(e) => setCategorie(e.target.value)}
+            required
+          />
+        </Field>
+        <Field label={t("caisse.depenses.montant")} required>
+          <Input
+            placeholder={t("caisse.depenses.montantPlaceholder")}
+            value={montant}
+            onChange={(e) => setMontant(e.target.value)}
+            required
+          />
+        </Field>
       </div>
       <Field label={t("caisse.depenses.description")}>
-        <Input
+        <Textarea
           placeholder={t("caisse.depenses.descriptionPlaceholder")}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          rows={2}
         />
       </Field>
-      <div className="flex gap-2">
-        <Button type="submit" disabled={isSubmitting}>
-          {t("caisse.depenses.submit")}
-        </Button>
+      <div className="flex justify-end gap-2">
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="light" onClick={onCancel}>
             {t("common.cancel")}
           </Button>
         )}
+        <Button type="submit" disabled={isSubmitting}>
+          {t("caisse.depenses.submit")}
+        </Button>
       </div>
     </form>
   );

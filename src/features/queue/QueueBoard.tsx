@@ -1,35 +1,26 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Clock, PhoneCall, CheckCircle2, type LucideIcon } from "lucide-react";
-import { Badge, Card, PageHeader, Pagination } from "@/components/ui";
+import { IconCircleCheck, IconClock, IconPhoneCall } from "@tabler/icons-react";
+import {
+  Badge,
+  Button,
+  DataTable,
+  PageHeader,
+  StatCard,
+  type Column,
+  type Tone,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { callTicket, completeTicket, fetchQueue } from "./queue-api";
 import { SERVICES, type Service, type Ticket } from "./types";
 
-const STATUS_TONE: Record<Ticket["statut"], "primary" | "success" | "warning" | "danger"> = {
+const STATUS_TONE: Record<Ticket["statut"], Tone> = {
   en_attente: "warning",
   appele: "primary",
   traite: "success",
   annule: "danger",
-};
-
-const STAT_ICON: Record<"en_attente" | "appele" | "traite", LucideIcon> = {
-  en_attente: Clock,
-  appele: PhoneCall,
-  traite: CheckCircle2,
-};
-
-const STAT_CHIP: Record<"en_attente" | "appele" | "traite", string> = {
-  en_attente: "bg-warning-light text-warning",
-  appele: "bg-primary-light text-primary",
-  traite: "bg-success-light text-success",
-};
-
-const STAT_TEXT: Record<"en_attente" | "appele" | "traite", string> = {
-  en_attente: "text-warning",
-  appele: "text-primary",
-  traite: "text-success",
 };
 
 export function QueueBoard() {
@@ -37,19 +28,18 @@ export function QueueBoard() {
   const [service, setService] = useState<Service | "">("");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<number | null>(null);
 
   const reload = useCallback(() => {
-    fetchQueue(service || undefined, page).then((res) => {
-      setTickets(res.data);
-      setTotalPages(res.meta.last_page);
-    });
+    fetchQueue(service || undefined, page)
+      .then((res) => {
+        setTickets(res.data);
+        setTotal(res.meta.total);
+      })
+      .finally(() => setLoading(false));
   }, [service, page]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [service]);
 
   useEffect(() => {
     reload();
@@ -86,109 +76,122 @@ export function QueueBoard() {
     [tickets],
   );
 
+  const columns: Column<Ticket>[] = [
+    {
+      key: "ticket",
+      header: t("queue.table.ticket"),
+      className: "font-semibold text-heading",
+      cell: (tk) => tk.label,
+    },
+    {
+      key: "service",
+      header: t("queue.table.service"),
+      cell: (tk) => t(`queue.service.${tk.service}`),
+    },
+    {
+      key: "patient",
+      header: t("queue.table.patient"),
+      cell: (tk) => `${tk.patient.prenom} ${tk.patient.nom}`,
+    },
+    {
+      key: "statut",
+      header: t("queue.table.statut"),
+      cell: (tk) => (
+        <Badge tone={STATUS_TONE[tk.statut]} border>
+          {t(`queue.statut.${tk.statut}`)}
+        </Badge>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "text-right",
+      headClassName: "text-right",
+      cell: (tk) => (
+        <div className="flex justify-end">
+          {tk.statut === "en_attente" && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleCall(tk)}
+              disabled={busyId === tk.id}
+            >
+              {t("queue.call")}
+            </Button>
+          )}
+          {tk.statut === "appele" && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleComplete(tk)}
+              disabled={busyId === tk.id}
+            >
+              {t("queue.markDone")}
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  const serviceOptions: (Service | "")[] = ["", ...SERVICES];
+
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title={t("queue.title")} />
+      <PageHeader title={t("queue.title")} total={total} />
 
       <div className="grid grid-cols-3 gap-4">
-        {(["en_attente", "appele", "traite"] as const).map((key) => {
-          const Icon = STAT_ICON[key];
-          return (
-            <Card key={key} className="flex items-start gap-3 p-4">
-              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${STAT_CHIP[key]}`}>
-                <Icon size={18} />
-              </span>
-              <div className="min-w-0">
-                <div className="text-xs font-medium text-muted">{t(`queue.statut.${key}`)}</div>
-                <div className={`mt-1 text-2xl font-semibold ${STAT_TEXT[key]}`}>{counts[key]}</div>
-              </div>
-            </Card>
-          );
-        })}
+        <StatCard
+          icon={<IconClock size={18} />}
+          label={t("queue.statut.en_attente")}
+          value={counts.en_attente}
+          tone="warning"
+        />
+        <StatCard
+          icon={<IconPhoneCall size={18} />}
+          label={t("queue.statut.appele")}
+          value={counts.appele}
+          tone="primary"
+        />
+        <StatCard
+          icon={<IconCircleCheck size={18} />}
+          label={t("queue.statut.traite")}
+          value={counts.traite}
+          tone="success"
+        />
       </div>
 
-      <div className="flex items-center gap-2 text-sm flex-wrap">
-        <button
-          onClick={() => setService("")}
-          className={`rounded-full px-3 py-1.5 border transition-colors ${
-            service === ""
-              ? "border-primary bg-primary text-white"
-              : "border-border bg-surface hover:bg-primary-light/60"
-          }`}
-        >
-          {t("queue.all")}
-        </button>
-        {SERVICES.map((s) => (
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        {serviceOptions.map((s) => (
           <button
-            key={s}
-            onClick={() => setService(s)}
-            className={`rounded-full px-3 py-1.5 border transition-colors ${
+            key={s || "all"}
+            onClick={() => {
+              setService(s);
+              setPage(1);
+            }}
+            className={cn(
+              "rounded-full border px-3 py-1.5 transition-colors",
               service === s
                 ? "border-primary bg-primary text-white"
-                : "border-border bg-surface hover:bg-primary-light/60"
-            }`}
+                : "border-border bg-surface text-muted hover:bg-light",
+            )}
           >
-            {t(`queue.service.${s}`)}
+            {s === "" ? t("queue.all") : t(`queue.service.${s}`)}
           </button>
         ))}
       </div>
 
-      <Card className="p-0 overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("queue.table.ticket")}</th>
-              <th>{t("queue.table.service")}</th>
-              <th>{t("queue.table.patient")}</th>
-              <th>{t("queue.table.statut")}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {tickets.map((ticket) => (
-              <tr key={ticket.id}>
-                <td className="font-semibold">{ticket.label}</td>
-                <td>{t(`queue.service.${ticket.service}`)}</td>
-                <td>
-                  {ticket.patient.prenom} {ticket.patient.nom}
-                </td>
-                <td>
-                  <Badge tone={STATUS_TONE[ticket.statut]}>
-                    {t(`queue.statut.${ticket.statut}`)}
-                  </Badge>
-                </td>
-                <td>
-                  <div className="flex gap-2">
-                    {ticket.statut === "en_attente" && (
-                      <button
-                        onClick={() => handleCall(ticket)}
-                        disabled={busyId === ticket.id}
-                        className="text-primary hover:underline disabled:opacity-50"
-                      >
-                        {t("queue.call")}
-                      </button>
-                    )}
-                    {ticket.statut === "appele" && (
-                      <button
-                        onClick={() => handleComplete(ticket)}
-                        disabled={busyId === ticket.id}
-                        className="text-primary hover:underline disabled:opacity-50"
-                      >
-                        {t("queue.markDone")}
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {tickets.length === 0 && (
-          <p className="text-sm text-muted p-4">{t("queue.empty")}</p>
-        )}
-      </Card>
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      <DataTable
+        columns={columns}
+        rows={tickets}
+        getRowKey={(tk) => tk.id}
+        page={page}
+        perPage={15}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+        emptyLabel={t("queue.empty")}
+      />
     </div>
   );
 }

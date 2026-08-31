@@ -1,125 +1,183 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Users } from "lucide-react";
-import { Badge, Button, Card, Input, Modal, PageHeader, Pagination } from "@/components/ui";
+import { IconPlus } from "@tabler/icons-react";
+import {
+  Avatar,
+  Badge,
+  Button,
+  DataTable,
+  Modal,
+  PageHeader,
+  RowActions,
+  type Column,
+} from "@/components/ui";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { searchPatients } from "./patients-api";
 import { PatientForm } from "./PatientForm";
 import type { Patient } from "./types";
-import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+function ageFrom(dateNaissance: string | null): number | null {
+  if (!dateNaissance) return null;
+  const birth = new Date(dateNaissance);
+  if (Number.isNaN(birth.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+  return age;
+}
 
 export function PatientList() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [patients, setPatients] = useState<Patient[]>([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [perPage, setPerPage] = useState(10);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    setPage(1);
-  }, [query]);
+    setIsLoading(true);
+    searchPatients(query, page, perPage)
+      .then((res) => {
+        setPatients(res.data);
+        setTotal(res.meta.total);
+      })
+      .finally(() => setIsLoading(false));
+  }, [query, page, perPage]);
 
-  useEffect(() => {
-    const handle = setTimeout(() => {
-      setIsLoading(true);
-      searchPatients(query, page)
-        .then((res) => {
-          setPatients(res.data);
-          setTotalPages(res.meta.last_page);
-          setTotal(res.meta.total);
-        })
-        .finally(() => setIsLoading(false));
-    }, 250);
-    return () => clearTimeout(handle);
-  }, [query, page]);
+  const columns: Column<Patient>[] = [
+    {
+      key: "patient",
+      header: t("patients.list.patient"),
+      cell: (p) => {
+        const age = ageFrom(p.date_naissance);
+        const sexeLabel = p.sexe
+          ? p.sexe === "F"
+            ? t("patients.detail.sexeFeminin")
+            : t("patients.detail.sexeMasculin")
+          : null;
+        const sub = [age != null ? t("patients.list.age", { age }) : null, sexeLabel]
+          .filter(Boolean)
+          .join(", ");
+        return (
+          <div className="flex items-center gap-2.5">
+            <Avatar
+              initials={`${p.prenom.charAt(0)}${p.nom.charAt(0)}`}
+              size="md"
+              rounded
+            />
+            <Link
+              href={`/patients/${p.id}`}
+              className="font-semibold text-heading hover:text-primary"
+            >
+              {p.prenom} {p.nom}
+              {sub && (
+                <span className="block text-[13px] font-normal text-muted">
+                  {sub}
+                </span>
+              )}
+            </Link>
+          </div>
+        );
+      },
+    },
+    {
+      key: "dossier",
+      header: t("patients.numeroDossier"),
+      cell: (p) => <span className="text-primary">{p.numero_dossier}</span>,
+    },
+    {
+      key: "tel",
+      header: t("patients.telephone"),
+      cell: (p) => p.telephone ?? "-",
+    },
+    {
+      key: "sexe",
+      header: t("patients.form.sexe"),
+      cell: (p) =>
+        p.sexe ? (
+          <Badge tone={p.sexe === "F" ? "accent" : "primary"}>
+            {p.sexe === "F"
+              ? t("patients.detail.sexeFeminin")
+              : t("patients.detail.sexeMasculin")}
+          </Badge>
+        ) : (
+          "-"
+        ),
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "text-right",
+      headClassName: "text-right",
+      cell: (p) => (
+        <div className="flex justify-end">
+          <RowActions
+            view={`/patients/${p.id}`}
+            edit={`/patients/${p.id}/modifier`}
+            viewLabel={t("common.view")}
+            editLabel={t("common.edit")}
+          />
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title={t("patients.title")}
+        title={t("patients.list.title")}
+        total={total}
         actions={
-          <Button onClick={() => setShowForm(true)}>
-            + {t("patients.newPatient")}
-          </Button>
+          <>
+            <Button variant="light" onClick={() => setShowForm(true)}>
+              {t("patients.list.quickNew")}
+            </Button>
+            <Button
+              icon={<IconPlus size={15} />}
+              onClick={() => router.push("/patients/nouveau")}
+            >
+              {t("patients.list.newPatient")}
+            </Button>
+          </>
         }
       />
 
-      <Card className="flex w-fit items-start gap-3 p-4">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
-          <Users size={18} />
-        </span>
-        <div className="min-w-0">
-          <div className="text-xs font-medium text-muted">{t("patients.stats.total")}</div>
-          <div className="mt-1 text-2xl font-semibold text-primary">{total}</div>
-        </div>
-      </Card>
-
-      <div className="flex items-center justify-between gap-4">
-        <Input
-          type="search"
-          placeholder={t("patients.searchPlaceholder")}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="max-w-md"
-        />
-      </div>
-
-      <Card className="p-0 overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("patients.numeroDossier")}</th>
-              <th>{t("patients.nom")}</th>
-              <th>{t("patients.prenom")}</th>
-              <th>{t("patients.form.sexe")}</th>
-              <th>{t("patients.telephone")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {patients.map((patient) => (
-              <tr key={patient.id}>
-                <td>
-                  <Link
-                    href={`/patients/${patient.id}`}
-                    className="text-primary hover:underline font-medium"
-                  >
-                    {patient.numero_dossier}
-                  </Link>
-                </td>
-                <td>{patient.nom}</td>
-                <td>{patient.prenom}</td>
-                <td>
-                  {patient.sexe && (
-                    <Badge tone={patient.sexe === "F" ? "accent" : "primary"}>
-                      {patient.sexe === "F"
-                        ? t("patients.detail.sexeFeminin")
-                        : t("patients.detail.sexeMasculin")}
-                    </Badge>
-                  )}
-                </td>
-                <td>{patient.telephone ?? "-"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {!isLoading && patients.length === 0 && (
-          <p className="text-sm text-muted p-4">{t("patients.noResults")}</p>
-        )}
-      </Card>
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      <DataTable
+        columns={columns}
+        rows={patients}
+        getRowKey={(p) => p.id}
+        page={page}
+        perPage={perPage}
+        total={total}
+        onPageChange={setPage}
+        onPerPageChange={(n) => {
+          setPerPage(n);
+          setPage(1);
+        }}
+        search={query}
+        onSearchChange={(v) => {
+          setQuery(v);
+          setPage(1);
+        }}
+        searchPlaceholder={t("patients.searchPlaceholder")}
+        loading={isLoading}
+        emptyLabel={t("patients.noResults")}
+      />
 
       <Modal
         open={showForm}
         onClose={() => setShowForm(false)}
-        title={t("patients.newPatient")}
+        title={t("patients.list.quickNew")}
         size="lg"
       >
-        <PatientForm onCancel={() => setShowForm(false)} />
+        <PatientForm compact onCancel={() => setShowForm(false)} />
       </Modal>
     </div>
   );

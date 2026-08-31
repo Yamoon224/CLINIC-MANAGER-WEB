@@ -28,12 +28,12 @@ export function PatientSejours({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold mb-2 text-foreground">{t("hospitalisation.sejours.title")}</h2>
+      <h2 className="mb-2 font-semibold text-heading">{t("hospitalisation.sejours.title")}</h2>
       <ul className="flex flex-col gap-2 mb-3 text-sm">
         {sejours.map((s) => (
           <li
             key={s.id}
-            className="flex items-center justify-between rounded-xl border border-border bg-surface p-3"
+            className="flex items-center justify-between rounded-[6px] border border-border bg-surface p-3"
           >
             <Link href={`/sejours/${s.id}`} className="font-medium text-primary hover:underline">
               {t("hospitalisation.sejours.room", { chambre: s.lit.chambre, numero: s.lit.numero })}

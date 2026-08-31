@@ -1,41 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Building2, CheckCircle2, type LucideIcon } from "lucide-react";
+import { IconBuildingBank, IconCircleCheck, IconPlus } from "@tabler/icons-react";
 import { createCompagnie, fetchCompagnies } from "./assurances-api";
 import type { CompagnieAssurance } from "./types";
-import { Badge, Button, Card, Field, Input, Modal } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  DataTable,
+  Field,
+  Input,
+  Modal,
+  StatCard,
+  type Column,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <Card className="flex items-center gap-3 p-4">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
-        <Icon size={18} />
-      </span>
-      <div className="min-w-0">
-        <div className="text-xs font-medium text-muted">{label}</div>
-        <div className="mt-1 text-2xl font-semibold text-foreground">{value}</div>
-      </div>
-    </Card>
-  );
-}
 
 export function CompagniesAssurance() {
   const { t } = useTranslation();
   const [compagnies, setCompagnies] = useState<CompagnieAssurance[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
   function load() {
-    fetchCompagnies().then((res) => setCompagnies(res.data));
+    fetchCompagnies()
+      .then((res) => setCompagnies(res.data))
+      .finally(() => setLoading(false));
   }
 
   useEffect(() => {
@@ -44,25 +34,63 @@ export function CompagniesAssurance() {
 
   const actives = compagnies.filter((c) => c.actif).length;
 
+  const columns: Column<CompagnieAssurance>[] = [
+    {
+      key: "nom",
+      header: t("assurances.compagnies.nom"),
+      cell: (c) => <span className="font-semibold text-heading">{c.nom}</span>,
+    },
+    {
+      key: "tel",
+      header: t("assurances.compagnies.telephone"),
+      cell: (c) => c.contact_telephone ?? "-",
+    },
+    {
+      key: "taux",
+      header: t("assurances.compagnies.tauxCouverture"),
+      cell: (c) => `${c.taux_couverture_defaut}%`,
+    },
+    {
+      key: "statut",
+      header: t("common.status"),
+      cell: (c) => (
+        <Badge tone={c.actif ? "success" : "neutral"} border>
+          {c.actif ? t("common.active") : t("common.inactive")}
+        </Badge>
+      ),
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
-      {compagnies.length > 0 && (
-        <div className="grid grid-cols-2 gap-4">
-          <StatCard
-            icon={Building2}
-            label={t("assurances.compagnies.statTotal")}
-            value={compagnies.length}
-          />
-          <StatCard
-            icon={CheckCircle2}
-            label={t("assurances.compagnies.statActives")}
-            value={actives}
-          />
-        </div>
-      )}
-      <Button onClick={() => setShowForm(true)} className="self-start">
-        + {t("assurances.compagnies.newCompagnie")}
-      </Button>
+      <div className="grid grid-cols-2 gap-4">
+        <StatCard
+          icon={<IconBuildingBank size={18} />}
+          label={t("assurances.compagnies.statTotal")}
+          value={compagnies.length}
+          tone="primary"
+        />
+        <StatCard
+          icon={<IconCircleCheck size={18} />}
+          label={t("assurances.compagnies.statActives")}
+          value={actives}
+          tone="success"
+        />
+      </div>
+
+      <DataTable
+        columns={columns}
+        rows={compagnies}
+        getRowKey={(c) => c.id}
+        searchAccessor={(c) => `${c.nom} ${c.contact_telephone ?? ""}`}
+        loading={loading}
+        emptyLabel={t("assurances.compagnies.empty")}
+        toolbarRight={
+          <Button icon={<IconPlus size={15} />} onClick={() => setShowForm(true)}>
+            {t("assurances.compagnies.newCompagnie")}
+          </Button>
+        }
+      />
 
       <Modal
         open={showForm}
@@ -77,27 +105,6 @@ export function CompagniesAssurance() {
           }}
         />
       </Modal>
-
-      <ul className="flex flex-col gap-2 text-sm">
-        {compagnies.map((c) => (
-          <li
-            key={c.id}
-            className="flex items-center justify-between rounded-xl border border-border bg-surface p-3"
-          >
-            <span className="flex items-center gap-2">
-              {c.nom}
-              {c.contact_telephone && (
-                <span className="text-muted">- {c.contact_telephone}</span>
-              )}
-              <Badge tone={c.actif ? "success" : "neutral"}>
-                {c.actif ? t("common.active") : t("common.inactive")}
-              </Badge>
-            </span>
-            <span className="font-semibold">{c.taux_couverture_defaut}%</span>
-          </li>
-        ))}
-        {compagnies.length === 0 && <li className="text-muted">{t("assurances.compagnies.empty")}</li>}
-      </ul>
     </div>
   );
 }
@@ -115,7 +122,8 @@ function CreateCompagnieForm({
   const [contactTelephone, setContactTelephone] = useState("");
   const [busy, setBusy] = useState(false);
 
-  async function handleSubmit() {
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     if (!nom || !taux) return;
     setBusy(true);
     try {
@@ -124,9 +132,6 @@ function CreateCompagnieForm({
         taux_couverture_defaut: Number(taux),
         contact_telephone: contactTelephone || undefined,
       });
-      setNom("");
-      setTaux("");
-      setContactTelephone("");
       onCreated();
     } finally {
       setBusy(false);
@@ -134,26 +139,24 @@ function CreateCompagnieForm({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <Field label={t("assurances.compagnies.nom")}>
-            <Input
-              placeholder={t("assurances.compagnies.nomPlaceholder")}
-              value={nom}
-              onChange={(e) => setNom(e.target.value)}
-            />
-          </Field>
-        </div>
-        <div className="w-40">
-          <Field label={t("assurances.compagnies.tauxCouverture")}>
-            <Input
-              placeholder={t("assurances.compagnies.tauxCouverturePlaceholder")}
-              value={taux}
-              onChange={(e) => setTaux(e.target.value)}
-            />
-          </Field>
-        </div>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("assurances.compagnies.nom")} required>
+          <Input
+            placeholder={t("assurances.compagnies.nomPlaceholder")}
+            value={nom}
+            onChange={(e) => setNom(e.target.value)}
+            required
+          />
+        </Field>
+        <Field label={t("assurances.compagnies.tauxCouverture")} required>
+          <Input
+            placeholder={t("assurances.compagnies.tauxCouverturePlaceholder")}
+            value={taux}
+            onChange={(e) => setTaux(e.target.value)}
+            required
+          />
+        </Field>
       </div>
       <Field label={t("assurances.compagnies.telephone")}>
         <Input
@@ -162,16 +165,16 @@ function CreateCompagnieForm({
           onChange={(e) => setContactTelephone(e.target.value)}
         />
       </Field>
-      <div className="flex gap-2">
-        <Button onClick={handleSubmit} disabled={busy}>
-          {t("assurances.compagnies.submit")}
-        </Button>
+      <div className="flex justify-end gap-2">
         {onCancel && (
-          <Button variant="outline" onClick={onCancel}>
+          <Button type="button" variant="light" onClick={onCancel}>
             {t("common.cancel")}
           </Button>
         )}
+        <Button type="submit" disabled={busy}>
+          {t("assurances.compagnies.submit")}
+        </Button>
       </div>
-    </div>
+    </form>
   );
 }

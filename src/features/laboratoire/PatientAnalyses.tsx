@@ -46,7 +46,7 @@ export function PatientAnalyses({ patientId }: { patientId: number }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h2 className="font-semibold text-foreground">{t("laboratoire.title")}</h2>
+        <h2 className="font-semibold text-heading">{t("laboratoire.title")}</h2>
         <div className="flex items-center gap-2">
           {demandes.some((d) => d.statut === "valide") && (
             <PdfButton
@@ -63,7 +63,7 @@ export function PatientAnalyses({ patientId }: { patientId: number }) {
         {demandes.map((d) => (
           <li key={d.id} className="rounded-lg border border-border p-2">
             <div className="flex items-center justify-between">
-              <span className="font-medium text-foreground">{d.analyse_type.nom}</span>
+              <span className="font-medium text-heading">{d.analyse_type.nom}</span>
               <Badge tone={STATUT_TONE[d.statut]}>{STATUT_LABELS[d.statut]}</Badge>
             </div>
             {d.resultat_valeur && d.statut === "valide" && (

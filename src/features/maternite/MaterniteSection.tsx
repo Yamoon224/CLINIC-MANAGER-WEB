@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Baby } from "lucide-react";
+import { IconBabyCarriage } from "@tabler/icons-react";
 import { createGrossesse, fetchGrossesses } from "./maternite-api";
 import type { Grossesse } from "./types";
 import { Badge, Button, Card, Input } from "@/components/ui";
@@ -36,8 +36,8 @@ export function MaterniteSection({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
-        <Baby size={18} className="text-primary" />
+      <h2 className="mb-2 flex items-center gap-2 font-semibold text-heading">
+        <IconBabyCarriage size={18} className="text-primary" />
         {t("maternite.section.title")}
       </h2>
       <div className="mb-3 flex flex-col gap-2 text-sm">

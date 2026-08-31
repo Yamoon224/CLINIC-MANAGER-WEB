@@ -1,12 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { demanderConge, fetchConges, fetchEmployes, traiterConge } from "./personnel-api";
+import { useCallback, useEffect, useState } from "react";
+import { IconPlus } from "@tabler/icons-react";
+import {
+  demanderConge,
+  fetchConges,
+  fetchEmployes,
+  traiterConge,
+} from "./personnel-api";
 import type { Conge, CongeStatut, CongeType, Employe } from "./types";
-import { Badge, Button, Card, Field, Input, Modal, Pagination, Select } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  DataTable,
+  DateInput,
+  Field,
+  Modal,
+  Select,
+  type Column,
+  type Tone,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
-const CONGE_STATUT_TONE: Record<CongeStatut, "warning" | "success" | "danger"> = {
+const CONGE_STATUT_TONE: Record<CongeStatut, Tone> = {
   en_attente: "warning",
   approuve: "success",
   refuse: "danger",
@@ -18,7 +34,8 @@ export function Conges() {
   const [conges, setConges] = useState<Conge[]>([]);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
   const CONGE_TYPE_LABELS: Record<CongeType, string> = {
@@ -35,21 +52,18 @@ export function Conges() {
     refuse: t("personnel.congeStatut.refuse"),
   };
 
-  function load() {
-    fetchConges(statut, page).then((res) => {
-      setConges(res.data);
-      setTotalPages(res.meta.last_page);
-    });
-  }
-
-  useEffect(() => {
-    setPage(1);
-  }, [statut]);
+  const load = useCallback(() => {
+    fetchConges(statut, page)
+      .then((res) => {
+        setConges(res.data);
+        setTotal(res.meta.total);
+      })
+      .finally(() => setLoading(false));
+  }, [statut, page]);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statut, page]);
+  }, [load]);
 
   async function handleTraiter(id: number, decision: "approuve" | "refuse") {
     setBusyId(id);
@@ -61,13 +75,109 @@ export function Conges() {
     }
   }
 
+  const columns: Column<Conge>[] = [
+    {
+      key: "employe",
+      header: t("personnel.conges.tableEmploye"),
+      cell: (c) =>
+        c.employe ? `${c.employe.prenom} ${c.employe.nom}` : "-",
+    },
+    {
+      key: "type",
+      header: t("personnel.conges.tableType"),
+      cell: (c) => CONGE_TYPE_LABELS[c.type],
+    },
+    {
+      key: "periode",
+      header: t("personnel.conges.tablePeriode"),
+      cell: (c) =>
+        t("personnel.conges.periodeValue", {
+          debut: c.date_debut,
+          fin: c.date_fin,
+        }),
+    },
+    {
+      key: "duree",
+      header: t("personnel.conges.tableDuree"),
+      cell: (c) => t("personnel.conges.dureeJours", { jours: c.duree_jours }),
+    },
+    {
+      key: "statut",
+      header: t("personnel.conges.tableStatut"),
+      cell: (c) => (
+        <Badge tone={CONGE_STATUT_TONE[c.statut]} border>
+          {CONGE_STATUT_LABELS[c.statut]}
+        </Badge>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "text-right",
+      headClassName: "text-right",
+      cell: (c) =>
+        c.statut === "en_attente" ? (
+          <div className="flex justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleTraiter(c.id, "approuve")}
+              disabled={busyId === c.id}
+              className="border-success/40 text-success hover:bg-success-light"
+            >
+              {t("personnel.conges.approuver")}
+            </Button>
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() => handleTraiter(c.id, "refuse")}
+              disabled={busyId === c.id}
+            >
+              {t("personnel.conges.refuser")}
+            </Button>
+          </div>
+        ) : null,
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
-        <Button onClick={() => setShowForm(true)}>
-          + {t("personnel.conges.newDemande")}
-        </Button>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={conges}
+        getRowKey={(c) => c.id}
+        page={page}
+        perPage={15}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+        emptyLabel={t("personnel.conges.noConges")}
+        toolbarRight={
+          <>
+            <Select
+              value={statut}
+              onChange={(e) => {
+                setStatut(e.target.value as CongeStatut | "");
+                setPage(1);
+              }}
+              className="w-48"
+            >
+              <option value="">{t("personnel.conges.tousStatuts")}</option>
+              {Object.entries(CONGE_STATUT_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+            <Button
+              icon={<IconPlus size={15} />}
+              onClick={() => setShowForm(true)}
+            >
+              {t("personnel.conges.newDemande")}
+            </Button>
+          </>
+        }
+      />
 
       <Modal
         open={showForm}
@@ -83,78 +193,6 @@ export function Conges() {
           }}
         />
       </Modal>
-
-      <Field label={t("personnel.conges.filtreStatut")}>
-        <Select
-          value={statut}
-          onChange={(e) => setStatut(e.target.value as CongeStatut | "")}
-          className="w-56"
-        >
-          <option value="">{t("personnel.conges.tousStatuts")}</option>
-          {Object.entries(CONGE_STATUT_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </Select>
-      </Field>
-
-      <Card className="p-0 overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("personnel.conges.tableEmploye")}</th>
-              <th>{t("personnel.conges.tableType")}</th>
-              <th>{t("personnel.conges.tablePeriode")}</th>
-              <th>{t("personnel.conges.tableDuree")}</th>
-              <th>{t("personnel.conges.tableStatut")}</th>
-              <th>{t("personnel.conges.tableActions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {conges.map((c) => (
-              <tr key={c.id}>
-                <td>{c.employe && `${c.employe.prenom} ${c.employe.nom}`}</td>
-                <td>{CONGE_TYPE_LABELS[c.type]}</td>
-                <td>
-                  {t("personnel.conges.periodeValue", { debut: c.date_debut, fin: c.date_fin })}
-                </td>
-                <td>{t("personnel.conges.dureeJours", { jours: c.duree_jours })}</td>
-                <td>
-                  <Badge tone={CONGE_STATUT_TONE[c.statut]}>{CONGE_STATUT_LABELS[c.statut]}</Badge>
-                </td>
-                <td>
-                  {c.statut === "en_attente" && (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleTraiter(c.id, "approuve")}
-                        disabled={busyId === c.id}
-                        className="border-success/30 text-success hover:bg-success-light"
-                      >
-                        {t("personnel.conges.approuver")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => handleTraiter(c.id, "refuse")}
-                        disabled={busyId === c.id}
-                      >
-                        {t("personnel.conges.refuser")}
-                      </Button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {conges.length === 0 && (
-          <p className="text-sm text-muted p-4">{t("personnel.conges.noConges")}</p>
-        )}
-      </Card>
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
@@ -193,7 +231,11 @@ function CreateCongeForm({
     setError(null);
     setBusy(true);
     try {
-      await demanderConge(Number(employeId), { type, date_debut: dateDebut, date_fin: dateFin });
+      await demanderConge(Number(employeId), {
+        type,
+        date_debut: dateDebut,
+        date_fin: dateFin,
+      });
       onCreated();
     } catch {
       setError(t("personnel.conges.error"));
@@ -203,9 +245,9 @@ function CreateCongeForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-3">
-        <Field label={t("personnel.conges.employeLabel")}>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("personnel.conges.employeLabel")} required>
           <Select value={employeId} onChange={(e) => setEmployeId(e.target.value)}>
             <option value="">{t("personnel.conges.employePlaceholder")}</option>
             {employes.map((e) => (
@@ -216,7 +258,10 @@ function CreateCongeForm({
           </Select>
         </Field>
         <Field label={t("personnel.conges.typeLabel")}>
-          <Select value={type} onChange={(e) => setType(e.target.value as CongeType)}>
+          <Select
+            value={type}
+            onChange={(e) => setType(e.target.value as CongeType)}
+          >
             {Object.entries(CONGE_TYPE_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -224,31 +269,30 @@ function CreateCongeForm({
             ))}
           </Select>
         </Field>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label={t("personnel.conges.dateDebut")}>
-          <Input
-            type="date"
+        <Field label={t("personnel.conges.dateDebut")} required>
+          <DateInput
             value={dateDebut}
             onChange={(e) => setDateDebut(e.target.value)}
           />
         </Field>
-        <Field label={t("personnel.conges.dateFin")}>
-          <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
+        <Field label={t("personnel.conges.dateFin")} required>
+          <DateInput value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
         </Field>
       </div>
       {error && (
-        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">
+          {error}
+        </p>
       )}
-      <div className="flex gap-2">
-        <Button type="submit" disabled={busy}>
-          {t("personnel.conges.submit")}
-        </Button>
+      <div className="flex justify-end gap-2">
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="light" onClick={onCancel}>
             {t("common.cancel")}
           </Button>
         )}
+        <Button type="submit" disabled={busy}>
+          {t("personnel.conges.submit")}
+        </Button>
       </div>
     </form>
   );

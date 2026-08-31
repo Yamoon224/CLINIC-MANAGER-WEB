@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { FileStack, Landmark, type LucideIcon } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { IconFileStack, IconReportMoney, IconPlus } from "@tabler/icons-react";
 import {
   creerBordereau,
   envoyerBordereau,
@@ -10,60 +10,50 @@ import {
   reglerBordereau,
 } from "./assurances-api";
 import type { BordereauAssurance, CompagnieAssurance } from "./types";
-import { Badge, Button, Card, Input, Modal, Pagination, Select } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  DataTable,
+  Field,
+  Input,
+  Modal,
+  Select,
+  StatCard,
+  type Column,
+  type Tone,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
-const STATUT_TONES: Record<BordereauAssurance["statut"], "neutral" | "primary" | "warning" | "success"> = {
+const STATUT_TONES: Record<BordereauAssurance["statut"], Tone> = {
   brouillon: "neutral",
   envoye: "primary",
   paye_partiel: "warning",
   paye: "success",
 };
 
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <Card className="flex items-center gap-3 p-4">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-light text-accent">
-        <Icon size={18} />
-      </span>
-      <div className="min-w-0">
-        <div className="text-xs font-medium text-muted">{label}</div>
-        <div className="mt-1 text-2xl font-semibold text-foreground">{value}</div>
-      </div>
-    </Card>
-  );
-}
-
 export function Bordereaux() {
   const { t } = useTranslation();
   const [bordereaux, setBordereaux] = useState<BordereauAssurance[]>([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalBordereaux, setTotalBordereaux] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [compagnies, setCompagnies] = useState<CompagnieAssurance[]>([]);
   const [montantRegle, setMontantRegle] = useState<Record<number, string>>({});
   const [busy, setBusy] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
-  function load() {
-    fetchBordereaux(page).then((res) => {
-      setBordereaux(res.data);
-      setTotalPages(res.meta.last_page);
-      setTotalBordereaux(res.meta.total);
-    });
-  }
+  const load = useCallback(() => {
+    fetchBordereaux(page)
+      .then((res) => {
+        setBordereaux(res.data);
+        setTotal(res.meta.total);
+      })
+      .finally(() => setLoading(false));
+  }, [page]);
 
   useEffect(() => {
     load();
-  }, [page]);
+  }, [load]);
 
   useEffect(() => {
     fetchCompagnies().then((res) => setCompagnies(res.data));
@@ -92,27 +82,120 @@ export function Bordereaux() {
     }
   }
 
-  const montantReclamePage = bordereaux.reduce((sum, b) => sum + Number(b.montant_total), 0);
+  const montantReclamePage = bordereaux.reduce(
+    (sum, b) => sum + Number(b.montant_total),
+    0,
+  );
+
+  const columns: Column<BordereauAssurance>[] = [
+    {
+      key: "numero",
+      header: t("assurances.bordereaux.numero"),
+      cell: (b) => <span className="font-semibold text-heading">{b.numero}</span>,
+    },
+    {
+      key: "compagnie",
+      header: t("assurances.bordereaux.compagnie"),
+      cell: (b) => b.compagnie.nom,
+    },
+    {
+      key: "statut",
+      header: t("common.status"),
+      cell: (b) => (
+        <Badge tone={STATUT_TONES[b.statut]} border>
+          {t(`assurances.bordereauStatut.${b.statut}`)}
+        </Badge>
+      ),
+    },
+    {
+      key: "reglement",
+      header: t("assurances.bordereaux.reglement"),
+      cell: (b) => (
+        <span>
+          {t("assurances.bordereaux.reglementProgress", {
+            regle: b.montant_regle,
+            total: b.montant_total,
+          })}
+          {b.nombre_factures !== null &&
+            ` · ${t("assurances.bordereaux.facturesCount", { count: b.nombre_factures })}`}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "text-right",
+      headClassName: "text-right",
+      cell: (b) => (
+        <div className="flex justify-end">
+          {b.statut === "brouillon" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleEnvoyer(b.id)}
+              disabled={busy}
+            >
+              {t("assurances.bordereaux.marquerEnvoye")}
+            </Button>
+          )}
+          {(b.statut === "envoye" || b.statut === "paye_partiel") && (
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder={t("assurances.bordereaux.montantReglePlaceholder")}
+                value={montantRegle[b.id] ?? ""}
+                onChange={(e) =>
+                  setMontantRegle((m) => ({ ...m, [b.id]: e.target.value }))
+                }
+                className="w-28 text-xs"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleRegler(b.id)}
+                disabled={busy}
+              >
+                {t("assurances.bordereaux.enregistrerReglement")}
+              </Button>
+            </div>
+          )}
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-4">
-      {bordereaux.length > 0 && (
-        <div className="grid grid-cols-2 gap-4">
-          <StatCard
-            icon={FileStack}
-            label={t("assurances.bordereaux.statTotal")}
-            value={totalBordereaux}
-          />
-          <StatCard
-            icon={Landmark}
-            label={t("assurances.bordereaux.statMontantPage")}
-            value={`${montantReclamePage.toLocaleString("fr-FR")} F CFA`}
-          />
-        </div>
-      )}
-      <Button onClick={() => setShowForm(true)} className="self-start">
-        + {t("assurances.bordereaux.newBordereau")}
-      </Button>
+      <div className="grid grid-cols-2 gap-4">
+        <StatCard
+          icon={<IconFileStack size={18} />}
+          label={t("assurances.bordereaux.statTotal")}
+          value={total}
+          tone="accent"
+        />
+        <StatCard
+          icon={<IconReportMoney size={18} />}
+          label={t("assurances.bordereaux.statMontantPage")}
+          value={`${montantReclamePage.toLocaleString("fr-FR")} F CFA`}
+          tone="primary"
+        />
+      </div>
+
+      <DataTable
+        columns={columns}
+        rows={bordereaux}
+        getRowKey={(b) => b.id}
+        page={page}
+        perPage={15}
+        total={total}
+        onPageChange={setPage}
+        loading={loading}
+        emptyLabel={t("assurances.bordereaux.empty")}
+        toolbarRight={
+          <Button icon={<IconPlus size={15} />} onClick={() => setShowForm(true)}>
+            {t("assurances.bordereaux.newBordereau")}
+          </Button>
+        }
+      />
 
       <Modal
         open={showForm}
@@ -128,67 +211,6 @@ export function Bordereaux() {
           }}
         />
       </Modal>
-
-      <Card className="p-0 overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("assurances.bordereaux.numero")}</th>
-              <th>{t("assurances.bordereaux.compagnie")}</th>
-              <th>{t("common.status")}</th>
-              <th>{t("assurances.bordereaux.reglement")}</th>
-              <th>{t("common.actions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bordereaux.map((b) => (
-              <tr key={b.id}>
-                <td>{b.numero}</td>
-                <td>{b.compagnie.nom}</td>
-                <td>
-                  <Badge tone={STATUT_TONES[b.statut]}>
-                    {t(`assurances.bordereauStatut.${b.statut}`)}
-                  </Badge>
-                </td>
-                <td>
-                  {t("assurances.bordereaux.reglementProgress", {
-                    regle: b.montant_regle,
-                    total: b.montant_total,
-                  })}
-                  {b.nombre_factures !== null &&
-                    ` - ${t("assurances.bordereaux.facturesCount", { count: b.nombre_factures })}`}
-                </td>
-                <td>
-                  {b.statut === "brouillon" && (
-                    <Button variant="outline" size="sm" onClick={() => handleEnvoyer(b.id)} disabled={busy}>
-                      {t("assurances.bordereaux.marquerEnvoye")}
-                    </Button>
-                  )}
-                  {(b.statut === "envoye" || b.statut === "paye_partiel") && (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        placeholder={t("assurances.bordereaux.montantReglePlaceholder")}
-                        value={montantRegle[b.id] ?? ""}
-                        onChange={(e) =>
-                          setMontantRegle((m) => ({ ...m, [b.id]: e.target.value }))
-                        }
-                        className="w-28 text-xs"
-                      />
-                      <Button variant="outline" size="sm" onClick={() => handleRegler(b.id)} disabled={busy}>
-                        {t("assurances.bordereaux.enregistrerReglement")}
-                      </Button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {bordereaux.length === 0 && (
-          <p className="text-sm text-muted p-4">{t("assurances.bordereaux.empty")}</p>
-        )}
-      </Card>
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
@@ -207,13 +229,13 @@ function CreateBordereauForm({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function handleCreer() {
+  async function handleCreer(event: React.FormEvent) {
+    event.preventDefault();
     if (!compagnieId) return;
     setBusy(true);
     setError(null);
     try {
       await creerBordereau(Number(compagnieId));
-      setCompagnieId("");
       onCreated();
     } catch {
       setError(t("assurances.bordereaux.error"));
@@ -223,28 +245,37 @@ function CreateBordereauForm({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <Select value={compagnieId} onChange={(e) => setCompagnieId(e.target.value)}>
-        <option value="">{t("assurances.bordereaux.compagniePlaceholder")}</option>
-        {compagnies.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.nom}
+    <form onSubmit={handleCreer} className="flex flex-col gap-4">
+      <Field label={t("assurances.bordereaux.compagnie")} required>
+        <Select
+          value={compagnieId}
+          onChange={(e) => setCompagnieId(e.target.value)}
+        >
+          <option value="">
+            {t("assurances.bordereaux.compagniePlaceholder")}
           </option>
-        ))}
-      </Select>
+          {compagnies.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nom}
+            </option>
+          ))}
+        </Select>
+      </Field>
       {error && (
-        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">
+          {error}
+        </p>
       )}
-      <div className="flex gap-2">
-        <Button onClick={handleCreer} disabled={busy}>
-          {t("assurances.bordereaux.generer")}
-        </Button>
+      <div className="flex justify-end gap-2">
         {onCancel && (
-          <Button variant="outline" onClick={onCancel}>
+          <Button type="button" variant="light" onClick={onCancel}>
             {t("common.cancel")}
           </Button>
         )}
+        <Button type="submit" disabled={busy}>
+          {t("assurances.bordereaux.generer")}
+        </Button>
       </div>
-    </div>
+    </form>
   );
 }

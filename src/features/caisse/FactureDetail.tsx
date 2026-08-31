@@ -1,17 +1,35 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { IconChevronLeft } from "@tabler/icons-react";
 import { annulerFacture, encaisser, fetchFacture } from "./caisse-api";
 import { MODE_PAIEMENT_LABELS, type Facture, type ModePaiement } from "./types";
-import { Badge, Button, Card, Input, Modal, PageHeader, PdfButton, Select } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardHeader,
+  Field,
+  Input,
+  Modal,
+  PageHeader,
+  PdfButton,
+  Select,
+  type Tone,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
-const STATUT_TONES: Record<Facture["statut"], "primary" | "warning" | "success" | "neutral"> = {
+const STATUT_TONES: Record<Facture["statut"], Tone> = {
   ouverte: "primary",
   partiellement_payee: "warning",
   payee: "success",
   annulee: "neutral",
 };
+
+function fcfa(v: number | string): string {
+  return `${Number(v).toLocaleString("fr-FR")} F CFA`;
+}
 
 export function FactureDetail({ id }: { id: number }) {
   const { t } = useTranslation();
@@ -39,10 +57,19 @@ export function FactureDetail({ id }: { id: number }) {
 
   if (!facture) return <p className="text-muted">{t("common.loading")}</p>;
 
-  const active = facture.statut === "ouverte" || facture.statut === "partiellement_payee";
+  const active =
+    facture.statut === "ouverte" || facture.statut === "partiellement_payee";
 
   return (
     <div className="flex flex-col gap-4">
+      <Link
+        href="/caisse"
+        className="inline-flex w-fit items-center gap-1 text-sm font-semibold text-heading hover:text-primary"
+      >
+        <IconChevronLeft size={16} />
+        {t("nav.caisse")}
+      </Link>
+
       <PageHeader
         title={t("caisse.factureDetail.title", {
           id: facture.id,
@@ -53,115 +80,138 @@ export function FactureDetail({ id }: { id: number }) {
           numero: facture.patient.numero_dossier,
         })}
         actions={
-          <div className="flex items-center gap-2">
-            <PdfButton path={`/factures/${id}/pdf`} label={t("caisse.factureDetail.exportPdf")} />
-            <Badge tone={STATUT_TONES[facture.statut]}>{t(`caisse.factureStatut.${facture.statut}`)}</Badge>
-          </div>
+          <>
+            <PdfButton
+              path={`/factures/${id}/pdf`}
+              label={t("caisse.factureDetail.exportPdf")}
+            />
+            <Badge tone={STATUT_TONES[facture.statut]} border>
+              {t(`caisse.factureStatut.${facture.statut}`)}
+            </Badge>
+          </>
         }
       />
 
-      <Card className="p-0 overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("caisse.factureDetail.designation")}</th>
-              <th>{t("caisse.factureDetail.quantite")}</th>
-              <th>{t("caisse.factureDetail.prixUnitaire")}</th>
-              <th>{t("caisse.factureDetail.montant")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {facture.lignes.map((l) => (
-              <tr key={l.id}>
-                <td>{l.designation}</td>
-                <td>{l.quantite}</td>
-                <td>{l.prix_unitaire}</td>
-                <td>{l.montant}</td>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="overflow-hidden p-0 lg:col-span-2">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>{t("caisse.factureDetail.designation")}</th>
+                <th>{t("caisse.factureDetail.quantite")}</th>
+                <th>{t("caisse.factureDetail.prixUnitaire")}</th>
+                <th className="text-right">
+                  {t("caisse.factureDetail.montant")}
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+            </thead>
+            <tbody>
+              {facture.lignes.map((l) => (
+                <tr key={l.id}>
+                  <td className="font-medium text-heading">{l.designation}</td>
+                  <td>{l.quantite}</td>
+                  <td>{fcfa(l.prix_unitaire)}</td>
+                  <td className="text-right">{fcfa(l.montant)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
 
-      <Card className="flex flex-col gap-1.5 max-w-xs text-sm">
-        <div className="flex justify-between">
-          <span>{t("caisse.factureDetail.total")}</span>
-          <span className="font-semibold">{facture.montant_total} F CFA</span>
-        </div>
-        {facture.assurance_patient && (
-          <>
-            <div className="flex justify-between text-muted">
-              <span>
-                {t("caisse.factureDetail.partCompagnie", {
-                  compagnie: facture.assurance_patient.compagnie,
-                })}
-              </span>
-              <span>{facture.montant_part_assurance} F CFA</span>
-            </div>
-            <div className="flex justify-between text-muted">
-              <span>{t("caisse.factureDetail.partPatient")}</span>
-              <span>{facture.montant_part_patient} F CFA</span>
-            </div>
-          </>
-        )}
-        <div className="flex justify-between">
-          <span>{t("caisse.factureDetail.paye")}</span>
-          <span>{facture.montant_paye} F CFA</span>
-        </div>
-        <div className="flex justify-between">
-          <span>{t("caisse.factureDetail.solde")}</span>
-          <span className={`font-semibold ${Number(facture.solde) > 0 ? "text-danger" : "text-success"}`}>
-            {facture.solde} F CFA
-          </span>
-        </div>
-      </Card>
-
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-foreground">
-            {t("caisse.factureDetail.encaissementsTitle")}
-          </h2>
+        <Card className="flex h-fit flex-col gap-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted">{t("caisse.factureDetail.total")}</span>
+            <span className="font-semibold text-heading">
+              {fcfa(facture.montant_total)}
+            </span>
+          </div>
+          {facture.assurance_patient && (
+            <>
+              <div className="flex justify-between text-muted">
+                <span>
+                  {t("caisse.factureDetail.partCompagnie", {
+                    compagnie: facture.assurance_patient.compagnie,
+                  })}
+                </span>
+                <span>{fcfa(facture.montant_part_assurance)}</span>
+              </div>
+              <div className="flex justify-between text-muted">
+                <span>{t("caisse.factureDetail.partPatient")}</span>
+                <span>{fcfa(facture.montant_part_patient)}</span>
+              </div>
+            </>
+          )}
+          <div className="flex justify-between border-t border-border pt-2">
+            <span className="text-muted">{t("caisse.factureDetail.paye")}</span>
+            <span>{fcfa(facture.montant_paye)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted">{t("caisse.factureDetail.solde")}</span>
+            <span
+              className={`font-semibold ${Number(facture.solde) > 0 ? "text-danger" : "text-success"}`}
+            >
+              {fcfa(facture.solde)}
+            </span>
+          </div>
           {active && (
-            <Button size="sm" onClick={() => setShowEncaissement(true)}>
-              + {t("caisse.factureDetail.encaisser")}
+            <Button
+              className="mt-2 w-full"
+              onClick={() => setShowEncaissement(true)}
+            >
+              {t("caisse.factureDetail.encaisser")}
             </Button>
           )}
-        </div>
-        <ul className="text-sm flex flex-col gap-2 mb-3">
-          {facture.encaissements.map((e) => (
-            <li key={e.id} className="rounded-xl border border-border bg-surface p-3">
-              {e.montant} F CFA - {t(`caisse.modePaiement.${e.mode_paiement}`)}
-              {e.caissier && ` (${e.caissier.name})`}
-            </li>
-          ))}
-          {facture.encaissements.length === 0 && (
-            <li className="text-muted">{t("caisse.factureDetail.noEncaissements")}</li>
-          )}
-        </ul>
+        </Card>
       </div>
 
-      {active && (
-        <Modal
-          open={showEncaissement}
-          onClose={() => setShowEncaissement(false)}
-          title={t("caisse.factureDetail.encaisser")}
-        >
-          <EncaissementForm
-            factureId={id}
-            onCancel={() => setShowEncaissement(false)}
-            onCreated={() => {
-              setShowEncaissement(false);
-              load();
-            }}
-          />
-        </Modal>
-      )}
+      <Card className="p-0">
+        <CardHeader title={t("caisse.factureDetail.encaissementsTitle")} />
+        <div className="flex flex-col divide-y divide-border">
+          {facture.encaissements.map((e) => (
+            <div
+              key={e.id}
+              className="flex items-center justify-between px-5 py-3 text-sm"
+            >
+              <span className="font-medium text-heading">{fcfa(e.montant)}</span>
+              <span className="text-muted">
+                {t(`caisse.modePaiement.${e.mode_paiement}`)}
+                {e.caissier && ` · ${e.caissier.name}`}
+              </span>
+            </div>
+          ))}
+          {facture.encaissements.length === 0 && (
+            <p className="px-5 py-4 text-sm text-muted">
+              {t("caisse.factureDetail.noEncaissements")}
+            </p>
+          )}
+        </div>
+      </Card>
 
       {facture.statut === "ouverte" && (
-        <Button variant="ghost" onClick={handleAnnuler} disabled={busy} className="self-start text-danger hover:bg-danger-light">
+        <Button
+          variant="outline"
+          onClick={handleAnnuler}
+          disabled={busy}
+          className="self-start border-danger/40 text-danger hover:bg-danger-light"
+        >
           {t("caisse.factureDetail.annulerFacture")}
         </Button>
       )}
+
+      <Modal
+        open={showEncaissement}
+        onClose={() => setShowEncaissement(false)}
+        title={t("caisse.factureDetail.encaisser")}
+      >
+        <EncaissementForm
+          factureId={id}
+          onCancel={() => setShowEncaissement(false)}
+          onCreated={() => {
+            setShowEncaissement(false);
+            load();
+          }}
+        />
+      </Modal>
     </div>
   );
 }
@@ -193,8 +243,6 @@ function EncaissementForm({
         mode_paiement: modePaiement,
         reference: reference || undefined,
       });
-      setMontant("");
-      setReference("");
       onCreated();
     } catch {
       setError(t("caisse.factureDetail.encaisserError"));
@@ -204,39 +252,50 @@ function EncaissementForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <Input
-        placeholder={t("caisse.factureDetail.montantPlaceholder")}
-        value={montant}
-        onChange={(e) => setMontant(e.target.value)}
-      />
-      <Select
-        value={modePaiement}
-        onChange={(e) => setModePaiement(e.target.value as ModePaiement)}
-      >
-        {Object.keys(MODE_PAIEMENT_LABELS).map((value) => (
-          <option key={value} value={value}>
-            {t(`caisse.modePaiement.${value}`)}
-          </option>
-        ))}
-      </Select>
-      <Input
-        placeholder={t("caisse.factureDetail.referencePlaceholder")}
-        value={reference}
-        onChange={(e) => setReference(e.target.value)}
-      />
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("caisse.factureDetail.montant")} required>
+          <Input
+            placeholder={t("caisse.factureDetail.montantPlaceholder")}
+            value={montant}
+            onChange={(e) => setMontant(e.target.value)}
+            required
+          />
+        </Field>
+        <Field label={t("caisse.factureDetail.modePaiement")}>
+          <Select
+            value={modePaiement}
+            onChange={(e) => setModePaiement(e.target.value as ModePaiement)}
+          >
+            {Object.keys(MODE_PAIEMENT_LABELS).map((value) => (
+              <option key={value} value={value}>
+                {t(`caisse.modePaiement.${value}`)}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
+      <Field label={t("caisse.factureDetail.referencePlaceholder")}>
+        <Input
+          placeholder={t("caisse.factureDetail.referencePlaceholder")}
+          value={reference}
+          onChange={(e) => setReference(e.target.value)}
+        />
+      </Field>
       {error && (
-        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">
+          {error}
+        </p>
       )}
-      <div className="flex gap-2">
-        <Button type="submit" disabled={busy}>
-          {t("caisse.factureDetail.encaisser")}
-        </Button>
+      <div className="flex justify-end gap-2">
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="light" onClick={onCancel}>
             {t("common.cancel")}
           </Button>
         )}
+        <Button type="submit" disabled={busy}>
+          {t("caisse.factureDetail.encaisser")}
+        </Button>
       </div>
     </form>
   );

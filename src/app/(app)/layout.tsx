@@ -10,19 +10,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem("sidebar_collapsed") === "1";
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     if (!isLoading && !user) router.replace("/");
   }, [isLoading, user, router]);
-
-  useEffect(() => {
-    try {
-      setCollapsed(localStorage.getItem("sidebar_collapsed") === "1");
-    } catch {
-      /* ignore */
-    }
-  }, []);
 
   function toggleCollapse() {
     setCollapsed((prev) => {

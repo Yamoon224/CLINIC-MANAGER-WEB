@@ -35,7 +35,7 @@ export function PatientAssurances({ patientId }: { patientId: number }) {
 
   return (
     <div>
-      <h2 className="font-semibold mb-2 text-foreground">
+      <h2 className="mb-2 font-semibold text-heading">
         {t("assurances.patientAssurances.title")}
       </h2>
       <Card className="p-0 overflow-hidden mb-3">
@@ -160,7 +160,7 @@ function AddAssuranceForm({
         />
       </div>
       {error && (
-        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
       <div className="flex gap-2">
         <Button onClick={handleSubmit} disabled={busy}>

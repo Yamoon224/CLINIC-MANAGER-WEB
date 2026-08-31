@@ -8,7 +8,7 @@ import {
   type AuditEntry,
   type AuditEvent,
 } from "./types";
-import { Badge, Card, Field, Input, Pagination, Select } from "@/components/ui";
+import { Badge, Card, DateInput, Field, Pagination, Select } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const AUDIT_EVENT_TONE: Record<AuditEvent, "success" | "primary" | "danger"> = {
@@ -120,8 +120,7 @@ export function Audit() {
           </Select>
         </Field>
         <Field label={t("audit.filters.du")}>
-          <Input
-            type="date"
+          <DateInput
             value={dateDebut}
             onChange={(e) => {
               setPage(1);
@@ -130,8 +129,7 @@ export function Audit() {
           />
         </Field>
         <Field label={t("audit.filters.au")}>
-          <Input
-            type="date"
+          <DateInput
             value={dateFin}
             onChange={(e) => {
               setPage(1);
@@ -141,7 +139,7 @@ export function Audit() {
         </Field>
       </Card>
 
-      <Card className="p-0 overflow-hidden">
+      <Card className="overflow-hidden p-0">
         <table className="table">
           <thead>
             <tr>
@@ -185,18 +183,18 @@ export function Audit() {
                     <td colSpan={5}>
                       <div className="grid grid-cols-2 gap-4 text-xs py-2">
                         <div>
-                          <div className="mb-1 font-semibold text-foreground">
+                          <div className="mb-1 font-semibold text-heading">
                             {t("audit.avant")}
                           </div>
-                          <pre className="overflow-x-auto rounded-lg bg-primary-light/40 p-2">
+                          <pre className="overflow-x-auto rounded-[5px] bg-light p-2">
                             {entry.avant ? JSON.stringify(entry.avant, null, 2) : "-"}
                           </pre>
                         </div>
                         <div>
-                          <div className="mb-1 font-semibold text-foreground">
+                          <div className="mb-1 font-semibold text-heading">
                             {t("audit.apres")}
                           </div>
-                          <pre className="overflow-x-auto rounded-lg bg-primary-light/40 p-2">
+                          <pre className="overflow-x-auto rounded-[5px] bg-light p-2">
                             {entry.apres ? JSON.stringify(entry.apres, null, 2) : "-"}
                           </pre>
                         </div>

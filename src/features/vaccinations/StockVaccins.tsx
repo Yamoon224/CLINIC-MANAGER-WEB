@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Boxes, PackageX } from "lucide-react";
+import { IconBoxSeam, IconPackageOff, IconPlus } from "@tabler/icons-react";
 import { createLot, fetchLots, fetchVaccins } from "./vaccinations-api";
 import type { LotVaccin, Vaccin } from "./types";
-import { Badge, Button, Card, Input, Modal, Select } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  DateInput,
+  Input,
+  Modal,
+  Select,
+  StatCard,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function StockVaccins() {
@@ -46,29 +55,21 @@ export function StockVaccins() {
 
       {selected && (
         <>
-          <div className="grid grid-cols-2 gap-4 max-w-2xl">
-            <Card className="flex items-center gap-3 p-4">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
-                <Boxes size={18} />
-              </span>
-              <div className="min-w-0">
-                <div className="text-xs font-medium text-muted">{t("vaccinations.statLots")}</div>
-                <div className="mt-1 text-2xl font-semibold text-primary">{lots.length}</div>
-              </div>
-            </Card>
-            <Card className="flex items-center gap-3 p-4">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-light text-danger">
-                <PackageX size={18} />
-              </span>
-              <div className="min-w-0">
-                <div className="text-xs font-medium text-muted">{t("vaccinations.statLotsPerimes")}</div>
-                <div className="mt-1 text-2xl font-semibold text-danger">
-                  {lots.filter((l) => l.est_perime).length}
-                </div>
-              </div>
-            </Card>
+          <div className="grid grid-cols-2 gap-4">
+            <StatCard
+              icon={<IconBoxSeam size={18} />}
+              label={t("vaccinations.statLots")}
+              value={lots.length}
+              tone="primary"
+            />
+            <StatCard
+              icon={<IconPackageOff size={18} />}
+              label={t("vaccinations.statLotsPerimes")}
+              value={lots.filter((l) => l.est_perime).length}
+              tone="danger"
+            />
           </div>
-          <Card className="p-0 max-w-2xl overflow-hidden">
+          <Card className="overflow-hidden p-0">
             <table className="table">
               <thead>
                 <tr>
@@ -102,8 +103,12 @@ export function StockVaccins() {
             </table>
           </Card>
 
-          <Button onClick={() => setShowForm(true)} className="self-start">
-            + {t("vaccinations.addLot")}
+          <Button
+            icon={<IconPlus size={15} />}
+            onClick={() => setShowForm(true)}
+            className="self-start"
+          >
+            {t("vaccinations.addLot")}
           </Button>
 
           <Modal
@@ -168,8 +173,7 @@ function AddLotForm({
           onChange={(e) => setNumeroLot(e.target.value)}
           className="flex-1"
         />
-        <Input
-          type="date"
+        <DateInput
           value={datePeremption}
           onChange={(e) => setDatePeremption(e.target.value)}
           className="w-auto"

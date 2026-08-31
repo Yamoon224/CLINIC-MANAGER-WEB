@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { User } from "lucide-react";
+import { IconUser } from "@tabler/icons-react";
 import { searchPatients } from "@/features/patients/patients-api";
 import type { Patient } from "@/features/patients/types";
 import { Button, Field, Input, Textarea } from "@/components/ui";
@@ -61,7 +61,7 @@ export function AdmissionForm({ onCancel }: { onCancel?: () => void }) {
           {patient ? (
             <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm">
               <span className="flex items-center gap-2">
-                <User size={16} className="text-primary" />
+                <IconUser size={16} className="text-primary" />
                 {patient.prenom} {patient.nom} ({patient.numero_dossier})
               </span>
               <button
@@ -131,7 +131,7 @@ export function AdmissionForm({ onCancel }: { onCancel?: () => void }) {
         </Field>
 
         {error && (
-          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">
+          <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">
             {error}
           </p>
         )}

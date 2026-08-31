@@ -55,7 +55,7 @@ export function ValiderResultatModal({
         </div>
 
         {demande.resultat_critique && (
-          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">
+          <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">
             {t("laboratoire.validerModal.criticalNotice")}
           </p>
         )}
@@ -70,7 +70,7 @@ export function ValiderResultatModal({
         </Field>
 
         {error && (
-          <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+          <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
         )}
 
         <div className="flex gap-2">

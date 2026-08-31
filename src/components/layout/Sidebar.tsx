@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -31,18 +31,8 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-
-  // Ouvre automatiquement le sous-menu contenant la route active.
-  useEffect(() => {
-    const next: Record<string, boolean> = {};
-    for (const group of NAV_GROUPS) {
-      for (const item of group.items) {
-        if (item.children && itemActive(pathname, item)) next[item.href] = true;
-      }
-    }
-    setExpanded((prev) => ({ ...prev, ...next }));
-  }, [pathname]);
+  // Bascule manuelle de l'utilisateur ; `null` = suivre l'état auto (route active).
+  const [overrides, setOverrides] = useState<Record<string, boolean>>({});
 
   return (
     <>
@@ -96,7 +86,8 @@ export function Sidebar({
                   const active = itemActive(pathname, item);
                   const Icon = item.icon;
                   const hasChildren = Boolean(item.children?.length) && !collapsed;
-                  const isOpen = expanded[item.href] ?? false;
+                  const isOpen =
+                    overrides[item.href] ?? itemActive(pathname, item);
 
                   return (
                     <li key={item.href}>
@@ -120,7 +111,7 @@ export function Sidebar({
                           <button
                             type="button"
                             onClick={() =>
-                              setExpanded((p) => ({ ...p, [item.href]: !isOpen }))
+                              setOverrides((p) => ({ ...p, [item.href]: !isOpen }))
                             }
                             className="p-1.5 text-sidebar-muted hover:text-primary"
                             aria-label={t(item.labelKey)}

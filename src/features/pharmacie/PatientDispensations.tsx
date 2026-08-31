@@ -30,7 +30,7 @@ export function PatientDispensations({ patientId }: { patientId: number }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h2 className="font-semibold text-foreground">{t("pharmacie.title")}</h2>
+        <h2 className="font-semibold text-heading">{t("pharmacie.title")}</h2>
         <Button size="sm" onClick={() => setShowForm(true)}>
           + {t("pharmacie.dispense")}
         </Button>
@@ -38,7 +38,7 @@ export function PatientDispensations({ patientId }: { patientId: number }) {
       <ul className="flex flex-col gap-2 mb-3 text-sm">
         {dispensations.map((d) => (
           <li key={d.id} className="rounded-lg border border-border p-2">
-            <span className="font-medium text-foreground">
+            <span className="font-medium text-heading">
               {t("pharmacie.itemLabel", { dci: d.medicament.dci, quantite: d.quantite })}
             </span>{" "}
             <span className="text-muted">

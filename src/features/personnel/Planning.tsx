@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { assignerPlanning, fetchEmployes, fetchPlanning, retirerPlanning } from "./personnel-api";
 import { type Creneau, type Employe, type Planning as PlanningEntry } from "./types";
-import { Badge, Button, Card, Field, Input, Modal, Select, TONE_CLASSES, type Tone } from "@/components/ui";
+import { Badge, Button, Card, DateInput, Field, Input, Modal, Select, TONE_CLASSES, type Tone } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { addMonths, buildMonthGrid, startOfMonth, toISODate } from "@/lib/calendar";
 
@@ -79,11 +79,11 @@ export function Planning() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setMonthCursor((m) => addMonths(m, -1))}>
-            <ChevronLeft size={16} />
+            <IconChevronLeft size={16} />
           </Button>
           <span className="min-w-[10rem] text-center text-sm font-semibold capitalize">{monthLabel}</span>
           <Button variant="outline" size="sm" onClick={() => setMonthCursor((m) => addMonths(m, 1))}>
-            <ChevronRight size={16} />
+            <IconChevronRight size={16} />
           </Button>
           <Button variant="ghost" size="sm" onClick={() => setMonthCursor(startOfMonth(new Date()))}>
             {t("personnel.planning.today")}
@@ -190,7 +190,7 @@ export function Planning() {
               {dayDetailEntries.map((entry) => (
                 <li
                   key={entry.id}
-                  className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface p-3 text-sm"
+                  className="flex items-center justify-between gap-2 rounded-[6px] border border-border bg-surface p-3 text-sm"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge tone={CRENEAU_TONE[entry.creneau]}>{CRENEAU_LABELS[entry.creneau]}</Badge>
@@ -298,7 +298,7 @@ function CreateCreneauForm({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <Field label={t("personnel.planning.dateLabel")}>
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <DateInput value={date} onChange={(e) => setDate(e.target.value)} />
         </Field>
         <Field label={t("personnel.planning.serviceLabel")}>
           <Input
@@ -309,7 +309,7 @@ function CreateCreneauForm({
         </Field>
       </div>
       {error && (
-        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
       <div className="flex gap-2">
         <Button type="submit" disabled={busy}>

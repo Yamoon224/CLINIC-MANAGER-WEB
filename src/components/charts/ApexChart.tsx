@@ -6,6 +6,7 @@ import type { ApexOptions } from "apexcharts";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
+  loading: () => <div className="h-[300px]" />,
 });
 
 /* Couleurs de marque (tokens du template) pour les séries. */
@@ -57,38 +58,40 @@ export function ApexChart({
   sparkline?: boolean;
 }) {
   const isDark = useIsDark();
+  const foreColor = isDark ? "#9FACBF" : "#6B7280";
+  const gridColor = isDark ? "#202A3F" : "#E7E8EB";
 
-  const base: ApexOptions = {
+  const merged: ApexOptions = {
+    ...options,
+    theme: { mode: isDark ? "dark" : "light", ...options?.theme },
     chart: {
       type,
       toolbar: { show: false },
       zoom: { enabled: false },
       fontFamily: "Inter, sans-serif",
-      foreColor: isDark ? "#9FACBF" : "#6B7280",
+      foreColor,
       sparkline: { enabled: sparkline },
+      ...options?.chart,
     },
-    colors: colors ?? [CHART_COLORS.primary, CHART_COLORS.secondary],
-    dataLabels: { enabled: false },
-    stroke: { width: type === "area" || type === "line" ? 2.5 : 0, curve: "smooth" },
-    grid: {
-      borderColor: isDark ? "#202A3F" : "#E7E8EB",
-      strokeDashArray: 4,
+    colors:
+      colors && colors.length > 0
+        ? colors
+        : (options?.colors ?? [CHART_COLORS.primary, CHART_COLORS.secondary]),
+    dataLabels: { enabled: false, ...options?.dataLabels },
+    stroke: {
+      width: type === "area" || type === "line" ? 2.5 : 0,
+      curve: "smooth",
+      ...options?.stroke,
     },
-    legend: { position: "bottom", labels: { colors: isDark ? "#9FACBF" : "#6B7280" } },
-    tooltip: { theme: isDark ? "dark" : "light" },
-    fill:
-      type === "area"
-        ? {
-            type: "gradient",
-            gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05 },
-          }
-        : undefined,
-  };
-
-  const merged: ApexOptions = {
-    ...base,
-    ...options,
-    chart: { ...base.chart, ...options?.chart },
+    grid: { borderColor: gridColor, strokeDashArray: 4, ...options?.grid },
+    tooltip: { theme: isDark ? "dark" : "light", ...options?.tooltip },
+    // apexcharts 5.16 plante dans setSeriesYAxisMappings si yaxis n'est pas
+    // un tableau — on garantit toujours un tableau.
+    yaxis: Array.isArray(options?.yaxis)
+      ? options?.yaxis
+      : options?.yaxis
+        ? [options.yaxis]
+        : [{}],
   };
 
   return (

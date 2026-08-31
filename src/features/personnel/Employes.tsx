@@ -1,10 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UserCheck, UserX, Users, type LucideIcon } from "lucide-react";
+import {
+  IconPlus,
+  IconUserCheck,
+  IconUsers,
+  IconUserX,
+} from "@tabler/icons-react";
 import { createEmploye, fetchEmployes } from "./personnel-api";
 import type { Employe, EmployeStatut, TypeContrat } from "./types";
-import { Badge, Button, Card, Field, Input, Modal, Select, type Tone } from "@/components/ui";
+import {
+  Avatar,
+  Badge,
+  Button,
+  DataTable,
+  DateInput,
+  Field,
+  Input,
+  Modal,
+  Select,
+  StatCard,
+  type Column,
+  type Tone,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const EMPLOYE_STATUT_TONE: Record<EmployeStatut, Tone> = {
@@ -13,43 +31,10 @@ const EMPLOYE_STATUT_TONE: Record<EmployeStatut, Tone> = {
   suspendu: "danger",
 };
 
-function StatCard({
-  label,
-  value,
-  tone,
-  icon: Icon,
-}: {
-  label: string;
-  value: number;
-  tone: "primary" | "success" | "danger";
-  icon: LucideIcon;
-}) {
-  const chipClass = {
-    primary: "bg-primary-light text-primary",
-    success: "bg-success-light text-success",
-    danger: "bg-danger-light text-danger",
-  }[tone];
-  const valueClass = {
-    primary: "text-primary",
-    success: "text-success",
-    danger: "text-danger",
-  }[tone];
-  return (
-    <Card className="flex items-start gap-3 p-4">
-      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${chipClass}`}>
-        <Icon size={18} />
-      </span>
-      <div className="min-w-0">
-        <div className="text-xs font-medium text-muted">{label}</div>
-        <div className={`mt-1 text-2xl font-semibold ${valueClass}`}>{value}</div>
-      </div>
-    </Card>
-  );
-}
-
 export function Employes() {
   const { t } = useTranslation();
   const [employes, setEmployes] = useState<Employe[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
   const TYPE_CONTRAT_LABELS: Record<TypeContrat, string> = {
@@ -66,7 +51,9 @@ export function Employes() {
   };
 
   function load() {
-    fetchEmployes().then((res) => setEmployes(res.data));
+    fetchEmployes()
+      .then((res) => setEmployes(res.data))
+      .finally(() => setLoading(false));
   }
 
   useEffect(() => {
@@ -76,19 +63,88 @@ export function Employes() {
   const actifsCount = employes.filter((e) => e.statut === "actif").length;
   const inactifsCount = employes.length - actifsCount;
 
+  const columns: Column<Employe>[] = [
+    {
+      key: "employe",
+      header: t("personnel.employes.tableNom"),
+      cell: (e) => (
+        <div className="flex items-center gap-2.5">
+          <Avatar initials={`${e.prenom.charAt(0)}${e.nom.charAt(0)}`} size="md" />
+          <div>
+            <span className="font-semibold text-heading">
+              {e.prenom} {e.nom}
+            </span>
+            <span className="block text-[13px] text-muted">{e.matricule}</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "fonction",
+      header: t("personnel.employes.tableFonction"),
+      cell: (e) => e.fonction,
+    },
+    {
+      key: "service",
+      header: t("personnel.employes.tableService"),
+      cell: (e) => e.service ?? "-",
+    },
+    {
+      key: "contrat",
+      header: t("personnel.employes.tableTypeContrat"),
+      cell: (e) => (
+        <Badge tone="neutral">{TYPE_CONTRAT_LABELS[e.type_contrat]}</Badge>
+      ),
+    },
+    {
+      key: "statut",
+      header: t("personnel.employes.tableStatut"),
+      cell: (e) => (
+        <Badge tone={EMPLOYE_STATUT_TONE[e.statut]} border>
+          {EMPLOYE_STATUT_LABELS[e.statut]}
+        </Badge>
+      ),
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <StatCard label={t("personnel.employes.statTotal")} value={employes.length} tone="primary" icon={Users} />
-        <StatCard label={t("personnel.employes.statActifs")} value={actifsCount} tone="success" icon={UserCheck} />
-        <StatCard label={t("personnel.employes.statInactifs")} value={inactifsCount} tone="danger" icon={UserX} />
+        <StatCard
+          label={t("personnel.employes.statTotal")}
+          value={employes.length}
+          tone="primary"
+          icon={<IconUsers size={18} />}
+        />
+        <StatCard
+          label={t("personnel.employes.statActifs")}
+          value={actifsCount}
+          tone="success"
+          icon={<IconUserCheck size={18} />}
+        />
+        <StatCard
+          label={t("personnel.employes.statInactifs")}
+          value={inactifsCount}
+          tone="danger"
+          icon={<IconUserX size={18} />}
+        />
       </div>
 
-      <div className="flex justify-end">
-        <Button onClick={() => setShowForm(true)}>
-          + {t("personnel.employes.newEmploye")}
-        </Button>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={employes}
+        getRowKey={(e) => e.id}
+        searchAccessor={(e) =>
+          `${e.prenom} ${e.nom} ${e.matricule} ${e.fonction} ${e.service ?? ""}`
+        }
+        loading={loading}
+        emptyLabel={t("personnel.employes.noEmployes")}
+        toolbarRight={
+          <Button icon={<IconPlus size={15} />} onClick={() => setShowForm(true)}>
+            {t("personnel.employes.newEmploye")}
+          </Button>
+        }
+      />
 
       <Modal
         open={showForm}
@@ -104,42 +160,6 @@ export function Employes() {
           }}
         />
       </Modal>
-
-      <Card className="p-0 overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("personnel.employes.tableMatricule")}</th>
-              <th>{t("personnel.employes.tableNom")}</th>
-              <th>{t("personnel.employes.tablePrenom")}</th>
-              <th>{t("personnel.employes.tableFonction")}</th>
-              <th>{t("personnel.employes.tableService")}</th>
-              <th>{t("personnel.employes.tableTypeContrat")}</th>
-              <th>{t("personnel.employes.tableStatut")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {employes.map((e) => (
-              <tr key={e.id}>
-                <td>{e.matricule}</td>
-                <td>{e.nom}</td>
-                <td>{e.prenom}</td>
-                <td>{e.fonction}</td>
-                <td>{e.service ?? "-"}</td>
-                <td>
-                  <Badge tone="neutral">{TYPE_CONTRAT_LABELS[e.type_contrat]}</Badge>
-                </td>
-                <td>
-                  <Badge tone={EMPLOYE_STATUT_TONE[e.statut]}>{EMPLOYE_STATUT_LABELS[e.statut]}</Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {employes.length === 0 && (
-          <p className="text-sm text-muted p-4">{t("personnel.employes.noEmployes")}</p>
-        )}
-      </Card>
     </div>
   );
 }
@@ -180,11 +200,6 @@ function CreateEmployeForm({
         type_contrat: typeContrat,
         date_embauche: dateEmbauche,
       });
-      setNom("");
-      setPrenom("");
-      setFonction("");
-      setService("");
-      setDateEmbauche("");
       onCreated();
     } finally {
       setBusy(false);
@@ -192,40 +207,28 @@ function CreateEmployeForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-3">
-        <Field label={t("personnel.employes.formNom")}>
-          <Input
-            placeholder={t("personnel.employes.formNom")}
-            value={nom}
-            onChange={(e) => setNom(e.target.value)}
-          />
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("personnel.employes.formNom")} required>
+          <Input value={nom} onChange={(e) => setNom(e.target.value)} required />
         </Field>
-        <Field label={t("personnel.employes.formPrenom")}>
+        <Field label={t("personnel.employes.formPrenom")} required>
           <Input
-            placeholder={t("personnel.employes.formPrenom")}
             value={prenom}
             onChange={(e) => setPrenom(e.target.value)}
+            required
           />
         </Field>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label={t("personnel.employes.formFonction")}>
+        <Field label={t("personnel.employes.formFonction")} required>
           <Input
-            placeholder={t("personnel.employes.formFonction")}
             value={fonction}
             onChange={(e) => setFonction(e.target.value)}
+            required
           />
         </Field>
         <Field label={t("personnel.employes.formService")}>
-          <Input
-            placeholder={t("personnel.employes.formService")}
-            value={service}
-            onChange={(e) => setService(e.target.value)}
-          />
+          <Input value={service} onChange={(e) => setService(e.target.value)} />
         </Field>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
         <Field label={t("personnel.employes.formTypeContrat")}>
           <Select
             value={typeContrat}
@@ -238,23 +241,22 @@ function CreateEmployeForm({
             ))}
           </Select>
         </Field>
-        <Field label={t("personnel.employes.formDateEmbauche")}>
-          <Input
-            type="date"
+        <Field label={t("personnel.employes.formDateEmbauche")} required>
+          <DateInput
             value={dateEmbauche}
             onChange={(e) => setDateEmbauche(e.target.value)}
           />
         </Field>
       </div>
-      <div className="flex gap-2">
-        <Button type="submit" disabled={busy}>
-          {t("personnel.employes.submit")}
-        </Button>
+      <div className="flex justify-end gap-2">
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="light" onClick={onCancel}>
             {t("common.cancel")}
           </Button>
         )}
+        <Button type="submit" disabled={busy}>
+          {t("personnel.employes.submit")}
+        </Button>
       </div>
     </form>
   );

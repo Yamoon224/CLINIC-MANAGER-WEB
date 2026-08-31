@@ -1,52 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, BellRing, type LucideIcon } from "lucide-react";
+import { IconBell, IconBellRinging } from "@tabler/icons-react";
 import * as api from "./notifications-api";
 import { emitNotificationsChanged } from "./events";
 import type { Notification } from "./types";
-import { Badge, Button, Card } from "@/components/ui";
+import { Badge, Button, Card, StatCard, type Tone } from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
-const TONE_BY_TYPE: Record<Notification["type"], "primary" | "success" | "warning" | "danger"> = {
+const TONE_BY_TYPE: Record<Notification["type"], Tone> = {
   info: "primary",
   success: "success",
   warning: "warning",
   danger: "danger",
 };
 
-function StatCard({
-  label,
-  value,
-  tone,
-  icon: Icon,
-}: {
-  label: string;
-  value: number;
-  tone: "primary" | "warning";
-  icon: LucideIcon;
-}) {
-  const chipClass =
-    tone === "warning" ? "bg-warning-light text-warning" : "bg-primary-light text-primary";
-  const valueClass = tone === "warning" ? "text-warning" : "text-primary";
-  return (
-    <Card className="flex items-start gap-3 p-4">
-      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${chipClass}`}>
-        <Icon size={18} />
-      </span>
-      <div className="min-w-0">
-        <div className="text-xs font-medium text-muted">{label}</div>
-        <div className={`mt-1 text-2xl font-semibold ${valueClass}`}>{value}</div>
-      </div>
-    </Card>
-  );
-}
-
 export function NotificationsList() {
   const { t, locale } = useTranslation();
-  const [notifications, setNotifications] = useState<Notification[] | null>(
-    null,
-  );
+  const [notifications, setNotifications] = useState<Notification[] | null>(null);
 
   useEffect(() => {
     api.fetchNotifications().then(({ data }) => setNotifications(data));
@@ -74,22 +46,20 @@ export function NotificationsList() {
 
   return (
     <div className="flex flex-col gap-4">
-      {notifications !== null && notifications.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:max-w-md">
-          <StatCard
-            label={t("notifications.statTotal")}
-            value={notifications.length}
-            tone="primary"
-            icon={Bell}
-          />
-          <StatCard
-            label={t("notifications.statNonLues")}
-            value={unreadCount}
-            tone="warning"
-            icon={BellRing}
-          />
-        </div>
-      )}
+      <div className="grid grid-cols-2 gap-4 sm:max-w-md">
+        <StatCard
+          label={t("notifications.statTotal")}
+          value={notifications?.length ?? 0}
+          tone="primary"
+          icon={<IconBell size={18} />}
+        />
+        <StatCard
+          label={t("notifications.statNonLues")}
+          value={unreadCount}
+          tone="warning"
+          icon={<IconBellRinging size={18} />}
+        />
+      </div>
 
       <div className="flex justify-end">
         <Button
@@ -116,12 +86,17 @@ export function NotificationsList() {
         {notifications?.map((n) => (
           <Card
             key={n.id}
-            className={`flex items-start justify-between gap-4 ${n.lue ? "" : "border-primary/40 bg-primary-light/20"}`}
+            className={cn(
+              "flex items-start justify-between gap-4",
+              !n.lue && "border-primary/40 bg-primary-light/40",
+            )}
           >
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                <Badge tone={TONE_BY_TYPE[n.type]}>{n.type}</Badge>
-                <span className="font-medium">{n.title}</span>
+                <Badge tone={TONE_BY_TYPE[n.type]} border>
+                  {n.type}
+                </Badge>
+                <span className="font-semibold text-heading">{n.title}</span>
               </div>
               <p className="text-sm text-muted">{n.message}</p>
               <span className="text-xs text-muted">
@@ -132,7 +107,7 @@ export function NotificationsList() {
             </div>
             {!n.lue && (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={() => handleMarkAsRead(n.id)}
               >

@@ -1,15 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PackageX, Pill } from "lucide-react";
+import { IconPackageOff, IconPill } from "@tabler/icons-react";
 import { createLot, fetchLots, fetchMedicaments } from "./pharmacie-api";
 import type { LotMedicament, Medicament } from "./types";
-import { Badge, Button, Card, Input } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  DataTable,
+  DateInput,
+  Input,
+  StatCard,
+  type Column,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function StockMedicaments() {
   const { t } = useTranslation();
   const [medicaments, setMedicaments] = useState<Medicament[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<number | "">("");
   const [lots, setLots] = useState<LotMedicament[]>([]);
 
@@ -19,7 +29,9 @@ export function StockMedicaments() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchMedicaments().then((res) => setMedicaments(res.data));
+    fetchMedicaments()
+      .then((res) => setMedicaments(res.data))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -47,71 +59,74 @@ export function StockMedicaments() {
     }
   }
 
-  const sousLeSeuilCount = medicaments.filter((m) => m.stock_disponible < m.seuil_alerte).length;
+  const sousLeSeuilCount = medicaments.filter(
+    (m) => m.stock_disponible < m.seuil_alerte,
+  ).length;
+
+  const columns: Column<Medicament>[] = [
+    {
+      key: "dci",
+      header: t("pharmacie.colDci"),
+      cell: (m) => (
+        <span className="font-semibold text-heading">
+          {m.dci}
+          {m.nom_commercial && (
+            <span className="font-normal text-muted"> ({m.nom_commercial})</span>
+          )}
+        </span>
+      ),
+    },
+    {
+      key: "forme",
+      header: t("pharmacie.colFormeDosage"),
+      cell: (m) => `${m.forme} ${m.dosage}`,
+    },
+    {
+      key: "stock",
+      header: t("pharmacie.colStockDisponible"),
+      cell: (m) =>
+        m.stock_disponible < m.seuil_alerte ? (
+          <Badge tone="danger">{m.stock_disponible}</Badge>
+        ) : (
+          m.stock_disponible
+        ),
+    },
+    {
+      key: "seuil",
+      header: t("pharmacie.colSeuilAlerte"),
+      cell: (m) => m.seuil_alerte,
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-4 max-w-3xl">
-        <Card className="flex items-center gap-3 p-4">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
-            <Pill size={18} />
-          </span>
-          <div className="min-w-0">
-            <div className="text-xs font-medium text-muted">{t("pharmacie.statTotalMedicaments")}</div>
-            <div className="mt-1 text-2xl font-semibold text-primary">{medicaments.length}</div>
-          </div>
-        </Card>
-        <Card className="flex items-center gap-3 p-4">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-light text-danger">
-            <PackageX size={18} />
-          </span>
-          <div className="min-w-0">
-            <div className="text-xs font-medium text-muted">{t("pharmacie.statSousLeSeuil")}</div>
-            <div className="mt-1 text-2xl font-semibold text-danger">{sousLeSeuilCount}</div>
-          </div>
-        </Card>
+      <div className="grid grid-cols-2 gap-4">
+        <StatCard
+          icon={<IconPill size={18} />}
+          label={t("pharmacie.statTotalMedicaments")}
+          value={medicaments.length}
+          tone="primary"
+        />
+        <StatCard
+          icon={<IconPackageOff size={18} />}
+          label={t("pharmacie.statSousLeSeuil")}
+          value={sousLeSeuilCount}
+          tone="danger"
+        />
       </div>
-      <Card className="p-0 max-w-3xl overflow-hidden">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("pharmacie.colDci")}</th>
-              <th>{t("pharmacie.colFormeDosage")}</th>
-              <th>{t("pharmacie.colStockDisponible")}</th>
-              <th>{t("pharmacie.colSeuilAlerte")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {medicaments.map((m) => (
-              <tr
-                key={m.id}
-                onClick={() => setSelected(m.id)}
-                className={`cursor-pointer transition-colors hover:bg-primary-light/60 ${selected === m.id ? "bg-primary-light" : ""}`}
-              >
-                <td>
-                  {m.dci}
-                  {m.nom_commercial && ` (${m.nom_commercial})`}
-                </td>
-                <td>
-                  {m.forme} {m.dosage}
-                </td>
-                <td>
-                  {m.stock_disponible < m.seuil_alerte ? (
-                    <Badge tone="danger">{m.stock_disponible}</Badge>
-                  ) : (
-                    m.stock_disponible
-                  )}
-                </td>
-                <td>{m.seuil_alerte}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+
+      <DataTable
+        columns={columns}
+        rows={medicaments}
+        getRowKey={(m) => m.id}
+        searchAccessor={(m) => `${m.dci} ${m.nom_commercial ?? ""} ${m.forme}`}
+        loading={loading}
+        onRowClick={(m) => setSelected(m.id)}
+      />
 
       {selected && (
         <>
-          <Card className="p-0 max-w-2xl overflow-hidden">
+          <Card className="overflow-hidden p-0">
             <table className="table">
               <thead>
                 <tr>
@@ -130,7 +145,9 @@ export function StockMedicaments() {
                       {lot.quantite_restante} / {lot.quantite_initiale}
                     </td>
                     <td>
-                      {lot.est_perime && <Badge tone="danger">{t("pharmacie.perime")}</Badge>}
+                      {lot.est_perime && (
+                        <Badge tone="danger">{t("pharmacie.perime")}</Badge>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -145,15 +162,14 @@ export function StockMedicaments() {
             </table>
           </Card>
 
-          <Card className="flex items-center gap-2 max-w-2xl p-3">
+          <Card className="flex flex-wrap items-end gap-2">
             <Input
               placeholder={t("pharmacie.numeroLotPlaceholder")}
               value={numeroLot}
               onChange={(e) => setNumeroLot(e.target.value)}
               className="flex-1"
             />
-            <Input
-              type="date"
+            <DateInput
               value={datePeremption}
               onChange={(e) => setDatePeremption(e.target.value)}
               className="w-auto"

@@ -1,16 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import {
-  Calendar,
-  CalendarCheck,
-  CalendarClock,
-  CalendarX,
-  ChevronLeft,
-  ChevronRight,
-  type LucideIcon,
-} from "lucide-react";
-import { Badge, Button, Card, Modal, PageHeader, TONE_CLASSES, type Tone } from "@/components/ui";
+  IconCalendar,
+  IconCalendarCheck,
+  IconCalendarClock,
+  IconCalendarX,
+  IconChevronLeft,
+  IconChevronRight,
+  IconPlus,
+} from "@tabler/icons-react";
+import {
+  Badge,
+  Button,
+  Card,
+  Modal,
+  PageHeader,
+  StatCard,
+  TONE_CLASSES,
+  type Tone,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { addMonths, buildMonthGrid, startOfMonth, toISODate } from "@/lib/calendar";
 import { changerStatutRendezVous, fetchAgenda } from "./rendezvous-api";
@@ -45,25 +55,18 @@ const A_VENIR_STATUTS: RendezVousStatut[] = [
 
 type StatKey = "total" | "honore" | "aVenir" | "annuleAbsent";
 
-const STAT_ICON: Record<StatKey, LucideIcon> = {
-  total: Calendar,
-  honore: CalendarCheck,
-  aVenir: CalendarClock,
-  annuleAbsent: CalendarX,
+const STAT_ICON: Record<StatKey, ReactNode> = {
+  total: <IconCalendar size={18} />,
+  honore: <IconCalendarCheck size={18} />,
+  aVenir: <IconCalendarClock size={18} />,
+  annuleAbsent: <IconCalendarX size={18} />,
 };
 
-const STAT_CHIP: Record<StatKey, string> = {
-  total: "bg-foreground/5 text-muted",
-  honore: "bg-success-light text-success",
-  aVenir: "bg-primary-light text-primary",
-  annuleAbsent: "bg-danger-light text-danger",
-};
-
-const STAT_TEXT: Record<StatKey, string> = {
-  total: "text-foreground",
-  honore: "text-success",
-  aVenir: "text-primary",
-  annuleAbsent: "text-danger",
+const STAT_TONE: Record<StatKey, Tone> = {
+  total: "neutral",
+  honore: "success",
+  aVenir: "primary",
+  annuleAbsent: "danger",
 };
 
 export function AgendaBoard() {
@@ -153,7 +156,7 @@ export function AgendaBoard() {
               setShowForm(true);
             }}
           >
-            + {t("rendezvous.newRendezVous")}
+            <><IconPlus size={15} className="mr-1" />{t("rendezvous.newRendezVous")}</>
           </Button>
         }
       />
@@ -166,29 +169,24 @@ export function AgendaBoard() {
             ["aVenir", t("rendezvous.stats.aVenir")],
             ["annuleAbsent", t("rendezvous.stats.annulesAbsents")],
           ] as [StatKey, string][]
-        ).map(([key, label]) => {
-          const Icon = STAT_ICON[key];
-          return (
-            <Card key={key} className="flex items-start gap-3 p-4">
-              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${STAT_CHIP[key]}`}>
-                <Icon size={18} />
-              </span>
-              <div className="min-w-0">
-                <div className="text-xs font-medium text-muted">{label}</div>
-                <div className={`mt-1 text-2xl font-semibold ${STAT_TEXT[key]}`}>{stats[key]}</div>
-              </div>
-            </Card>
-          );
-        })}
+        ).map(([key, label]) => (
+          <StatCard
+            key={key}
+            label={label}
+            value={stats[key]}
+            tone={STAT_TONE[key]}
+            icon={STAT_ICON[key]}
+          />
+        ))}
       </div>
 
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={() => setMonthCursor((m) => addMonths(m, -1))}>
-          <ChevronLeft size={16} />
+          <IconChevronLeft size={16} />
         </Button>
         <span className="min-w-[10rem] text-center text-sm font-semibold capitalize">{monthLabel}</span>
         <Button variant="outline" size="sm" onClick={() => setMonthCursor((m) => addMonths(m, 1))}>
-          <ChevronRight size={16} />
+          <IconChevronRight size={16} />
         </Button>
         <Button variant="ghost" size="sm" onClick={() => setMonthCursor(startOfMonth(new Date()))}>
           {t("rendezvous.today")}
@@ -282,7 +280,7 @@ export function AgendaBoard() {
                 .map((rdv) => (
                   <li
                     key={rdv.id}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface p-3 text-sm"
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-[6px] border border-border bg-surface p-3 text-sm"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium">
@@ -335,7 +333,7 @@ export function AgendaBoard() {
               }}
               className="self-start"
             >
-              + {t("rendezvous.newRendezVous")}
+              <><IconPlus size={15} className="mr-1" />{t("rendezvous.newRendezVous")}</>
             </Button>
           </div>
         )}

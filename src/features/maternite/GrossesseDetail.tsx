@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, Baby, ClipboardList } from "lucide-react";
+import { IconAlertTriangle, IconBabyCarriage, IconClipboardList } from "@tabler/icons-react";
 import { getGrossesse } from "./maternite-api";
 import { AccouchementForm } from "./AccouchementForm";
 import { CpnForm } from "./CpnForm";
@@ -40,7 +40,7 @@ export function GrossesseDetail({ id }: { id: number }) {
   if (!grossesse) return <p className="text-sm text-muted">{t("maternite.detail.loading")}</p>;
 
   return (
-    <div className="flex flex-col gap-4 max-w-2xl">
+    <div className="flex flex-col gap-4">
       <PageHeader
         title={t("maternite.detail.title", {
           prenom: grossesse.patient.prenom,
@@ -53,8 +53,8 @@ export function GrossesseDetail({ id }: { id: number }) {
       />
 
       {grossesse.a_risque && (
-        <div className="flex items-center gap-2 rounded-lg bg-danger-light px-3 py-2 text-sm font-semibold text-danger">
-          <AlertTriangle size={16} className="shrink-0" />
+        <div className="flex items-center gap-2 rounded-[5px] bg-danger-light px-3 py-2 text-sm font-semibold text-danger">
+          <IconAlertTriangle size={16} className="shrink-0" />
           {t("maternite.detail.aRisque")}
         </div>
       )}
@@ -84,17 +84,17 @@ export function GrossesseDetail({ id }: { id: number }) {
       </Card>
 
       {grossesse.facteurs_risque && (
-        <div className="rounded-lg bg-danger-light p-3 text-sm">
+        <div className="rounded-[5px] bg-danger-light p-3 text-sm">
           <span className="font-semibold text-danger">
             {t("maternite.detail.facteursRisque")}
           </span>
-          <span className="text-foreground">{grossesse.facteurs_risque}</span>
+          <span className="text-heading">{grossesse.facteurs_risque}</span>
         </div>
       )}
 
       <div>
-        <h2 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
-          <ClipboardList size={18} className="text-primary" />
+        <h2 className="mb-2 flex items-center gap-2 font-semibold text-heading">
+          <IconClipboardList size={18} className="text-primary" />
           {t("maternite.detail.consultationsPrenatales", {
             count: grossesse.consultations_prenatales.length,
           })}
@@ -120,7 +120,7 @@ export function GrossesseDetail({ id }: { id: number }) {
               </p>
               {cpn.risque_detecte && (
                 <p className="mt-1 flex items-start gap-1.5 font-medium text-danger">
-                  <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                  <IconAlertTriangle size={14} className="mt-0.5 shrink-0" />
                   {cpn.risque_details}
                 </p>
               )}
@@ -130,7 +130,7 @@ export function GrossesseDetail({ id }: { id: number }) {
         {grossesse.statut === "suivie" && (
           <>
             <Button size="sm" onClick={() => setShowCpnForm(true)}>
-              + {t("maternite.cpnForm.newCpn")}
+              {"+ "}{t("maternite.cpnForm.newCpn")}
             </Button>
             <Modal
               open={showCpnForm}
@@ -152,8 +152,8 @@ export function GrossesseDetail({ id }: { id: number }) {
       </div>
 
       <div>
-        <h2 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
-          <Baby size={18} className="text-primary" />
+        <h2 className="mb-2 flex items-center gap-2 font-semibold text-heading">
+          <IconBabyCarriage size={18} className="text-primary" />
           {t("maternite.detail.accouchementTitle")}
         </h2>
         {grossesse.accouchement ? (
@@ -177,7 +177,7 @@ export function GrossesseDetail({ id }: { id: number }) {
               </p>
             )}
 
-            <h3 className="mt-2 font-medium text-foreground">
+            <h3 className="mt-2 font-medium text-heading">
               {t("maternite.detail.nouveauxNes")}
             </h3>
             <div className="flex flex-col gap-2">
@@ -203,7 +203,7 @@ export function GrossesseDetail({ id }: { id: number }) {
             </div>
 
             <Button size="sm" onClick={() => setShowNouveauNeForm(true)} className="self-start">
-              + {t("maternite.nouveauNeForm.newNouveauNe")}
+              {"+ "}{t("maternite.nouveauNeForm.newNouveauNe")}
             </Button>
             <Modal
               open={showNouveauNeForm}
@@ -224,7 +224,7 @@ export function GrossesseDetail({ id }: { id: number }) {
         ) : grossesse.statut === "suivie" ? (
           <>
             <Button size="sm" onClick={() => setShowAccouchementForm(true)}>
-              + {t("maternite.accouchementForm.submit")}
+              {"+ "}{t("maternite.accouchementForm.submit")}
             </Button>
             <Modal
               open={showAccouchementForm}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { addCpn } from "./maternite-api";
-import { Button, Field, Input, Textarea } from "@/components/ui";
+import { Button, DateInput, Field, Input, Textarea } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function CpnForm({
@@ -53,7 +53,7 @@ export function CpnForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="grid grid-cols-4 gap-3">
         <Field label={t("maternite.cpnForm.date")}>
-          <Input type="date" value={dateCpn} onChange={(e) => setDateCpn(e.target.value)} />
+          <DateInput value={dateCpn} onChange={(e) => setDateCpn(e.target.value)} />
         </Field>
         <Field label={t("maternite.cpnForm.poids")}>
           <Input

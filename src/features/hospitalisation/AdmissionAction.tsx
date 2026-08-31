@@ -138,7 +138,7 @@ export function AdmissionAction({
         />
       </Field>
       {error && (
-        <p className="rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
       <div className="flex gap-2">
         <Button

@@ -17,7 +17,7 @@ import { fetchAnalyseTypes } from "@/features/laboratoire/laboratoire-api";
 import type { AnalyseType } from "@/features/laboratoire/types";
 import { checkInteractions, fetchMedicaments } from "@/features/pharmacie/pharmacie-api";
 import type { InteractionMedicamenteuse, Medicament } from "@/features/pharmacie/types";
-import { AlertTriangle, CheckCircle2, ClipboardList } from "lucide-react";
+import { IconAlertTriangle, IconCircleCheck, IconClipboardList } from "@tabler/icons-react";
 import { Badge, Button, Card, Field, Input, PageHeader, PdfButton, Select, Textarea } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
@@ -205,15 +205,15 @@ export function ConsultationScreen({ id }: { id: number }) {
           motif: consultation.motif,
         })}
         actions={
-          <Badge tone={readOnly ? "success" : "primary"}>
+          <Badge border tone={readOnly ? "success" : "primary"}>
             {readOnly ? t("consultations.statutTerminee") : t("consultations.statutEnCours")}
           </Badge>
         }
       />
 
       {consultation.patient.allergies && (
-        <div className="flex items-start gap-2 rounded-xl border border-danger/30 bg-danger-light p-3 text-sm">
-          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-danger" />
+        <div className="flex items-start gap-2 rounded-[6px] border border-danger/30 bg-danger-light p-3 text-sm">
+          <IconAlertTriangle size={16} className="mt-0.5 shrink-0 text-danger" />
           <p>
             <span className="font-semibold text-danger">{t("consultations.allergiesLabel")}</span>
             {consultation.patient.allergies}
@@ -222,8 +222,8 @@ export function ConsultationScreen({ id }: { id: number }) {
       )}
 
       {readOnly && (
-        <div className="flex items-center gap-2 rounded-xl border border-success/30 bg-success-light p-3 text-sm text-success">
-          <CheckCircle2 size={16} className="shrink-0" />
+        <div className="flex items-center gap-2 rounded-[6px] border border-success/30 bg-success-light p-3 text-sm text-success">
+          <IconCircleCheck size={16} className="shrink-0" />
           {t("consultations.completed")}
         </div>
       )}
@@ -339,8 +339,8 @@ export function ConsultationScreen({ id }: { id: number }) {
 
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="flex items-center gap-2 font-semibold text-foreground">
-            <ClipboardList size={18} className="text-primary" />
+          <h2 className="flex items-center gap-2 font-semibold text-heading">
+            <IconClipboardList size={18} className="text-primary" />
             {t("consultations.prescriptions")}
           </h2>
           {consultation.prescriptions.length > 0 && (
@@ -352,10 +352,10 @@ export function ConsultationScreen({ id }: { id: number }) {
         </div>
         <ul className="flex flex-col gap-2 mb-3 text-sm">
           {consultation.prescriptions.map((p) => (
-            <li key={p.id} className="flex items-start gap-2 rounded-lg border border-border p-2">
+            <li key={p.id} className="flex items-start gap-2 rounded-[5px] border border-border p-2">
               <Badge tone="neutral">{PRESCRIPTION_TYPE_LABELS[p.type]}</Badge>
               <div>
-                <span className="font-medium text-foreground">{p.designation}</span>
+                <span className="font-medium text-heading">{p.designation}</span>
                 {p.instructions && <p className="text-muted">{p.instructions}</p>}
               </div>
             </li>
@@ -366,7 +366,7 @@ export function ConsultationScreen({ id }: { id: number }) {
         </ul>
 
         {!readOnly && (
-          <div className="flex flex-col gap-2 rounded-xl border border-border p-3">
+          <div className="flex flex-col gap-2 rounded-[6px] border border-border p-3">
             <div className="flex gap-2">
               <Select
                 value={prescriptionType}
@@ -427,8 +427,8 @@ export function ConsultationScreen({ id }: { id: number }) {
             </div>
 
             {allergyWarning && (
-              <div className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger-light p-2 text-sm text-danger">
-                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+              <div className="flex items-start gap-2 rounded-[5px] border border-danger/30 bg-danger-light p-2 text-sm text-danger">
+                <IconAlertTriangle size={14} className="mt-0.5 shrink-0" />
                 <div>
                   <p className="font-semibold">{t("consultations.allergyWarningTitle")}</p>
                   <p>{t("consultations.allergyWarningBody", { allergies: consultation.patient.allergies ?? "" })}</p>
@@ -447,9 +447,9 @@ export function ConsultationScreen({ id }: { id: number }) {
             {interactionWarnings.map((interaction) => (
               <div
                 key={interaction.id}
-                className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning-light p-2 text-sm text-warning"
+                className="flex items-start gap-2 rounded-[5px] border border-warning/30 bg-warning-light p-2 text-sm text-warning"
               >
-                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                <IconAlertTriangle size={14} className="mt-0.5 shrink-0" />
                 <div>
                   <p className="font-semibold">{t("pharmacie.interactions.warningTitle")}</p>
                   <p>

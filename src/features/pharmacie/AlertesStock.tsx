@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarClock, PackageX } from "lucide-react";
+import { IconCalendarClock, IconPackageOff } from "@tabler/icons-react";
 import { fetchAlertes } from "./pharmacie-api";
 import type { Alertes } from "./types";
-import { Badge, Card } from "@/components/ui";
+import { Badge, StatCard } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function AlertesStock() {
@@ -18,34 +18,28 @@ export function AlertesStock() {
   if (!alertes) return null;
 
   return (
-    <div className="flex flex-col gap-4 max-w-2xl">
+    <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4">
-        <Card className="flex items-center gap-3 p-4">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-light text-danger">
-            <PackageX size={18} />
-          </span>
-          <div className="min-w-0">
-            <div className="text-xs font-medium text-muted">{t("dashboard.pharmacie.rupturesStock")}</div>
-            <div className="mt-1 text-2xl font-semibold text-danger">{alertes.ruptures.length}</div>
-          </div>
-        </Card>
-        <Card className="flex items-center gap-3 p-4">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-light text-warning">
-            <CalendarClock size={18} />
-          </span>
-          <div className="min-w-0">
-            <div className="text-xs font-medium text-muted">{t("dashboard.pharmacie.peremptionsProches")}</div>
-            <div className="mt-1 text-2xl font-semibold text-warning">{alertes.peremptions_proches.length}</div>
-          </div>
-        </Card>
+        <StatCard
+          icon={<IconPackageOff size={18} />}
+          label={t("dashboard.pharmacie.rupturesStock")}
+          value={alertes.ruptures.length}
+          tone="danger"
+        />
+        <StatCard
+          icon={<IconCalendarClock size={18} />}
+          label={t("dashboard.pharmacie.peremptionsProches")}
+          value={alertes.peremptions_proches.length}
+          tone="warning"
+        />
       </div>
       <div>
-        <h3 className="font-medium text-foreground mb-2">{t("pharmacie.rupturesTitle")}</h3>
+        <h3 className="font-medium text-heading mb-2">{t("pharmacie.rupturesTitle")}</h3>
         <ul className="text-sm flex flex-col gap-2">
           {alertes.ruptures.map((m) => (
             <li
               key={m.id}
-              className="flex items-center justify-between rounded-lg border border-danger/30 bg-danger-light p-2"
+              className="flex items-center justify-between rounded-[5px] border border-danger/30 bg-danger-light p-2"
             >
               <span>
                 {t("pharmacie.ruptureItem", { dci: m.dci, stock: m.stock_disponible, seuil: m.seuil_alerte })}
@@ -60,12 +54,12 @@ export function AlertesStock() {
       </div>
 
       <div>
-        <h3 className="font-medium text-foreground mb-2">{t("pharmacie.expiringTitle")}</h3>
+        <h3 className="font-medium text-heading mb-2">{t("pharmacie.expiringTitle")}</h3>
         <ul className="text-sm flex flex-col gap-2">
           {alertes.peremptions_proches.map((lot) => (
             <li
               key={lot.id}
-              className="flex items-center justify-between rounded-lg border border-warning/30 bg-warning-light p-2"
+              className="flex items-center justify-between rounded-[5px] border border-warning/30 bg-warning-light p-2"
             >
               <span>
                 {t("pharmacie.expiringItem", {

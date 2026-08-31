@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Wallet } from "lucide-react";
+import { IconWallet } from "@tabler/icons-react";
 import { cloturerSession, fetchSessionCourante, ouvrirSession } from "./caisse-api";
 import type { SessionCaisse } from "./types";
 import { Badge, Button, Card, Input } from "@/components/ui";
@@ -54,10 +54,10 @@ export function SessionCaisseWidget() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground/5 text-muted">
-            <Wallet size={18} />
+            <IconWallet size={18} />
           </span>
           <div className="flex items-center gap-2">
-            <h2 className="font-semibold text-foreground">{t("caisse.session.title")}</h2>
+            <h2 className="font-semibold text-heading">{t("caisse.session.title")}</h2>
             <Badge tone="neutral">{t("caisse.session.statutFermee")}</Badge>
           </div>
         </div>
@@ -92,10 +92,10 @@ export function SessionCaisseWidget() {
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success-light text-success">
-          <Wallet size={18} />
+          <IconWallet size={18} />
         </span>
         <div className="flex items-center gap-2">
-          <h2 className="font-semibold text-foreground">{t("caisse.session.title")}</h2>
+          <h2 className="font-semibold text-heading">{t("caisse.session.title")}</h2>
           <Badge tone="success">{t("caisse.session.statutOuverte")}</Badge>
         </div>
       </div>
