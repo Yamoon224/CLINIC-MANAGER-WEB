@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "./auth-context";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import { Button, Field, Input, PasswordInput } from "@/components/ui";
@@ -8,6 +9,7 @@ import { Button, Field, Input, PasswordInput } from "@/components/ui";
 export function LoginForm() {
   const { login } = useAuth();
   const { t } = useTranslation();
+  const redirectTo = useSearchParams().get("redirect") ?? undefined;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +20,7 @@ export function LoginForm() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await login({ email, password });
+      await login({ email, password }, redirectTo);
     } catch {
       setError(t("auth.invalidCredentials"));
     } finally {

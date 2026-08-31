@@ -8,6 +8,7 @@ import {
   IconCake,
   IconCalendarPlus,
   IconChevronLeft,
+  IconFileText,
   IconGenderBigender,
   IconIdBadge2,
   IconMapPin,
@@ -201,6 +202,12 @@ export function PatientDetail({ patient: initialPatient }: { patient: Patient })
 
         <div className="flex flex-wrap gap-2 border-t border-border px-5 py-3.5">
           <Button
+            icon={<IconFileText size={15} />}
+            onClick={() => router.push(`/patients/${patient.id}/dossier`)}
+          >
+            {t("dossierMedical.title")}
+          </Button>
+          <Button
             variant="light"
             icon={<IconRoute size={15} />}
             onClick={() => setShowOrient(true)}
@@ -210,6 +217,10 @@ export function PatientDetail({ patient: initialPatient }: { patient: Patient })
           <PdfButton
             path={`/patients/${patient.id}/dossier.pdf`}
             label={t("patients.detail.exportDossierPdf")}
+          />
+          <PdfButton
+            path={`/patients/${patient.id}/carte.pdf`}
+            label={t("dossierMedical.cartePatient")}
           />
           <ActivatePortailAccess patient={patient} onUpdated={setPatient} />
         </div>

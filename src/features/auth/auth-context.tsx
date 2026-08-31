@@ -15,9 +15,16 @@ import { disconnectEcho } from "@/lib/echo";
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials, redirectTo?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (payload: UpdateProfilePayload) => Promise<void>;
+}
+
+/** N'autorise qu'un chemin interne comme cible de redirection (anti open-redirect). */
+function safeRedirect(target?: string): string {
+  return target && target.startsWith("/") && !target.startsWith("//")
+    ? target
+    : "/dashboard";
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -40,11 +47,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(
-    async (credentials: LoginCredentials) => {
+    async (credentials: LoginCredentials, redirectTo?: string) => {
       const { user, token } = await authApi.login(credentials);
       window.localStorage.setItem("auth_token", token);
       setUser(user);
-      router.push("/dashboard");
+      router.push(safeRedirect(redirectTo));
     },
     [router],
   );

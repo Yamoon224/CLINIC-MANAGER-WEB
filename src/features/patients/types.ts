@@ -1,6 +1,7 @@
 export interface Patient {
   id: number;
   numero_dossier: string;
+  carte_uuid: string | null;
   nom: string;
   prenom: string;
   date_naissance: string | null;

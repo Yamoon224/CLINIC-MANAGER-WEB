@@ -1,20 +1,27 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/auth-context";
 import { LoginForm } from "@/features/auth/LoginForm";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
-export default function RootPage() {
+function RootPageInner() {
   const { user, isLoading } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
+  const redirect = useSearchParams().get("redirect");
 
   useEffect(() => {
-    if (!isLoading && user) router.replace("/dashboard");
-  }, [isLoading, user, router]);
+    if (!isLoading && user) {
+      const target =
+        redirect && redirect.startsWith("/") && !redirect.startsWith("//")
+          ? redirect
+          : "/dashboard";
+      router.replace(target);
+    }
+  }, [isLoading, user, router, redirect]);
 
   if (isLoading || user) return null;
 
@@ -62,5 +69,13 @@ export default function RootPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function RootPage() {
+  return (
+    <Suspense fallback={null}>
+      <RootPageInner />
+    </Suspense>
   );
 }
