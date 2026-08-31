@@ -69,7 +69,11 @@ export function FeuillesLaboList({ canEdit }: { canEdit: boolean }) {
         </span>
       ),
     },
-    { key: "motif", header: t("consultations.motif"), cell: (r) => r.motif ?? "-" },
+    {
+      key: "motif",
+      header: t("laboratoire.feuille.colMotif"),
+      cell: (r) => r.motif ?? "-",
+    },
     {
       key: "date",
       header: t("laboratoire.feuille.colDate"),

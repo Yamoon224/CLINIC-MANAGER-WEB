@@ -596,6 +596,7 @@ const fr = {
       colValeur: "Valeur",
       colRef: "Réf.",
       colDate: "Date",
+      colMotif: "Motif",
       critiqueNotice: "Au moins un résultat critique — le médecin prescripteur sera notifié à la validation.",
       commentairePlaceholder: "Interprétation du biologiste (optionnel)...",
       enregistrer: "Enregistrer",
