@@ -257,11 +257,15 @@ function PriseEnChargeForm({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setAssuranceId("");
-    setAssurances([]);
     if (!patient) return;
     fetchAssurancesPatient(patient.id).then((res) => setAssurances(res.data));
   }, [patient]);
+
+  function pickPatient(p: Patient | null) {
+    setPatient(p);
+    setAssuranceId("");
+    setAssurances([]);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -284,7 +288,7 @@ function PriseEnChargeForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Field label={t("assurances.prisesEnCharge.patient")} required>
-        <PatientSelect value={patient} onChange={setPatient} />
+        <PatientSelect value={patient} onChange={pickPatient} />
       </Field>
       <Field label={t("assurances.prisesEnCharge.compagnie")} required>
         <Select
