@@ -95,3 +95,32 @@ export function annulerOperation(operationId: number): Promise<{ data: Operation
     method: "POST",
   });
 }
+
+// --- Gestion des lits (CRUD) ---
+export interface LitPayload {
+  numero: string;
+  chambre: string;
+  prix_journalier?: number | null;
+  statut?: "libre" | "occupe" | "reserve" | "nettoyage";
+}
+
+export function createLit(payload: LitPayload): Promise<{ data: Lit }> {
+  return apiFetch<{ data: Lit }>("/lits", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateLit(
+  id: number,
+  payload: LitPayload,
+): Promise<{ data: Lit }> {
+  return apiFetch<{ data: Lit }>(`/lits/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteLit(id: number): Promise<void> {
+  return apiFetch<void>(`/lits/${id}`, { method: "DELETE" });
+}

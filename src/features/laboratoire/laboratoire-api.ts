@@ -62,3 +62,39 @@ export function annuler(id: number): Promise<{ data: DemandeAnalyse }> {
     method: "POST",
   });
 }
+
+// --- Catalogue examens / analyse types (CRUD) ---
+export interface AnalyseTypePayload {
+  nom: string;
+  section?: string | null;
+  unite?: string | null;
+  prelevement?: string | null;
+  valeur_ref_min?: number | null;
+  valeur_ref_max?: number | null;
+  valeur_critique_min?: number | null;
+  valeur_critique_max?: number | null;
+  prix?: number | null;
+}
+
+export function createAnalyseType(
+  payload: AnalyseTypePayload,
+): Promise<{ data: AnalyseType }> {
+  return apiFetch<{ data: AnalyseType }>("/analyse-types", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateAnalyseType(
+  id: number,
+  payload: AnalyseTypePayload,
+): Promise<{ data: AnalyseType }> {
+  return apiFetch<{ data: AnalyseType }>(`/analyse-types/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteAnalyseType(id: number): Promise<void> {
+  return apiFetch<void>(`/analyse-types/${id}`, { method: "DELETE" });
+}

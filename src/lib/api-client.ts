@@ -39,3 +39,17 @@ export async function apiFetch<T>(
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
+
+/** Extrait le message d'erreur lisible d'une ApiError (Laravel : { message }). */
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  if (
+    error instanceof ApiError &&
+    error.body &&
+    typeof error.body === "object" &&
+    "message" in error.body &&
+    typeof (error.body as { message: unknown }).message === "string"
+  ) {
+    return (error.body as { message: string }).message;
+  }
+  return fallback;
+}

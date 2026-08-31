@@ -113,3 +113,18 @@ export function reglerBordereau(id: number, montant: number): Promise<{ data: Bo
     body: JSON.stringify({ montant }),
   });
 }
+
+// --- Prise en charge : création & suppression ---
+export function creerPriseEnCharge(
+  assurancePatientId: number,
+  payload: { motif: string; montant_plafond?: number | null },
+): Promise<{ data: PriseEnCharge }> {
+  return apiFetch<{ data: PriseEnCharge }>(
+    `/assurances-patient/${assurancePatientId}/prises-en-charge`,
+    { method: "POST", body: JSON.stringify(payload) },
+  );
+}
+
+export function deletePriseEnCharge(id: number): Promise<void> {
+  return apiFetch<void>(`/prises-en-charge/${id}`, { method: "DELETE" });
+}
