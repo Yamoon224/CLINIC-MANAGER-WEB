@@ -418,7 +418,7 @@ function PlanifierOperationForm({
             ? t("hospitalisation.operations.submitting")
             : t("hospitalisation.operations.submit")}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="light" onClick={onCancel}>
           {t("common.cancel")}
         </Button>
       </div>
@@ -474,7 +474,7 @@ function TerminerOperationForm({
             ? t("hospitalisation.operations.submitting")
             : t("hospitalisation.operations.submitTerminer")}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="light" onClick={onCancel}>
           {t("common.cancel")}
         </Button>
       </div>

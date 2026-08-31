@@ -187,7 +187,7 @@ export function DispensationForm({
           {t("pharmacie.dispense")}
         </Button>
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="light" onClick={onCancel}>
             {t("common.cancel")}
           </Button>
         )}

@@ -54,7 +54,7 @@ export function StartConsultationAction({
       )}
       {onCancel && (
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="light" onClick={onCancel}>
             {t("common.cancel")}
           </Button>
         </div>

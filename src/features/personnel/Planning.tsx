@@ -316,7 +316,7 @@ function CreateCreneauForm({
           {t("personnel.planning.submit")}
         </Button>
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="light" onClick={onCancel}>
             {t("common.cancel")}
           </Button>
         )}

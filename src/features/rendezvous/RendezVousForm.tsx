@@ -4,7 +4,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { searchPatients } from "@/features/patients/patients-api";
 import type { Patient } from "@/features/patients/types";
-import { Button, Field, Input, Select, Textarea } from "@/components/ui";
+import {
+  Button,
+  DateInput,
+  Field,
+  Input,
+  Select,
+  Textarea,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import {
   createRendezVous,
@@ -101,7 +108,7 @@ export function RendezVousForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Field label={t("rendezvous.form.patient")}>
           {patient ? (
-            <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm">
+            <div className="flex items-center justify-between rounded-[5px] border border-border bg-surface px-3 py-2 text-sm">
               <span>
                 {patient.prenom} {patient.nom} ({patient.numero_dossier})
               </span>
@@ -121,7 +128,7 @@ export function RendezVousForm({
                 onChange={(e) => setPatientQuery(e.target.value)}
               />
               {patientResults.length > 0 && (
-                <ul className="rounded-lg border border-border divide-y divide-border overflow-hidden">
+                <ul className="rounded-[5px] border border-border divide-y divide-border overflow-hidden">
                   {patientResults.map((p) => (
                     <li key={p.id}>
                       <button
@@ -131,7 +138,7 @@ export function RendezVousForm({
                           setPatientResults([]);
                           setPatientQuery("");
                         }}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-primary-light/60"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-light"
                       >
                         {p.prenom} {p.nom} ({p.numero_dossier})
                       </button>
@@ -174,8 +181,7 @@ export function RendezVousForm({
           </Field>
 
           <Field label={t("rendezvous.form.date")}>
-            <Input
-              type="date"
+            <DateInput
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
@@ -191,10 +197,10 @@ export function RendezVousForm({
                     key={c}
                     type="button"
                     onClick={() => setStartsAt(c)}
-                    className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                    className={`rounded-[5px] border px-3 py-1.5 text-sm transition-colors ${
                       startsAt === c
                         ? "border-primary bg-primary text-white"
-                        : "border-border bg-surface hover:bg-primary-light/60"
+                        : "border-border bg-surface hover:bg-light"
                     }`}
                   >
                     {new Date(c).toLocaleTimeString("fr-FR", {
@@ -227,15 +233,15 @@ export function RendezVousForm({
           </p>
         )}
 
-        <div className="flex gap-2">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? t("rendezvous.form.submitting") : t("rendezvous.form.submit")}
-          </Button>
+        <div className="flex justify-end gap-2">
           {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button" variant="light" onClick={onCancel}>
               {t("common.cancel")}
             </Button>
           )}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? t("rendezvous.form.submitting") : t("rendezvous.form.submit")}
+          </Button>
         </div>
     </form>
   );
