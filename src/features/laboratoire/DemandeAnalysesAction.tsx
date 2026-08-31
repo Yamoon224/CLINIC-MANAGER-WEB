@@ -68,7 +68,7 @@ export function DemandeAnalysesAction({
         <input type="checkbox" checked={urgente} onChange={(e) => setUrgente(e.target.checked)} />
         {t("laboratoire.urgentLabel")}
       </label>
-      <div className="flex gap-2">
+      <div className="flex flex-row-reverse justify-start gap-2">
         <Button
           onClick={handleSubmit}
           disabled={isSubmitting || selected.length === 0}

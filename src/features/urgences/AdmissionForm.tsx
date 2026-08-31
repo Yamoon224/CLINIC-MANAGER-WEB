@@ -136,7 +136,7 @@ export function AdmissionForm({ onCancel }: { onCancel?: () => void }) {
           </p>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex flex-row-reverse justify-start gap-2">
           <Button type="submit" variant="danger" disabled={isSubmitting}>
             {isSubmitting ? t("urgences.form.submitting") : t("urgences.form.submit")}
           </Button>

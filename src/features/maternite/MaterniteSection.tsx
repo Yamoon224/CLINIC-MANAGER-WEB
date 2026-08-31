@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { IconBabyCarriage } from "@tabler/icons-react";
 import { createGrossesse, fetchGrossesses } from "./maternite-api";
 import type { Grossesse } from "./types";
-import { Badge, Button, Card, Input } from "@/components/ui";
+import { Badge, Button, Card, DateInput } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function MaterniteSection({ patientId }: { patientId: number }) {
@@ -61,8 +61,7 @@ export function MaterniteSection({ patientId }: { patientId: number }) {
 
       {!enCours && (
         <Card className="flex items-center gap-2">
-          <Input
-            type="date"
+          <DateInput
             value={ddr}
             onChange={(e) => setDdr(e.target.value)}
             className="flex-1"

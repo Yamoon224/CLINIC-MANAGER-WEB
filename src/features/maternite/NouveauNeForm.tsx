@@ -89,7 +89,7 @@ export function NouveauNeForm({
           onChange={(e) => setVaccinations(e.target.value)}
         />
       </Field>
-      <div className="flex gap-2">
+      <div className="flex flex-row-reverse justify-start gap-2">
         <Button type="submit" disabled={isSubmitting}>
           {t("maternite.nouveauNeForm.submit")}
         </Button>

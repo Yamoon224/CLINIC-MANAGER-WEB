@@ -73,11 +73,11 @@ export function ValiderResultatModal({
           <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex flex-row-reverse justify-start gap-2">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? t("laboratoire.validerModal.submitting") : t("laboratoire.validerModal.submit")}
           </Button>
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button type="button" variant="light" onClick={onClose}>
             {t("common.cancel")}
           </Button>
         </div>

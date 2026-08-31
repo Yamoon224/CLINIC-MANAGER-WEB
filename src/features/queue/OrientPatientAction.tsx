@@ -60,7 +60,7 @@ export function OrientPatientAction({
       )}
       {error && <p className="text-sm text-danger">{error}</p>}
       {onCancel && (
-        <div className="flex gap-2">
+        <div className="flex justify-end gap-2">
           <Button type="button" variant="light" onClick={onCancel}>
             {t("common.cancel")}
           </Button>

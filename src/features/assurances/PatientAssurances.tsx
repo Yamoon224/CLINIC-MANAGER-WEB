@@ -8,7 +8,16 @@ import {
   fetchCompagnies,
 } from "./assurances-api";
 import type { AssurancePatient, CompagnieAssurance } from "./types";
-import { Badge, Button, Card, Input, Modal, Pagination, Select } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  DateInput,
+  Input,
+  Modal,
+  Pagination,
+  Select,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function PatientAssurances({ patientId }: { patientId: number }) {
@@ -146,14 +155,12 @@ function AddAssuranceForm({
         />
       </div>
       <div className="flex gap-2">
-        <Input
-          type="date"
+        <DateInput
           value={dateDebut}
           onChange={(e) => setDateDebut(e.target.value)}
           className="flex-1"
         />
-        <Input
-          type="date"
+        <DateInput
           value={dateFin}
           onChange={(e) => setDateFin(e.target.value)}
           className="flex-1"

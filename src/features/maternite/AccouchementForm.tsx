@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createAccouchement } from "./maternite-api";
 import type { ModeAccouchement } from "./types";
-import { Button, Field, Input, Select, Textarea } from "@/components/ui";
+import { Button, DateInput, Field, Input, Select, Textarea } from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function AccouchementForm({
@@ -48,7 +48,7 @@ export function AccouchementForm({
           </Select>
         </Field>
         <Field label={t("maternite.accouchementForm.dateHeure")}>
-          <Input
+          <DateInput
             type="datetime-local"
             value={dateHeure}
             onChange={(e) => setDateHeure(e.target.value)}
@@ -70,7 +70,7 @@ export function AccouchementForm({
           rows={2}
         />
       </Field>
-      <div className="flex gap-2">
+      <div className="flex flex-row-reverse justify-start gap-2">
         <Button type="submit" disabled={isSubmitting}>
           {t("maternite.accouchementForm.submit")}
         </Button>

@@ -179,7 +179,7 @@ export function DispensationForm({
       {error && <p className="text-sm text-danger">{error}</p>}
       {confirmation && <p className="text-sm text-success">{confirmation}</p>}
 
-      <div className="flex gap-2">
+      <div className="flex flex-row-reverse justify-start gap-2">
         <Button
           onClick={handleSubmit}
           disabled={isSubmitting || !medicamentId || !lotId}

@@ -21,6 +21,7 @@ import {
   Badge,
   Button,
   Card,
+  DateInput,
   Field,
   Input,
   Modal,
@@ -389,7 +390,7 @@ function PlanifierOperationForm({
         />
       </Field>
       <Field label={t("hospitalisation.operations.datePrevue")} required>
-        <Input
+        <DateInput
           type="datetime-local"
           required
           value={datePrevue}
@@ -412,7 +413,7 @@ function PlanifierOperationForm({
       {error && (
         <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
-      <div className="flex gap-2">
+      <div className="flex flex-row-reverse justify-start gap-2">
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting
             ? t("hospitalisation.operations.submitting")
@@ -468,7 +469,7 @@ function TerminerOperationForm({
       {error && (
         <p className="rounded-[5px] bg-danger-light px-3 py-2 text-sm text-danger">{error}</p>
       )}
-      <div className="flex gap-2">
+      <div className="flex flex-row-reverse justify-start gap-2">
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting
             ? t("hospitalisation.operations.submitting")

@@ -3,7 +3,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { administrerVaccin, fetchCarnet, fetchVaccins } from "./vaccinations-api";
 import type { Carnet, Vaccin } from "./types";
-import { Badge, Button, Card, Input, Modal, PdfButton, Pagination, Select, Textarea } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  DateInput,
+  Modal,
+  PdfButton,
+  Pagination,
+  Select,
+  Textarea,
+} from "@/components/ui";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function CarnetVaccination({ patientId }: { patientId: number }) {
@@ -174,8 +184,7 @@ function AdministerVaccinForm({
             </option>
           ))}
         </Select>
-        <Input
-          type="date"
+        <DateInput
           value={dateAdministration}
           onChange={(e) => setDateAdministration(e.target.value)}
           className="w-auto"

@@ -103,7 +103,7 @@ export function CpnForm({
           />
         </Field>
       )}
-      <div className="flex gap-2">
+      <div className="flex flex-row-reverse justify-start gap-2">
         <Button type="submit" disabled={isSubmitting}>
           {t("maternite.cpnForm.submit")}
         </Button>
