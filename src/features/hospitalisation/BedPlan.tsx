@@ -353,7 +353,7 @@ function LitForm({
             onChange={(e) => setForm({ ...form, chambre: e.target.value })}
           />
         </Field>
-        <Field label={t("hospitalisation.lits.prixJournalier")}>
+        <Field label={t("hospitalisation.lits.prixJournalier")} full>
           <Input
             type="number"
             min={0}
@@ -367,7 +367,7 @@ function LitForm({
           />
         </Field>
         {initial && (
-          <Field label={t("common.status")}>
+          <Field label={t("common.status")} full>
             <Select
               value={form.statut ?? "libre"}
               onChange={(e) =>

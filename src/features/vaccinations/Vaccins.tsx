@@ -247,7 +247,7 @@ function VaccinForm({
             }
           />
         </Field>
-        <Field label={t("vaccins.colAge")}>
+        <Field label={t("vaccins.colAge")} full>
           <Input
             type="number"
             min={0}

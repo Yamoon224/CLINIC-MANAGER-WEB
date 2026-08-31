@@ -130,7 +130,7 @@ export function RendezVousForm({
             </Select>
           </Field>
 
-          <Field label={t("rendezvous.form.date")}>
+          <Field label={t("rendezvous.form.date")} full>
             <DateInput
               value={date}
               onChange={(e) => setDate(e.target.value)}

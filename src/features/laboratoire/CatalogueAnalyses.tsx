@@ -285,7 +285,7 @@ function AnalyseTypeForm({
             onChange={(e) => setNum("valeur_critique_max", e.target.value)}
           />
         </Field>
-        <Field label={t("catalogueAnalyses.colPrix")}>
+        <Field label={t("catalogueAnalyses.colPrix")} full>
           <Input
             type="number"
             min={0}
