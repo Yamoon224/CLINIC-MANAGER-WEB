@@ -1381,6 +1381,15 @@ const en: Dictionary = {
     carteInconnueTexte:
       "This patient card does not match any record. Check the QR code or search for the patient.",
     ouvertureDossier: "Opening the medical record…",
+    aucunVaccin: "No vaccination recorded.",
+    aucuneFacture: "No invoice.",
+    colVaccin: "Vaccine",
+    colDose: "Dose",
+    colDate: "Date",
+    colMapi: "AEFI",
+    colStatut: "Status",
+    colTotal: "Total",
+    colSolde: "Balance",
   },
 };
 

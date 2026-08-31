@@ -9,13 +9,11 @@ import {
   IconBed,
   IconChevronDown,
   IconFlask,
-  IconPill,
+  IconReceipt,
   IconStethoscope,
   IconVaccine,
 } from "@tabler/icons-react";
-import { CarnetVaccination } from "@/features/vaccinations/CarnetVaccination";
-import { PatientFactures } from "@/features/caisse/PatientFactures";
-import { Badge, Card, StatCard } from "@/components/ui";
+import { Badge, Card, StatCard, Table, Td, Th } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import type {
@@ -449,16 +447,80 @@ export function DossierMedical({
           <IconVaccine size={16} />
           {t("dossierMedical.carnetVaccination")}
         </h3>
-        <CarnetVaccination patientId={dossier.patient.id} />
+        <Card className="p-0">
+          {dossier.vaccinations.length === 0 ? (
+            <p className="m-0 p-4 text-sm text-muted">
+              {t("dossierMedical.aucunVaccin")}
+            </p>
+          ) : (
+            <Table>
+              <thead>
+                <tr>
+                  <Th>{t("dossierMedical.colVaccin")}</Th>
+                  <Th>{t("dossierMedical.colDose")}</Th>
+                  <Th>{t("dossierMedical.colDate")}</Th>
+                  <Th>{t("dossierMedical.colMapi")}</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {dossier.vaccinations.map((v) => (
+                  <tr key={v.id}>
+                    <Td>{v.vaccin}</Td>
+                    <Td>{v.dose_numero}</Td>
+                    <Td>{formatDate(v.date_administration)}</Td>
+                    <Td>
+                      {v.mapi_survenue ? (
+                        <Badge tone="danger">{t("common.yes")}</Badge>
+                      ) : (
+                        "—"
+                      )}
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Card>
       </div>
 
       {/* Factures */}
       <div className="flex flex-col gap-3">
         <h3 className="m-0 flex items-center gap-1.5 text-[15px] font-semibold text-heading">
-          <IconPill size={16} />
+          <IconReceipt size={16} />
           {t("dossierMedical.factures")}
         </h3>
-        <PatientFactures patientId={dossier.patient.id} />
+        <Card className="p-0">
+          {dossier.factures.length === 0 ? (
+            <p className="m-0 p-4 text-sm text-muted">
+              {t("dossierMedical.aucuneFacture")}
+            </p>
+          ) : (
+            <Table>
+              <thead>
+                <tr>
+                  <Th>{t("dossierMedical.colDate")}</Th>
+                  <Th>{t("dossierMedical.colStatut")}</Th>
+                  <Th className="text-right">{t("dossierMedical.colTotal")}</Th>
+                  <Th className="text-right">{t("dossierMedical.colSolde")}</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {dossier.factures.map((f) => (
+                  <tr key={f.id}>
+                    <Td>{formatDate(f.created_at)}</Td>
+                    <Td>
+                      <Badge tone={f.solde > 0 ? "warning" : "success"}>
+                        {f.statut}
+                      </Badge>
+                    </Td>
+                    <Td className="text-right">{f.montant_total}</Td>
+                    <Td className="text-right">{f.solde}</Td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Card>
       </div>
 
       <p className="flex items-center gap-1 text-[12px] text-muted">

@@ -1382,6 +1382,15 @@ const fr = {
     carteInconnueTexte:
       "Cette carte patient ne correspond à aucun dossier. Vérifiez le QR code ou recherchez le patient.",
     ouvertureDossier: "Ouverture du dossier médical…",
+    aucunVaccin: "Aucune vaccination enregistrée.",
+    aucuneFacture: "Aucune facture.",
+    colVaccin: "Vaccin",
+    colDose: "Dose",
+    colDate: "Date",
+    colMapi: "MAPI",
+    colStatut: "Statut",
+    colTotal: "Total",
+    colSolde: "Solde",
   },
 } as const;
 
