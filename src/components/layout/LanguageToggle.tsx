@@ -1,24 +1,20 @@
 "use client";
 
-import { Languages } from "lucide-react";
+import { IconWorld } from "@tabler/icons-react";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function LanguageToggle() {
   const { locale, setLocale } = useTranslation();
 
-  function toggle() {
-    setLocale(locale === "fr" ? "en" : "fr");
-  }
-
   return (
     <button
-      onClick={toggle}
+      onClick={() => setLocale(locale === "fr" ? "en" : "fr")}
       aria-label={locale === "fr" ? "Switch to English" : "Passer en français"}
       title={locale === "fr" ? "Switch to English" : "Passer en français"}
-      className="flex items-center gap-1 rounded-full px-2 py-2 text-muted hover:bg-primary-light hover:text-primary"
+      className="inline-flex h-8 items-center gap-1 rounded-full border border-border px-2 text-muted shadow-[var(--shadow-preclinic-sm)] transition-colors hover:border-primary hover:text-primary"
     >
-      <Languages size={20} />
-      <span className="text-xs font-semibold uppercase">{locale}</span>
+      <IconWorld size={16} />
+      <span className="text-[11px] font-semibold uppercase">{locale}</span>
     </button>
   );
 }

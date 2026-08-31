@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileSpreadsheet } from "lucide-react";
+import { IconFileTypeCsv } from "@tabler/icons-react";
 import { Button, type ButtonProps } from "./Button";
 import { downloadFile } from "@/lib/download";
 
@@ -38,7 +38,7 @@ export function CsvButton({
   return (
     <span className="inline-flex items-center gap-2">
       <Button variant={variant} size={size} onClick={handleClick} disabled={busy} className={className}>
-        <FileSpreadsheet size={14} className="mr-1.5" />
+        <IconFileTypeCsv size={14} className="mr-1.5" />
         {busy ? "…" : label}
       </Button>
       {error && <span className="text-xs text-danger">Export impossible</span>}

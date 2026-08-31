@@ -5,9 +5,11 @@ import type { Patient, RegisterPatientPayload } from "./types";
 export function searchPatients(
   query: string,
   page = 1,
+  perPage?: number,
 ): Promise<PaginatedResponse<Patient>> {
   const params = new URLSearchParams({ page: String(page) });
   if (query) params.set("q", query);
+  if (perPage) params.set("per_page", String(perPage));
   return apiFetch<PaginatedResponse<Patient>>(`/patients?${params}`);
 }
 
@@ -20,6 +22,16 @@ export function registerPatient(
 ): Promise<{ data: Patient }> {
   return apiFetch<{ data: Patient }>("/patients", {
     method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updatePatient(
+  id: number,
+  payload: RegisterPatientPayload,
+): Promise<{ data: Patient }> {
+  return apiFetch<{ data: Patient }>(`/patients/${id}`, {
+    method: "PUT",
     body: JSON.stringify(payload),
   });
 }

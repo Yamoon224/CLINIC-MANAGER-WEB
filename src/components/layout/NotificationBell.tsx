@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bell } from "lucide-react";
+import { IconBell } from "@tabler/icons-react";
 import { useAuth } from "@/features/auth/auth-context";
 import {
   fetchNotifications,
@@ -96,17 +96,17 @@ export function NotificationBell() {
       <button
         onClick={handleOpen}
         aria-label={t("nav.notifications")}
-        className="relative rounded-full p-2 text-muted hover:bg-primary-light hover:text-primary"
+        className="relative inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted shadow-[var(--shadow-preclinic-sm)] transition-colors hover:border-primary hover:text-primary"
       >
-        <Bell size={20} />
+        <IconBell size={16} className={unreadCount > 0 ? "animate-ring" : undefined} />
         {unreadCount > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-white">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-white">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
       {open && (
-        <div className="absolute right-0 z-40 mt-2 w-80 rounded-xl border border-border bg-surface shadow-lg">
+        <div className="absolute right-0 z-40 mt-2 w-80 rounded-[6px] border border-border bg-surface shadow-[var(--shadow-preclinic-lg)]">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <span className="text-sm font-semibold">
               {t("nav.notifications")}

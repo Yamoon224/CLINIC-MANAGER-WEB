@@ -19,7 +19,9 @@ const STATUT_TONE: Record<DemandeAnalyse["statut"], Tone> = {
 
 const STAT_CHIP: Record<Tone, string> = {
   primary: "bg-primary-light text-primary",
+  secondary: "bg-secondary-light text-accent",
   accent: "bg-accent-light text-accent",
+  info: "bg-info-light text-info",
   success: "bg-success-light text-success",
   warning: "bg-warning-light text-warning",
   danger: "bg-danger-light text-danger",
@@ -28,7 +30,9 @@ const STAT_CHIP: Record<Tone, string> = {
 
 const STAT_TEXT: Record<Tone, string> = {
   primary: "text-primary",
+  secondary: "text-accent",
   accent: "text-accent",
+  info: "text-info",
   success: "text-success",
   warning: "text-warning",
   danger: "text-danger",

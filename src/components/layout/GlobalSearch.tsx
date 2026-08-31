@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { IconSearch } from "@tabler/icons-react";
 import { searchPatients } from "@/features/patients/patients-api";
 import type { Patient } from "@/features/patients/types";
 import { useClickOutside } from "@/lib/useClickOutside";
@@ -42,8 +42,8 @@ export function GlobalSearch() {
 
   return (
     <div className="relative w-full max-w-sm" ref={ref}>
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
-        <Search size={16} className="shrink-0 text-muted" />
+      <div className="flex items-center gap-2 rounded-[5px] border border-border bg-background px-3 py-1.5 text-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15">
+        <IconSearch size={16} className="shrink-0 text-muted" />
         <input
           value={query}
           onChange={(e) => {
@@ -60,7 +60,7 @@ export function GlobalSearch() {
       </div>
 
       {open && query.trim() && (
-        <div className="absolute left-0 right-0 z-40 mt-1 max-h-80 overflow-y-auto rounded-lg border border-border bg-surface shadow-lg">
+        <div className="absolute left-0 right-0 z-40 mt-1 max-h-80 overflow-y-auto rounded-[6px] border border-border bg-surface shadow-[var(--shadow-preclinic-lg)]">
           {results.length === 0 && (
             <p className="px-3 py-3 text-center text-sm text-muted">{t("nav.searchNoResults")}</p>
           )}

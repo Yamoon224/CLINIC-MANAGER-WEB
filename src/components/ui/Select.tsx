@@ -10,7 +10,8 @@ import {
   useState,
 } from "react";
 import type { ReactNode, SelectHTMLAttributes } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { IconCheck, IconChevronDown } from "@tabler/icons-react";
+import { cn } from "@/lib/cn";
 import { useClickOutside } from "@/lib/useClickOutside";
 
 interface Option {
@@ -105,7 +106,7 @@ export const Select = forwardRef<
     }
 
     return (
-      <div className={`relative ${className || "w-full"}`} ref={containerRef}>
+      <div className={cn("relative", className || "w-full")} ref={containerRef}>
         <button
           ref={ref}
           type="button"
@@ -113,15 +114,15 @@ export const Select = forwardRef<
           disabled={disabled}
           aria-required={required}
           onClick={() => !disabled && setOpen((v) => !v)}
-          className="flex w-full items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left text-sm text-foreground outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
+          className="flex w-full items-center justify-between rounded-[5px] border border-border bg-surface px-3 py-2 text-left text-sm text-heading outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-60"
         >
-          <span className={`truncate ${selected ? "" : "text-muted"}`}>
+          <span className={cn("truncate", !selected && "text-muted")}>
             {selected?.label || "Sélectionner..."}
           </span>
-          <ChevronDown size={16} className="shrink-0 text-muted" />
+          <IconChevronDown size={16} className="shrink-0 text-muted" />
         </button>
         {open && (
-          <div className="absolute left-0 right-0 z-40 mt-1 overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
+          <div className="absolute left-0 right-0 z-40 mt-1 overflow-hidden rounded-[5px] border border-border bg-surface shadow-[var(--shadow-preclinic-lg)]">
             <input
               ref={searchRef}
               value={query}
@@ -131,13 +132,11 @@ export const Select = forwardRef<
               }}
               onKeyDown={handleKeyDown}
               placeholder="Rechercher..."
-              className="w-full border-b border-border px-3 py-2 text-sm outline-none"
+              className="w-full border-b border-border bg-surface px-3 py-2 text-sm outline-none"
             />
-            <ul className="max-h-56 overflow-y-auto py-1">
+            <ul className="preclinic-scroll max-h-56 overflow-y-auto py-1">
               {filtered.length === 0 && (
-                <li className="px-3 py-2 text-sm text-muted">
-                  Aucun résultat.
-                </li>
+                <li className="px-3 py-2 text-sm text-muted">Aucun résultat.</li>
               )}
               {filtered.map((option, index) => (
                 <li key={option.value}>
@@ -146,15 +145,16 @@ export const Select = forwardRef<
                     disabled={option.disabled}
                     onMouseEnter={() => setActiveIndex(index)}
                     onClick={() => selectOption(option)}
-                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm disabled:opacity-50 ${
+                    className={cn(
+                      "flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm disabled:opacity-50",
                       index === activeIndex
                         ? "bg-primary-light text-primary"
-                        : "text-foreground"
-                    }`}
+                        : "text-heading",
+                    )}
                   >
                     <span className="truncate">{option.label}</span>
                     {option.value === selected?.value && (
-                      <Check size={14} className="shrink-0" />
+                      <IconCheck size={14} className="shrink-0" />
                     )}
                   </button>
                 </li>

@@ -1,76 +1,40 @@
-import { cloneElement, isValidElement, useId } from "react";
-import type { ReactElement, ReactNode } from "react";
-import { Input } from "./Input";
-import { PasswordInput } from "./PasswordInput";
-import { Select } from "./Select";
-import { Textarea } from "./Textarea";
+import type { ReactNode } from "react";
+import { cn } from "@/lib/cn";
 
-const FLOATABLE_TYPES: unknown[] = [Input, Select, Textarea, PasswordInput];
-
-type FloatableProps = {
-  id?: string;
-  placeholder?: string;
-  className?: string;
-};
-
-function isFloatable(
-  node: ReactNode,
-): node is ReactElement<FloatableProps> {
-  return isValidElement(node) && FLOATABLE_TYPES.includes(node.type);
-}
-
+/* Champ de formulaire au format "stacked" du template :
+   label.form-label (13px / medium / heading) + astérisque danger + contrôle + hint. */
 export function Field({
   label,
   required,
   hint,
+  error,
+  htmlFor,
+  className,
   children,
 }: {
   label: string;
   required?: boolean;
   hint?: string;
-  children: React.ReactNode;
+  error?: string | null;
+  htmlFor?: string;
+  className?: string;
+  children: ReactNode;
 }) {
-  const generatedId = useId();
-
-  if (isFloatable(children)) {
-    const isSelect = children.type === Select;
-    const id = children.props.id ?? generatedId;
-
-    const field = cloneElement(children, {
-      id,
-      placeholder: children.props.placeholder ?? " ",
-      className: `peer w-full pt-5! pb-1.5! placeholder:text-transparent focus:placeholder:text-muted/60 ${children.props.className ?? ""}`,
-    });
-
-    return (
-      <div className="flex flex-col gap-1.5">
-        <div className="relative">
-          {field}
-          <label
-            htmlFor={id}
-            className={`pointer-events-none absolute left-3 top-1.5 z-10 origin-left text-xs text-muted transition-all duration-150 ${
-              isSelect
-                ? ""
-                : "peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm"
-            } peer-focus:top-1.5 peer-focus:-translate-y-0 peer-focus:text-xs peer-focus:text-primary`}
-          >
-            {label}
-            {required && <span className="text-danger"> *</span>}
-          </label>
-        </div>
-        {hint && <span className="text-xs text-muted">{hint}</span>}
-      </div>
-    );
-  }
-
   return (
-    <label className="flex flex-col gap-1.5 text-sm">
-      <span className="font-medium text-foreground/90">
+    <div className={cn("flex flex-col gap-1.5", className)}>
+      <label
+        htmlFor={htmlFor}
+        className="text-[13px] font-medium text-heading"
+      >
         {label}
-        {required && <span className="text-danger"> *</span>}
-      </span>
+        {required && <span className="ms-1 text-danger">*</span>}
+      </label>
       {children}
-      {hint && <span className="text-xs text-muted">{hint}</span>}
-    </label>
+      {error ? (
+        <span className="text-xs text-danger">{error}</span>
+      ) : hint ? (
+        <span className="text-xs text-muted">{hint}</span>
+      ) : null}
+    </div>
   );
 }

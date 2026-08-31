@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileDown } from "lucide-react";
+import { IconFileTypePdf } from "@tabler/icons-react";
 import { Button, type ButtonProps } from "./Button";
 import { openPdf } from "@/lib/pdf";
 
@@ -38,7 +38,7 @@ export function PdfButton({
   return (
     <span className="inline-flex items-center gap-2">
       <Button variant={variant} size={size} onClick={handleClick} disabled={busy} className={className}>
-        <FileDown size={14} className="mr-1.5" />
+        <IconFileTypePdf size={14} className="mr-1.5" />
         {busy ? "…" : label}
       </Button>
       {error && <span className="text-xs text-danger">Export impossible</span>}

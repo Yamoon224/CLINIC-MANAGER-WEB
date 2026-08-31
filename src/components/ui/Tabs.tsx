@@ -1,33 +1,39 @@
 "use client";
 
+import { cn } from "@/lib/cn";
+
 export interface TabItem {
   key: string;
   label: string;
 }
 
+/* nav nav-tabs nav-bordered du template : onglets soulignés, actif en primary. */
 export function Tabs({
   tabs,
   active,
   onChange,
+  className,
 }: {
   tabs: TabItem[];
   active: string;
   onChange: (key: string) => void;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-wrap gap-1 border-b border-border">
-      {tabs.map((tabItem) => (
+    <div className={cn("flex flex-wrap gap-6 border-b border-border", className)}>
+      {tabs.map((tab) => (
         <button
-          key={tabItem.key}
+          key={tab.key}
           type="button"
-          onClick={() => onChange(tabItem.key)}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            active === tabItem.key
-              ? "border-b-2 border-primary text-primary"
-              : "text-muted hover:text-foreground"
-          }`}
+          onClick={() => onChange(tab.key)}
+          className={cn(
+            "-mb-px border-b-2 px-1 pb-2.5 text-sm font-medium transition-colors",
+            active === tab.key
+              ? "border-primary text-primary"
+              : "border-transparent text-muted hover:text-heading",
+          )}
         >
-          {tabItem.label}
+          {tab.label}
         </button>
       ))}
     </div>

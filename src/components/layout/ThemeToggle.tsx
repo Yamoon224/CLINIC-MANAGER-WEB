@@ -1,16 +1,12 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useTheme } from "@/lib/theme/ThemeContext";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const { t } = useTranslation();
-
-  function toggle() {
-    setTheme(theme === "light" ? "dark" : "light");
-  }
 
   const label =
     theme === "light"
@@ -19,12 +15,12 @@ export function ThemeToggle() {
 
   return (
     <button
-      onClick={toggle}
+      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
       aria-label={label}
       title={label}
-      className="rounded-full p-2 text-muted hover:bg-primary-light hover:text-primary"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted shadow-[var(--shadow-preclinic-sm)] transition-colors hover:border-primary hover:text-primary"
     >
-      {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+      {theme === "light" ? <IconMoon size={16} /> : <IconSun size={16} />}
     </button>
   );
 }
