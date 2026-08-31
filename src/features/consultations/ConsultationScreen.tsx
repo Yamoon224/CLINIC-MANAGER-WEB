@@ -14,7 +14,9 @@ import {
   type UpdateConsultationPayload,
 } from "./types";
 import { fetchAnalyseTypes } from "@/features/laboratoire/laboratoire-api";
+import { FeuilleResultats } from "@/features/laboratoire/FeuilleResultats";
 import type { AnalyseType } from "@/features/laboratoire/types";
+import { useAuth } from "@/features/auth/auth-context";
 import { checkInteractions, fetchMedicaments } from "@/features/pharmacie/pharmacie-api";
 import type { InteractionMedicamenteuse, Medicament } from "@/features/pharmacie/types";
 import { IconAlertTriangle, IconCircleCheck, IconClipboardList } from "@tabler/icons-react";
@@ -42,6 +44,7 @@ function matchesAllergy(allergiesText: string, medicamentDci: string): boolean {
 
 export function ConsultationScreen({ id }: { id: number }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [consultation, setConsultation] = useState<Consultation | null>(null);
   const [form, setForm] = useState<UpdateConsultationPayload>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -492,6 +495,23 @@ export function ConsultationScreen({ id }: { id: number }) {
           </div>
         )}
       </Card>
+
+      {consultation.prescriptions.some((p) => p.type === "analyse") && (
+        <Card className="p-4">
+          <h2 className="mb-3 flex items-center gap-2 font-semibold text-heading">
+            <IconClipboardList size={18} className="text-primary" />
+            {t("laboratoire.feuille.titre")}
+          </h2>
+          <FeuilleResultats
+            consultationId={id}
+            canEdit={
+              user?.roles.includes("technicien-labo") ||
+              user?.roles.includes("administrateur") ||
+              false
+            }
+          />
+        </Card>
+      )}
 
       {!readOnly && (
         <Button onClick={handleFinish} disabled={isFinishing} className="self-start">

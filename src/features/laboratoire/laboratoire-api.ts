@@ -1,6 +1,12 @@
 import { apiFetch } from "@/lib/api-client";
 import type { PaginatedResponse } from "@/lib/pagination";
-import type { AnalyseType, DemandeAnalyse, DemanderAnalysesPayload } from "./types";
+import type {
+  AnalyseType,
+  DemandeAnalyse,
+  DemanderAnalysesPayload,
+  FeuilleLabo,
+  FeuilleLaboListItem,
+} from "./types";
 
 export function fetchAnalyseTypes(): Promise<{ data: AnalyseType[] }> {
   return apiFetch<{ data: AnalyseType[] }>("/analyse-types");
@@ -47,6 +53,57 @@ export function saisirResultat(
   });
 }
 
+export function saisirResultats(
+  id: number,
+  resultats: { analyse_parametre_id: number; valeur: string }[],
+): Promise<{ data: DemandeAnalyse }> {
+  return apiFetch<{ data: DemandeAnalyse }>(`/demandes-analyse/${id}/resultat`, {
+    method: "POST",
+    body: JSON.stringify({ resultats }),
+  });
+}
+
+// --- Feuille de résultats (toutes les analyses d'une consultation) ---
+export function fetchFeuillesLabo(
+  page = 1,
+): Promise<PaginatedResponse<FeuilleLaboListItem>> {
+  return apiFetch<PaginatedResponse<FeuilleLaboListItem>>(
+    `/feuilles-labo?page=${page}`,
+  );
+}
+
+export function fetchFeuilleLabo(
+  consultationId: number,
+): Promise<{ data: FeuilleLabo }> {
+  return apiFetch<{ data: FeuilleLabo }>(
+    `/consultations/${consultationId}/feuille-labo`,
+  );
+}
+
+export function saveFeuilleLabo(
+  consultationId: number,
+  lignes: {
+    demande_analyse_id: number;
+    analyse_parametre_id: number;
+    valeur: string;
+  }[],
+): Promise<{ data: FeuilleLabo }> {
+  return apiFetch<{ data: FeuilleLabo }>(
+    `/consultations/${consultationId}/feuille-labo`,
+    { method: "PUT", body: JSON.stringify({ lignes }) },
+  );
+}
+
+export function validerFeuilleLabo(
+  consultationId: number,
+  commentaire?: string,
+): Promise<{ data: FeuilleLabo }> {
+  return apiFetch<{ data: FeuilleLabo }>(
+    `/consultations/${consultationId}/feuille-labo/valider`,
+    { method: "POST", body: JSON.stringify({ commentaire: commentaire || undefined }) },
+  );
+}
+
 export function validerBiologiste(
   id: number,
   commentaire?: string,
@@ -64,16 +121,24 @@ export function annuler(id: number): Promise<{ data: DemandeAnalyse }> {
 }
 
 // --- Catalogue examens / analyse types (CRUD) ---
-export interface AnalyseTypePayload {
+export interface AnalyseParametrePayload {
+  id?: number;
   nom: string;
-  section?: string | null;
   unite?: string | null;
-  prelevement?: string | null;
   valeur_ref_min?: number | null;
   valeur_ref_max?: number | null;
   valeur_critique_min?: number | null;
   valeur_critique_max?: number | null;
+  valeurs_anormales?: string | null;
+  valeurs_critiques?: string | null;
+}
+
+export interface AnalyseTypePayload {
+  nom: string;
+  section?: string | null;
+  prelevement?: string | null;
   prix?: number | null;
+  parametres: AnalyseParametrePayload[];
 }
 
 export function createAnalyseType(
