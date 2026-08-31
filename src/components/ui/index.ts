@@ -4,6 +4,7 @@ export { Input } from "./Input";
 export { PasswordInput } from "./PasswordInput";
 export { Textarea } from "./Textarea";
 export { Select } from "./Select";
+export { PatientSelect } from "./PatientSelect";
 export { DateInput } from "./DateInput";
 export { Field } from "./Field";
 export { FormSection } from "./FormSection";

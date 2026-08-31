@@ -2,13 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { searchPatients } from "@/features/patients/patients-api";
 import type { Patient } from "@/features/patients/types";
 import {
   Button,
   DateInput,
   Field,
-  Input,
+  PatientSelect,
   Select,
   Textarea,
 } from "@/components/ui";
@@ -37,8 +36,6 @@ export function RendezVousForm({
   const router = useRouter();
   const { t } = useTranslation();
 
-  const [patientQuery, setPatientQuery] = useState("");
-  const [patientResults, setPatientResults] = useState<Patient[]>([]);
   const [patient, setPatient] = useState<Patient | null>(null);
 
   const [praticiens, setPraticiens] = useState<Praticien[]>([]);
@@ -55,17 +52,6 @@ export function RendezVousForm({
   useEffect(() => {
     fetchPraticiens().then((res) => setPraticiens(res.data));
   }, []);
-
-  useEffect(() => {
-    const handle = setTimeout(() => {
-      if (!patientQuery) {
-        setPatientResults([]);
-        return;
-      }
-      searchPatients(patientQuery).then((res) => setPatientResults(res.data));
-    }, 250);
-    return () => clearTimeout(handle);
-  }, [patientQuery]);
 
   useEffect(() => {
     (async () => {
@@ -106,48 +92,12 @@ export function RendezVousForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Field label={t("rendezvous.form.patient")}>
-          {patient ? (
-            <div className="flex items-center justify-between rounded-[5px] border border-border bg-surface px-3 py-2 text-sm">
-              <span>
-                {patient.prenom} {patient.nom} ({patient.numero_dossier})
-              </span>
-              <button
-                type="button"
-                onClick={() => setPatient(null)}
-                className="text-sm text-primary hover:underline"
-              >
-                {t("rendezvous.form.changePatient")}
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-1.5">
-              <Input
-                placeholder={t("rendezvous.form.searchPatientPlaceholder")}
-                value={patientQuery}
-                onChange={(e) => setPatientQuery(e.target.value)}
-              />
-              {patientResults.length > 0 && (
-                <ul className="rounded-[5px] border border-border divide-y divide-border overflow-hidden">
-                  {patientResults.map((p) => (
-                    <li key={p.id}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPatient(p);
-                          setPatientResults([]);
-                          setPatientQuery("");
-                        }}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-light"
-                      >
-                        {p.prenom} {p.nom} ({p.numero_dossier})
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
+        <Field label={t("rendezvous.form.patient")} required>
+          <PatientSelect
+            value={patient}
+            onChange={setPatient}
+            placeholder={t("rendezvous.form.searchPatientPlaceholder")}
+          />
         </Field>
 
         <div className="grid grid-cols-2 gap-4">

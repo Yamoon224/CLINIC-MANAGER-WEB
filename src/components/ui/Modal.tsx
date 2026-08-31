@@ -57,12 +57,12 @@ export function Modal({
         )}
       >
         {title && (
-          <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-            <h2 className="m-0 text-[15px] font-semibold text-heading">{title}</h2>
+          <div className="flex items-center justify-between rounded-t-[6px] bg-primary px-5 py-3.5 text-white">
+            <h2 className="m-0 text-[15px] font-semibold">{title}</h2>
             <button
               onClick={onClose}
               aria-label="Fermer"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted transition-colors hover:bg-light hover:text-heading"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/15 hover:text-white"
             >
               <IconX size={16} />
             </button>
