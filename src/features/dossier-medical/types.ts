@@ -15,6 +15,14 @@ export interface DossierPrescription {
   instructions: string | null;
 }
 
+export interface DossierAnalyseParametre {
+  nom: string;
+  unite: string | null;
+  valeur: string | null;
+  anormal: boolean;
+  critique: boolean;
+}
+
 export interface DossierAnalyse {
   id: number;
   analyse: string | null;
@@ -25,6 +33,7 @@ export interface DossierAnalyse {
   resultat_critique: boolean;
   commentaire: string | null;
   date: string | null;
+  parametres: DossierAnalyseParametre[];
 }
 
 export interface DossierDispensation {

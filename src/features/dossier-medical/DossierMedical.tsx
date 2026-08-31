@@ -99,28 +99,53 @@ function ConsultationBody({ episode }: { episode: ConsultationEpisode }) {
 
       {episode.analyses.length > 0 && (
         <Section title={t("dossierMedical.analyses")}>
-          <ul className="m-0 flex list-none flex-col gap-1 p-0">
-            {episode.analyses.map((a) => (
-              <li key={a.id} className="text-[13px] text-heading">
-                {a.analyse}
-                {a.resultat_valeur && (
-                  <>
-                    {" : "}
-                    <strong>
-                      {a.resultat_valeur} {a.unite}
-                    </strong>
-                  </>
-                )}{" "}
-                {a.resultat_critique ? (
-                  <Badge tone="danger">{t("dossierMedical.critique")}</Badge>
-                ) : a.resultat_anormal ? (
-                  <Badge tone="warning">{t("dossierMedical.anormal")}</Badge>
-                ) : null}
-                {a.commentaire && (
-                  <span className="text-muted"> — {a.commentaire}</span>
-                )}
-              </li>
-            ))}
+          <ul className="m-0 flex list-none flex-col gap-2 p-0">
+            {episode.analyses.map((a) => {
+              const multi =
+                a.parametres.filter((p) => p.valeur !== null).length > 1;
+              return (
+                <li key={a.id} className="text-[13px] text-heading">
+                  <span className="font-medium">{a.analyse}</span>{" "}
+                  {a.resultat_critique ? (
+                    <Badge tone="danger">{t("dossierMedical.critique")}</Badge>
+                  ) : a.resultat_anormal ? (
+                    <Badge tone="warning">{t("dossierMedical.anormal")}</Badge>
+                  ) : null}
+                  {multi ? (
+                    <ul className="m-0 mt-0.5 flex list-none flex-col gap-0.5 p-0 pl-3">
+                      {a.parametres
+                        .filter((p) => p.valeur !== null)
+                        .map((p) => (
+                          <li
+                            key={p.nom}
+                            className={
+                              p.critique
+                                ? "text-danger"
+                                : p.anormal
+                                  ? "text-warning"
+                                  : "text-muted"
+                            }
+                          >
+                            {p.nom} : {p.valeur} {p.unite}
+                          </li>
+                        ))}
+                    </ul>
+                  ) : (
+                    a.resultat_valeur && (
+                      <span>
+                        {" : "}
+                        <strong>
+                          {a.resultat_valeur} {a.unite}
+                        </strong>
+                      </span>
+                    )
+                  )}
+                  {a.commentaire && (
+                    <span className="text-muted"> — {a.commentaire}</span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </Section>
       )}
