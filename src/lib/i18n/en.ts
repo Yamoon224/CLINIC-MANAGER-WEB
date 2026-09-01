@@ -41,6 +41,8 @@ const en: Dictionary = {
       export: "Export",
       exportPdf: "Download as PDF",
       exportExcel: "Download as Excel",
+      viewList: "List view",
+      viewGrid: "Card view",
       filters: "Filters",
       sortBy: "Sort by",
       clearAll: "Clear all",

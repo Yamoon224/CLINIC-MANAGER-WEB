@@ -39,6 +39,8 @@ const fr = {
       export: "Exporter",
       exportPdf: "Télécharger en PDF",
       exportExcel: "Télécharger en Excel",
+      viewList: "Vue liste",
+      viewGrid: "Vue cartes",
       filters: "Filtres",
       sortBy: "Trier par",
       clearAll: "Tout effacer",

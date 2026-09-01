@@ -11,37 +11,127 @@ function filenameFromContentDisposition(header: string | null): string | null {
   return match ? match[1] : null;
 }
 
+/** Erreur d'export porteuse d'un message lisible destiné à l'utilisateur. */
+export class DownloadError extends Error {
+  constructor(
+    message: string,
+    public readonly kind: "network" | "auth" | "forbidden" | "notfound" | "server" | "unknown",
+    public readonly status?: number,
+  ) {
+    super(message);
+    this.name = "DownloadError";
+  }
+}
+
+async function readServerMessage(response: Response): Promise<string | null> {
+  try {
+    const text = await response.clone().text();
+    if (!text) return null;
+    const json = JSON.parse(text) as { message?: unknown };
+    return typeof json.message === "string" ? json.message : null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchOnce(path: string, accept: string, timeoutMs: number): Promise<Response> {
+  const token = getToken();
+  const headers = new Headers({ Accept: accept });
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(`${API_BASE_URL}${path}`, {
+      headers,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /**
- * Fetches a file (PDF, CSV, ...) from an authenticated API endpoint and
- * downloads it via the browser's native save flow. A plain `<a href>` can't
- * carry the Bearer token this app uses (no cookie session), so the file has
- * to be fetched as a blob first.
+ * Récupère un fichier (PDF, CSV, ...) depuis une route API authentifiée et le
+ * télécharge via le flux natif du navigateur. Un `<a href>` simple ne peut pas
+ * porter le Bearer token de l'app (pas de session cookie), d'où le fetch en
+ * blob d'abord.
  *
- * Deliberately downloads rather than opening a new tab: a blob: URL created
- * in this window isn't reliably loadable from a tab opened via
- * `window.open` (Chromium treats it as a separate browsing context), and
- * opening it asynchronously after the `fetch` also risks the popup blocker
- * since it's no longer inside the click's user-gesture stack. A same-window
- * anchor download sidesteps both.
+ * Téléchargement plutôt qu'ouverture d'onglet : une URL blob: créée dans cette
+ * fenêtre n'est pas chargeable de façon fiable depuis un onglet ouvert par
+ * `window.open` (Chromium la traite comme un contexte séparé), et l'ouvrir
+ * après le `fetch` risque le bloqueur de pop-up.
+ *
+ * Réessaie une fois en cas d'erreur réseau (le serveur de dev mono-thread peut
+ * mettre plusieurs secondes à répondre sous charge) et remonte un message
+ * d'erreur explicite (`DownloadError`).
  */
 export async function downloadFile(
   path: string,
   fallbackFilename = "document",
   accept = "*/*",
+  { timeoutMs = 60_000, retries = 1 }: { timeoutMs?: number; retries?: number } = {},
 ): Promise<void> {
-  const token = getToken();
-  const headers = new Headers({ Accept: accept });
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-
-  const response = await fetch(`${API_BASE_URL}${path}`, { headers });
-  if (!response.ok) {
-    throw new Error(`Impossible de télécharger le fichier (${response.status})`);
+  let response: Response;
+  try {
+    response = await fetchOnce(path, accept, timeoutMs);
+  } catch (error) {
+    const aborted = error instanceof DOMException && error.name === "AbortError";
+    if (retries > 0 && !aborted) {
+      await new Promise((r) => setTimeout(r, 800));
+      return downloadFile(path, fallbackFilename, accept, { timeoutMs, retries: retries - 1 });
+    }
+    throw new DownloadError(
+      aborted
+        ? "Le serveur met trop de temps à répondre. Réessayez dans un instant."
+        : "Serveur injoignable. Vérifiez votre connexion ou que le serveur est démarré.",
+      "network",
+    );
   }
 
-  const filename = filenameFromContentDisposition(response.headers.get("content-disposition")) ?? fallbackFilename;
-  const blob = await response.blob();
-  const url = URL.createObjectURL(blob);
+  if (!response.ok) {
+    const serverMessage = await readServerMessage(response);
+    if (response.status === 401) {
+      throw new DownloadError(
+        serverMessage ?? "Session expirée — reconnectez-vous.",
+        "auth",
+        401,
+      );
+    }
+    if (response.status === 403) {
+      throw new DownloadError(
+        serverMessage ?? "Vous n'avez pas l'autorisation d'exporter ce document.",
+        "forbidden",
+        403,
+      );
+    }
+    if (response.status === 404) {
+      throw new DownloadError(serverMessage ?? "Document introuvable.", "notfound", 404);
+    }
+    if (response.status >= 500) {
+      throw new DownloadError(
+        serverMessage ?? `Erreur serveur lors de la génération du document (${response.status}).`,
+        "server",
+        response.status,
+      );
+    }
+    throw new DownloadError(
+      serverMessage ?? `Échec de l'export (code ${response.status}).`,
+      "unknown",
+      response.status,
+    );
+  }
 
+  const filename =
+    filenameFromContentDisposition(response.headers.get("content-disposition")) ??
+    fallbackFilename;
+  const blob = await response.blob();
+
+  if (blob.size === 0) {
+    throw new DownloadError("Le document généré est vide.", "server");
+  }
+
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;

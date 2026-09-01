@@ -26,5 +26,6 @@ export type { Column, DataTableProps } from "./DataTable";
 export { StatCard } from "./StatCard";
 export { PdfButton } from "./PdfButton";
 export { CsvButton } from "./CsvButton";
+export { ViewToggle, useViewMode, type ViewMode } from "./ViewToggle";
 export { Tabs } from "./Tabs";
 export type { TabItem } from "./Tabs";

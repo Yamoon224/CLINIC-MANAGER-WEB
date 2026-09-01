@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import Link from "next/link";
 import {
   IconChevronDown,
@@ -36,6 +36,20 @@ export function PageHeader({
 }) {
   const { t } = useTranslation();
   const hasExport = Boolean(exportPdfPath || exportCsvPath);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  async function runExport(path: string, ext: "pdf" | "csv") {
+    setExportError(null);
+    try {
+      await downloadFile(
+        path,
+        `${exportFilename}.${ext}`,
+        ext === "pdf" ? "application/pdf" : "text/csv",
+      );
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : "Export impossible.");
+    }
+  }
 
   return (
     <div
@@ -75,24 +89,22 @@ export function PageHeader({
             )}
           >
             {exportPdfPath && (
-              <DropdownItem
-                onClick={() =>
-                  downloadFile(exportPdfPath, `${exportFilename}.pdf`, "application/pdf")
-                }
-              >
+              <DropdownItem onClick={() => runExport(exportPdfPath, "pdf")}>
                 {t("common.datatable.exportPdf")}
               </DropdownItem>
             )}
             {exportCsvPath && (
-              <DropdownItem
-                onClick={() =>
-                  downloadFile(exportCsvPath, `${exportFilename}.csv`, "text/csv")
-                }
-              >
+              <DropdownItem onClick={() => runExport(exportCsvPath, "csv")}>
                 {t("common.datatable.exportExcel")}
               </DropdownItem>
             )}
           </Dropdown>
+        )}
+
+        {exportError && (
+          <span className="w-full text-xs text-danger sm:w-auto" role="alert">
+            {exportError}
+          </span>
         )}
 
         {viewToggle && (

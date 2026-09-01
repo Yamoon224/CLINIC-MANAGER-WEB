@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   IconPlus,
+  IconSearch,
   IconUserCheck,
   IconUsers,
   IconUserX,
 } from "@tabler/icons-react";
 import { createEmploye, fetchEmployes, fetchServices } from "./personnel-api";
+import { EmployeCard } from "./EmployeCard";
 import type { Employe, EmployeStatut, TypeContrat } from "./types";
 import { EmployeRemunerationForm } from "@/features/comptabilite/EmployeRemunerationForm";
 import { useAuth } from "@/features/auth/auth-context";
@@ -22,6 +24,8 @@ import {
   Modal,
   Select,
   StatCard,
+  ViewToggle,
+  useViewMode,
   type Column,
   type Tone,
 } from "@/components/ui";
@@ -42,6 +46,18 @@ export function Employes() {
   const [remunerationTarget, setRemunerationTarget] = useState<Employe | null>(
     null,
   );
+  const [view, setView] = useViewMode("personnel.view");
+  const [gridQuery, setGridQuery] = useState("");
+
+  const gridResults = useMemo(() => {
+    const q = gridQuery.trim().toLowerCase();
+    if (!q) return employes;
+    return employes.filter((e) =>
+      `${e.prenom} ${e.nom} ${e.matricule} ${e.fonction} ${e.service ?? ""}`
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [employes, gridQuery]);
 
   const canManagePay =
     user?.roles.some((r) =>
@@ -162,21 +178,65 @@ export function Employes() {
         />
       </div>
 
-      <DataTable
-        columns={columns}
-        rows={employes}
-        getRowKey={(e) => e.id}
-        searchAccessor={(e) =>
-          `${e.prenom} ${e.nom} ${e.matricule} ${e.fonction} ${e.service ?? ""}`
-        }
-        loading={loading}
-        emptyLabel={t("personnel.employes.noEmployes")}
-        toolbarRight={
-          <Button icon={<IconPlus size={15} />} onClick={() => setShowForm(true)}>
-            {t("personnel.employes.newEmploye")}
-          </Button>
-        }
-      />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <ViewToggle
+          mode={view}
+          onChange={setView}
+          listLabel={t("common.datatable.viewList")}
+          gridLabel={t("common.datatable.viewGrid")}
+        />
+        <Button icon={<IconPlus size={15} />} onClick={() => setShowForm(true)}>
+          {t("personnel.employes.newEmploye")}
+        </Button>
+      </div>
+
+      {view === "list" ? (
+        <DataTable
+          columns={columns}
+          rows={employes}
+          getRowKey={(e) => e.id}
+          searchAccessor={(e) =>
+            `${e.prenom} ${e.nom} ${e.matricule} ${e.fonction} ${e.service ?? ""}`
+          }
+          loading={loading}
+          emptyLabel={t("personnel.employes.noEmployes")}
+        />
+      ) : (
+        <div className="flex flex-col gap-4">
+          <div className="relative max-w-sm">
+            <IconSearch
+              size={15}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+            />
+            <Input
+              type="search"
+              value={gridQuery}
+              onChange={(e) => setGridQuery(e.target.value)}
+              placeholder={t("common.datatable.search")}
+              className="pl-9"
+            />
+          </div>
+          {loading ? (
+            <p className="text-sm text-muted">{t("common.loading")}</p>
+          ) : gridResults.length === 0 ? (
+            <p className="text-sm text-muted">
+              {t("personnel.employes.noEmployes")}
+            </p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {gridResults.map((e) => (
+                <EmployeCard
+                  key={e.id}
+                  employe={e}
+                  onRemuneration={
+                    canManagePay ? () => setRemunerationTarget(e) : undefined
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <Modal
         open={showForm}
