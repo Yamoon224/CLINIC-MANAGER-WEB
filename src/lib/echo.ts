@@ -15,7 +15,7 @@ let echoToken: string | null = null;
 /**
  * Lazily creates (or reuses) a single Echo/Reverb connection authenticated
  * with the current Bearer token. This app has no cookie session (Sanctum
- * token-based, two separate origins — see Socle technique memory), so the
+ * token-based, two separate origins - see Socle technique memory), so the
  * default cookie-based channel auth Echo ships with doesn't apply: a
  * custom `authorizer` attaches the token by hand on every subscribe.
  *
@@ -30,21 +30,21 @@ export function getEcho(): InstanceType<typeof Echo> | null {
 
   // pusher-js throws synchronously (not a rejected promise) if the app key
   // is missing, which crashes the whole React tree since nothing here is
-  // inside a try/catch on the caller's side — real-time notifications are
+  // inside a try/catch on the caller's side - real-time notifications are
   // a nice-to-have, not something worth taking the entire page down for.
   // Deployments that haven't configured Reverb (e.g. no public
   // NEXT_PUBLIC_REVERB_* vars set) silently get no live updates instead.
   if (!process.env.NEXT_PUBLIC_REVERB_APP_KEY) {
     if (!warnedMissingKey) {
       console.warn(
-        "[echo] NEXT_PUBLIC_REVERB_APP_KEY absent — notifications temps réel désactivées.",
+        "[echo] NEXT_PUBLIC_REVERB_APP_KEY absent - notifications temps réel désactivées.",
       );
       warnedMissingKey = true;
     }
     return null;
   }
 
-  // Token changed (new login) — the old connection was authorized for a
+  // Token changed (new login) - the old connection was authorized for a
   // different user, so it can't just be reused.
   if (echoInstance && echoToken !== token) {
     disconnectEcho();

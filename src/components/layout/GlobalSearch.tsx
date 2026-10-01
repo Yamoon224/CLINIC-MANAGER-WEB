@@ -9,7 +9,7 @@ import { useClickOutside } from "@/lib/useClickOutside";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 /**
- * Patient-only for now — patients are the entity every other module hangs
+ * Patient-only for now - patients are the entity every other module hangs
  * off of, and the one staff actually reach for from anywhere in the app.
  * Extend to factures/rendez-vous if that need comes up.
  */

@@ -1,12 +1,12 @@
 /* Le cabinet dentaire facture en francs guinéens (cf. reçus et grille tarifaire). */
 export function gnf(value: string | number | null | undefined): string {
   const n = typeof value === "string" ? Number(value) : (value ?? 0);
-  if (Number.isNaN(n)) return "—";
+  if (Number.isNaN(n)) return "-";
   return `${n.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} GNF`;
 }
 
 export function formatDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleDateString("fr-FR", { dateStyle: "medium" });
 }
 

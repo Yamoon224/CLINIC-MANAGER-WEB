@@ -94,10 +94,10 @@ export function PatientCard({ patient }: { patient: Patient }) {
           </span>
         </InfoLine>
         <InfoLine icon={<IconPhone size={14} />}>
-          {patient.telephone || "—"}
+          {patient.telephone || "-"}
         </InfoLine>
         <InfoLine icon={<IconMapPin size={14} />}>
-          {patient.adresse || "—"}
+          {patient.adresse || "-"}
         </InfoLine>
       </div>
 

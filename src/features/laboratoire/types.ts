@@ -29,9 +29,9 @@ export interface AnalyseType {
   valeur_ref_max: string | null;
   valeur_critique_min: string | null;
   valeur_critique_max: string | null;
-  /** Mots-clés (séparés par des virgules) qui signalent un résultat texte comme anormal — ex. "positif". */
+  /** Mots-clés (séparés par des virgules) qui signalent un résultat texte comme anormal - ex. "positif". */
   valeurs_anormales: string | null;
-  /** Idem pour "critique" — voir EvaluateurResultat côté backend. */
+  /** Idem pour "critique" - voir EvaluateurResultat côté backend. */
   valeurs_critiques: string | null;
   prix: string | null;
   /** Paramètres mesurés (au moins un). Un examen simple en a un seul, nommé « Résultat ». */

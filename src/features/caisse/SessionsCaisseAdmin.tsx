@@ -12,7 +12,7 @@ import { useTranslation } from "@/lib/i18n/LanguageContext";
  * Vue de supervision réservée à l'administrateur : la carte "Session de
  * caisse" ci-dessus ne montre que la session courante *de l'utilisateur
  * connecté*, donc un admin (qui n'ouvre jamais lui-même de tiroir-caisse) n'a
- * normalement aucun moyen de voir — ni de clôturer — la session d'un autre
+ * normalement aucun moyen de voir - ni de clôturer - la session d'un autre
  * caissier. Le backend autorise déjà l'administrateur à clôturer n'importe
  * quelle session (voir SessionCaisseController::cloturer) ; ce panneau lui en
  * donne concrètement le moyen dans l'interface.

@@ -95,7 +95,7 @@ export function InteractionsMedicamenteuses() {
     {
       key: "description",
       header: t("pharmacie.interactions.colDescription"),
-      cell: (i) => <span className="text-muted">{i.description ?? "—"}</span>,
+      cell: (i) => <span className="text-muted">{i.description ?? "-"}</span>,
     },
     {
       key: "actions",

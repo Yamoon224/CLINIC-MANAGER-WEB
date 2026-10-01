@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 import { CONTROL_CLASS } from "./control-styles";
 
 /* Champ date avec addon calendrier (input-icon-end du template).
-   Utilise l'input date natif — évite une dépendance flatpickr côté client. */
+   Utilise l'input date natif - évite une dépendance flatpickr côté client. */
 export const DateInput = forwardRef<
   HTMLInputElement,
   Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {

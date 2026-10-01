@@ -86,7 +86,7 @@ export function ApexChart({
     grid: { borderColor: gridColor, strokeDashArray: 4, ...options?.grid },
     tooltip: { theme: isDark ? "dark" : "light", ...options?.tooltip },
     // apexcharts 5.16 plante dans setSeriesYAxisMappings si yaxis n'est pas
-    // un tableau — on garantit toujours un tableau.
+    // un tableau - on garantit toujours un tableau.
     yaxis: Array.isArray(options?.yaxis)
       ? options?.yaxis
       : options?.yaxis

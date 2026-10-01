@@ -92,7 +92,7 @@ export function PeriodesPaie() {
       key: "masse",
       header: t("comptabilite.paie.colMasse"),
       cell: (p) =>
-        p.masse_salariale != null ? fcfa(p.masse_salariale) : "—",
+        p.masse_salariale != null ? fcfa(p.masse_salariale) : "-",
     },
     {
       key: "statut",

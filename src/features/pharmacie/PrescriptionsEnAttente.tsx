@@ -30,7 +30,7 @@ export function PrescriptionsEnAttente() {
       key: "patient",
       header: t("pharmacie.enAttente.colPatient"),
       cell: (p) =>
-        p.patient ? `${p.patient.prenom} ${p.patient.nom}` : "—",
+        p.patient ? `${p.patient.prenom} ${p.patient.nom}` : "-",
     },
     {
       key: "medicament",
@@ -44,7 +44,7 @@ export function PrescriptionsEnAttente() {
     {
       key: "instructions",
       header: t("pharmacie.enAttente.colInstructions"),
-      cell: (p) => <span className="text-muted">{p.instructions ?? "—"}</span>,
+      cell: (p) => <span className="text-muted">{p.instructions ?? "-"}</span>,
     },
     {
       key: "actions",

@@ -98,7 +98,7 @@ export default function PortailRendezVousPage() {
                 <p className="m-0 text-sm text-muted">
                   {t(`rendezvous.type.${rdv.type}`)} {t("portail.rendezVous.with")}{" "}
                   {rdv.praticien.name}
-                  {rdv.motif ? ` — ${rdv.motif}` : ""}
+                  {rdv.motif ? ` - ${rdv.motif}` : ""}
                 </p>
               </div>
               <div className="flex items-center gap-3">

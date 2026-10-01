@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   Design tokens — repris 1:1 du template Preclinic (Dreams Technologies)
+   Design tokens - repris 1:1 du template Preclinic (Dreams Technologies)
    assets/css/style.css :root. Le rendu de l'app doit coller à ce template.
    Sélecteur de thème sombre : :root[data-theme="dark"] (convention interne,
    pas d'import Bootstrap donc pas besoin de data-bs-theme).
@@ -210,7 +210,7 @@ h6 {
 }
 
 /* ============================================================================
-   Tableaux — rendu du template (.table de style.css). Beaucoup de modules
+   Tableaux - rendu du template (.table de style.css). Beaucoup de modules
    utilisent encore <table className="table"> en attendant leur migration
    vers le composant <DataTable>.
    ==========================================================================*/

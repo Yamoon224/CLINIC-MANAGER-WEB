@@ -61,7 +61,7 @@ export function ReglementBadge({ facture }: { facture: FactureDentaire | null })
 }
 
 /* Encaissement d'une facture dentaire : passe par la Caisse (même route que
-   l'écran facture), donc soumis à ses règles — session ouverte, solde. */
+   l'écran facture), donc soumis à ses règles - session ouverte, solde. */
 export function EncaissementModal({
   facture,
   patient,

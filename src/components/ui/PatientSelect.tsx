@@ -9,7 +9,7 @@ import { searchPatients } from "@/features/patients/patients-api";
 import type { Patient } from "@/features/patients/types";
 import { Avatar } from "./Avatar";
 
-/* Combobox de recherche patient (type "select2") — recherche serveur debouncée,
+/* Combobox de recherche patient (type "select2") - recherche serveur debouncée,
    à utiliser partout où l'on choisit un patient. */
 export function PatientSelect({
   value,

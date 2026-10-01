@@ -93,7 +93,7 @@ export async function downloadFile(
     const serverMessage = await readServerMessage(response);
     if (response.status === 401) {
       throw new DownloadError(
-        serverMessage ?? "Session expirée — reconnectez-vous.",
+        serverMessage ?? "Session expirée - reconnectez-vous.",
         "auth",
         401,
       );

@@ -348,7 +348,7 @@ function TraitementForm({
                 <option value="">{t("dentaire.traitements.acteLibre")}</option>
                 {actes.map((acte) => (
                   <option key={acte.id} value={acte.id}>
-                    {`${t(`dentaire.grille.categories.${acte.categorie}`)} — ${acte.libelle}`}
+                    {`${t(`dentaire.grille.categories.${acte.categorie}`)} - ${acte.libelle}`}
                   </option>
                 ))}
               </Select>

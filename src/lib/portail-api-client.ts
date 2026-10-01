@@ -3,7 +3,7 @@ import { ApiError } from "@/lib/api-client";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8010/api";
 
 /**
- * Client API dédié au portail patient — même forme que lib/api-client.ts
+ * Client API dédié au portail patient - même forme que lib/api-client.ts
  * mais avec sa propre clé de stockage du token ("portail_token" plutôt que
  * "auth_token"). Deux sessions totalement indépendantes plutôt qu'un client
  * générique paramétré : un membre du personnel et un patient peuvent être

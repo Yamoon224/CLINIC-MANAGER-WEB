@@ -8,7 +8,7 @@ import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 function refHint(p: AnalyseParametre): string | null {
   if (p.valeur_ref_min !== null || p.valeur_ref_max !== null) {
-    return `${p.valeur_ref_min ?? "–"} – ${p.valeur_ref_max ?? "–"}${
+    return `${p.valeur_ref_min ?? "-"} - ${p.valeur_ref_max ?? "-"}${
       p.unite ? ` ${p.unite}` : ""
     }`;
   }
@@ -24,7 +24,7 @@ function refHint(p: AnalyseParametre): string | null {
 }
 
 /**
- * Saisie / correction des résultats d'une demande — un champ par paramètre
+ * Saisie / correction des résultats d'une demande - un champ par paramètre
  * mesuré (un examen simple n'en a qu'un). Le worklist reste la voie « ligne
  * par ligne » ; la saisie groupée d'une consultation passe par la feuille de
  * résultats.

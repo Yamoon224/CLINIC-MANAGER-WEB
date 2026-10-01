@@ -50,14 +50,14 @@ function evaluer(p: FeuilleParametre, valeur: string): "critique" | "anormal" | 
 
 function refLabel(p: FeuilleParametre): string {
   if (p.valeur_ref_min !== null || p.valeur_ref_max !== null) {
-    return `${p.valeur_ref_min ?? "–"} – ${p.valeur_ref_max ?? "–"}${
+    return `${p.valeur_ref_min ?? "-"} - ${p.valeur_ref_max ?? "-"}${
       p.unite ? ` ${p.unite}` : ""
     }`;
   }
   if (p.valeurs_anormales || p.valeurs_critiques) {
     return [p.valeurs_critiques, p.valeurs_anormales].filter(Boolean).join(" / ");
   }
-  return "—";
+  return "-";
 }
 
 export function FeuilleResultats({
@@ -208,7 +208,7 @@ export function FeuilleResultats({
                                 : "text-heading"
                           }
                         >
-                          {val || "—"} {p.unite}
+                          {val || "-"} {p.unite}
                         </span>
                       ) : (
                         <div className="flex items-center gap-2">

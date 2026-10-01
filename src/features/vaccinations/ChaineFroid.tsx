@@ -73,7 +73,7 @@ export function ChaineFroid() {
     {
       key: "notes",
       header: t("vaccinations.notesPlaceholder"),
-      cell: (r) => <span className="text-muted">{r.notes ?? "—"}</span>,
+      cell: (r) => <span className="text-muted">{r.notes ?? "-"}</span>,
     },
     {
       key: "statut",

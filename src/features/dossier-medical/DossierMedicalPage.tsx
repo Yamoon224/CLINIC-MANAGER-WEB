@@ -39,7 +39,7 @@ export function DossierMedicalPage({ id }: { id: number }) {
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="m-0 text-xl font-bold text-heading">
-            {t("dossierMedical.title")} — {patient.prenom} {patient.nom}
+            {t("dossierMedical.title")} - {patient.prenom} {patient.nom}
           </h1>
           <p className="m-0 text-[13px] text-muted">
             {t("patients.numeroDossier")} {patient.numero_dossier}

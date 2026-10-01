@@ -258,7 +258,7 @@ export function Employes() {
         onClose={() => setRemunerationTarget(null)}
         title={
           remunerationTarget
-            ? `${t("comptabilite.remuneration.titre")} — ${remunerationTarget.prenom} ${remunerationTarget.nom}`
+            ? `${t("comptabilite.remuneration.titre")} - ${remunerationTarget.prenom} ${remunerationTarget.nom}`
             : ""
         }
         size="md"
@@ -352,7 +352,7 @@ function CreateEmployeForm({
               value={service}
               onChange={(e) => setService(e.target.value)}
             >
-              <option value="">—</option>
+              <option value="">-</option>
               {services.map((s) => (
                 <option key={s.code} value={s.nom}>
                   {s.nom}

@@ -24,7 +24,7 @@ import { Badge, Button, Card, Field, Input, PageHeader, PdfButton, Select, Texta
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 /**
- * Very deliberately not a drug-interaction engine — there's no structured
+ * Very deliberately not a drug-interaction engine - there's no structured
  * interaction database in this app. This is a best-effort text match
  * against the patient's free-text allergies field, meant to catch the
  * obvious case (patient's allergy list literally names the drug) and
@@ -86,7 +86,7 @@ export function ConsultationScreen({ id }: { id: number }) {
     });
   }, [id]);
 
-  // Adding a prescription only changes the prescriptions list — refreshing
+  // Adding a prescription only changes the prescriptions list - refreshing
   // the whole form here (like `load` does) would silently overwrite any
   // clinical fields (diagnostic, price...) the practitioner typed but
   // hadn't hit "Enregistrer" for yet.
@@ -116,7 +116,7 @@ export function ConsultationScreen({ id }: { id: number }) {
     matchesAllergy(consultation.patient.allergies, selectedMedicament.dci);
 
   // Checked against the medicaments already prescribed in this same
-  // consultation — not the patient's full history, which this app has no
+  // consultation - not the patient's full history, which this app has no
   // "currently active medication" concept for (see Dispensation, which is
   // a one-off dispensing record, not a course of treatment with an end
   // date).

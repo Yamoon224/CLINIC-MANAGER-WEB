@@ -37,7 +37,7 @@ export function updatePatient(
 }
 
 /**
- * Provisionne l'accès portail du patient — la réception saisit uniquement
+ * Provisionne l'accès portail du patient - la réception saisit uniquement
  * l'email, le mot de passe temporaire est généré côté serveur et envoyé par
  * SMS/WhatsApp (jamais renvoyé par cette réponse).
  */

@@ -8,7 +8,7 @@ import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 /**
  * Action côté réception pour provisionner l'accès portail d'un patient
- * (jamais d'auto-inscription — choix confirmé du cahier des charges). Le
+ * (jamais d'auto-inscription - choix confirmé du cahier des charges). Le
  * mot de passe temporaire n'est ni affiché ni stocké ici : il part
  * directement par SMS/WhatsApp au patient (PortailAuthService::activerAcces).
  */

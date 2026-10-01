@@ -9,7 +9,7 @@ import { useTranslation } from "@/lib/i18n/LanguageContext";
 /**
  * La validation biologiste n'était qu'un simple clic sans aucun moyen de
  * laisser une interprétation pour le médecin prescripteur. Le commentaire
- * est optionnel — un résultat trivial n'a pas besoin d'un mot du biologiste,
+ * est optionnel - un résultat trivial n'a pas besoin d'un mot du biologiste,
  * mais il peut désormais en laisser un quand ça compte.
  */
 export function ValiderResultatModal({

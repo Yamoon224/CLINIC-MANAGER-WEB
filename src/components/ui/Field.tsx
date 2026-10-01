@@ -5,7 +5,7 @@ import { Input } from "./Input";
 import { Textarea } from "./Textarea";
 import { PasswordInput } from "./PasswordInput";
 
-/* Contrôles qui acceptent un placeholder texte — si aucun n'est fourni,
+/* Contrôles qui acceptent un placeholder texte - si aucun n'est fourni,
    Field injecte automatiquement un placeholder dérivé du label. */
 const PLACEHOLDER_TYPES: unknown[] = [Input, Textarea, PasswordInput];
 
@@ -30,7 +30,7 @@ export function Field({
   error?: string | null;
   htmlFor?: string;
   className?: string;
-  /** Occupe toute la largeur de la grille (col-span-2) — évite les demi-lignes vides. */
+  /** Occupe toute la largeur de la grille (col-span-2) - évite les demi-lignes vides. */
   full?: boolean;
   /** Placeholder explicite ; sinon le label est utilisé. */
   placeholder?: string;

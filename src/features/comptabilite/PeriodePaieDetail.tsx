@@ -172,7 +172,7 @@ export function PeriodePaieDetail({ id }: { id: number }) {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="m-0 text-xl font-bold capitalize text-heading">
-          {t("comptabilite.paie.titrePeriode")} — {formatMonth(periode.mois)}
+          {t("comptabilite.paie.titrePeriode")} - {formatMonth(periode.mois)}
         </h1>
         <div className="flex flex-wrap gap-2">
           {periode.statut === "brouillon" && (
@@ -240,7 +240,7 @@ export function PeriodePaieDetail({ id }: { id: number }) {
         {payTarget && (
           <div className="flex flex-col gap-4">
             <p className="m-0 text-sm text-muted">
-              {payTarget.employe.prenom} {payTarget.employe.nom} —{" "}
+              {payTarget.employe.prenom} {payTarget.employe.nom} -{" "}
               <strong>{fcfa(payTarget.salaire_net)}</strong>
             </p>
             <Field label={t("comptabilite.paie.modePaiement")}>

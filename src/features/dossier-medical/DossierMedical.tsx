@@ -25,7 +25,7 @@ import type {
 } from "./types";
 
 function formatDate(value: string | null): string {
-  if (!value) return "—";
+  if (!value) return "-";
   return new Date(value).toLocaleDateString("fr-FR", { dateStyle: "medium" });
 }
 
@@ -89,7 +89,7 @@ function ConsultationBody({ episode }: { episode: ConsultationEpisode }) {
               <li key={p.id} className="text-[13px] text-heading">
                 <Badge tone="primary">{p.type}</Badge> {p.designation}
                 {p.instructions && (
-                  <span className="text-muted"> — {p.instructions}</span>
+                  <span className="text-muted"> - {p.instructions}</span>
                 )}
               </li>
             ))}
@@ -141,7 +141,7 @@ function ConsultationBody({ episode }: { episode: ConsultationEpisode }) {
                     )
                   )}
                   {a.commentaire && (
-                    <span className="text-muted"> — {a.commentaire}</span>
+                    <span className="text-muted"> - {a.commentaire}</span>
                   )}
                 </li>
               );
@@ -170,7 +170,7 @@ function ConsultationBody({ episode }: { episode: ConsultationEpisode }) {
             {s.motif}
             <span className="text-muted">
               {" "}
-              — {formatDate(s.admitted_at)} →{" "}
+              - {formatDate(s.admitted_at)} →{" "}
               {s.sortie_at ? formatDate(s.sortie_at) : t("dossierMedical.enCours")}
             </span>
           </p>
@@ -250,7 +250,7 @@ function GrossesseBody({ episode }: { episode: GrossesseEpisode }) {
                     {" "}
                     <Badge tone="warning">{t("dossierMedical.risque")}</Badge>
                     {c.risque_details && (
-                      <span className="text-muted"> — {c.risque_details}</span>
+                      <span className="text-muted"> - {c.risque_details}</span>
                     )}
                   </>
                 )}
@@ -264,7 +264,7 @@ function GrossesseBody({ episode }: { episode: GrossesseEpisode }) {
           <p className="m-0 text-[13px] text-heading">
             {episode.accouchement.mode} · {formatDate(episode.accouchement.date_heure)}
             {episode.accouchement.complications && (
-              <span className="text-danger"> — {episode.accouchement.complications}</span>
+              <span className="text-danger"> - {episode.accouchement.complications}</span>
             )}
           </p>
           {episode.accouchement.nouveau_nes.length > 0 && (
@@ -497,7 +497,7 @@ export function DossierMedical({
                       {v.mapi_survenue ? (
                         <Badge tone="danger">{t("common.yes")}</Badge>
                       ) : (
-                        "—"
+                        "-"
                       )}
                     </Td>
                   </tr>

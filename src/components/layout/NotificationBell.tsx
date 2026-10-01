@@ -38,7 +38,7 @@ export function NotificationBell() {
   useEffect(() => {
     refreshUnreadCount();
     // Filet de sécurité si le WebSocket est momentanément coupé (Reverb pas
-    // démarré, réseau capricieux) — le polling reste actif mais espacé,
+    // démarré, réseau capricieux) - le polling reste actif mais espacé,
     // le temps réel ci-dessous est la voie normale de mise à jour.
     const interval = setInterval(refreshUnreadCount, 60_000);
     return () => clearInterval(interval);
