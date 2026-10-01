@@ -172,7 +172,9 @@ export function PatientDetail({ patient: initialPatient }: { patient: Patient })
           <InfoRow
             icon={<IconMapPin size={16} />}
             label={t("patients.detail.adresse")}
-            value={patient.adresse}
+            value={
+              [patient.adresse, patient.commune].filter(Boolean).join(", ") || null
+            }
           />
           <InfoRow
             icon={<IconPhone size={16} />}

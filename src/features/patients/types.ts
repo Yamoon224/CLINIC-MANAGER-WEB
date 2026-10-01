@@ -8,6 +8,7 @@ export interface Patient {
   sexe: "M" | "F" | null;
   telephone: string | null;
   adresse: string | null;
+  commune: string | null;
   personne_a_prevenir_nom: string | null;
   personne_a_prevenir_telephone: string | null;
   piece_identite_type: string | null;
@@ -28,6 +29,7 @@ export interface RegisterPatientPayload {
   sexe?: "M" | "F";
   telephone?: string;
   adresse?: string;
+  commune?: string;
   personne_a_prevenir_nom?: string;
   personne_a_prevenir_telephone?: string;
   piece_identite_type?: string;

@@ -6,6 +6,10 @@ import { IconChevronLeft } from "@tabler/icons-react";
 import { annulerFacture, encaisser, fetchFacture } from "./caisse-api";
 import { MODE_PAIEMENT_LABELS, type Facture, type ModePaiement } from "./types";
 import {
+  recuConsultationPath,
+  recuTraitementPath,
+} from "@/features/dentaire/dentaire-api";
+import {
   Badge,
   Button,
   Card,
@@ -85,6 +89,14 @@ export function FactureDetail({ id }: { id: number }) {
               path={`/factures/${id}/pdf`}
               label={t("caisse.factureDetail.exportPdf")}
             />
+            {facture.dentaire?.type === "consultation" &&
+              Number(facture.montant_paye) > 0 && (
+                <PdfButton
+                  path={recuConsultationPath(facture.dentaire.id)}
+                  label={t("dentaire.facture.recuConsultation")}
+                  filename={`recu-consultation-${facture.dentaire.id}.pdf`}
+                />
+              )}
             <Badge tone={STATUT_TONES[facture.statut]} border>
               {t(`caisse.factureStatut.${facture.statut}`)}
             </Badge>
@@ -173,9 +185,16 @@ export function FactureDetail({ id }: { id: number }) {
               className="flex items-center justify-between px-5 py-3 text-sm"
             >
               <span className="font-medium text-heading">{fcfa(e.montant)}</span>
-              <span className="text-muted">
+              <span className="flex items-center gap-3 text-muted">
                 {t(`caisse.modePaiement.${e.mode_paiement}`)}
                 {e.caissier && ` · ${e.caissier.name}`}
+                {facture.dentaire?.type === "traitement" && (
+                  <PdfButton
+                    path={recuTraitementPath(facture.dentaire.id, e.id)}
+                    label={t("dentaire.facture.recuTraitement")}
+                    filename={`recu-traitement-${e.id}.pdf`}
+                  />
+                )}
               </span>
             </div>
           ))}

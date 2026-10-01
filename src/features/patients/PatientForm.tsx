@@ -23,6 +23,7 @@ const EMPTY_FORM: RegisterPatientPayload = {
   sexe: undefined,
   telephone: "",
   adresse: "",
+  commune: "",
   personne_a_prevenir_nom: "",
   personne_a_prevenir_telephone: "",
   piece_identite_type: "",
@@ -41,6 +42,7 @@ function fromPatient(p: Patient): RegisterPatientPayload {
     sexe: p.sexe ?? undefined,
     telephone: p.telephone ?? "",
     adresse: p.adresse ?? "",
+    commune: p.commune ?? "",
     personne_a_prevenir_nom: p.personne_a_prevenir_nom ?? "",
     personne_a_prevenir_telephone: p.personne_a_prevenir_telephone ?? "",
     piece_identite_type: p.piece_identite_type ?? "",
@@ -153,6 +155,13 @@ export function PatientForm({
           placeholder={t("patients.form.adressePlaceholder")}
           value={form.adresse ?? ""}
           onChange={(e) => update("adresse", e.target.value)}
+        />
+      </Field>
+      <Field label={t("patients.form.commune")} full>
+        <Input
+          placeholder={t("patients.form.communePlaceholder")}
+          value={form.commune ?? ""}
+          onChange={(e) => update("commune", e.target.value)}
         />
       </Field>
     </div>

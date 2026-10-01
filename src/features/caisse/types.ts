@@ -59,6 +59,8 @@ export interface Facture {
     compagnie: string;
   };
   bordereau_assurance_id: number | null;
+  /** Document du cabinet dentaire à l'origine de la facture (détail uniquement). */
+  dentaire?: { type: "consultation" | "traitement"; id: number } | null;
   lignes: LigneFacture[];
   encaissements: Encaissement[];
   created_at: string | null;

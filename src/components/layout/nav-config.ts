@@ -3,6 +3,7 @@ import {
   IconBed,
   IconCalculator,
   IconCalendarCheck,
+  IconDental,
   IconHistory,
   IconLayoutDashboard,
   IconListNumbers,
@@ -55,6 +56,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/queue", labelKey: "nav.queue", icon: IconListNumbers },
       { href: "/urgences", labelKey: "nav.urgences", icon: IconAmbulance },
       { href: "/vaccinations", labelKey: "nav.vaccinations", icon: IconVaccine },
+      { href: "/dentaire", labelKey: "nav.dentaire", icon: IconDental },
     ],
   },
   {
